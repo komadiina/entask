@@ -1,0 +1,53 @@
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - entask
+      
+  placement:
+    image: daprio/dapr
+    command: [
+      "./placement",
+        "-port", "50006"
+    ]
+    ports:
+      - "50006:50006"
+    networks:
+      - entask
+    
+  # mp4 to gif conversion service + dapr sidecar 
+  videogif:
+    build: ./converters/videogif
+    depends_on:
+      - redis
+      - placement
+    networks:
+      - entask
+    volumes:
+      - "./converters/videogif/:/converters/videogif/"
+    ports:
+      - "8000:8000"
+      
+  videogif-dapr:
+    image: daprio/daprd:edge
+    command: [
+      "./daprd",
+        "-app-id", "videogif",
+        "-app-port", "50000",
+        
+        "-placement-host-address", "placement:50006",
+        "-dapr-grpc-port", "50002",
+        
+        "-components-path", "/converters/videogif/components/",
+    ]
+    depends_on:
+      - videogif
+    volumes:
+      - "./converters/videogif/components/:/converters/videogif/components/"
+    network_mode: "service:videogif"
+      
+    
+networks:
+  entask: null

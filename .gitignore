@@ -15,9 +15,6 @@ pyvenv.cfg
 .venv
 pip-selfcheck.json
 
-### Example user template template
-### Example user template
-
 # IntelliJ project files
 .idea
 *.iml
@@ -148,7 +145,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+converters/mp4-to-gif/dapr.dev.env
 .venv
 env/
 venv/
@@ -179,6 +176,10 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Dapr logs
+
+/.dapr
 
 # PyCharm
 #  JetBrains specific template is maintained in a separate JetBrains.gitignore that can
