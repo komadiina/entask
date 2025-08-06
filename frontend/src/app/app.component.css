@@ -1,0 +1,10 @@
+@import 'tailwindcss';
+@plugin "tailwindcss-primeui";
+@custom-variant dark (&:where(.dark-mode, .dark-mode *));
+
+:host {
+	display: flex;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}

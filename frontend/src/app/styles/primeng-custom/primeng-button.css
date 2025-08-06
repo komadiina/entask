@@ -1,0 +1,40 @@
+@import 'tailwindcss';
+@plugin "tailwindcss-primeui";
+
+p-button {
+	font-family: 'Inter';
+
+	--p-button-contrast-background: var(--p-surface-100);
+	--p-button-contrast-border-color: var(--p-surface-100);
+	--p-button-contrast-hover-background: var(--p-surface-200);
+	--p-button-contrast-active-background: var(--p-surface-300);
+	--p-button-contrast-hover-border-color: var(--p-surface-200);
+
+	--p-button-secondary-background: var(--p-surface-700);
+	--p-button-secondary-hover-background: var(--p-surface-600);
+	--p-button-secondary-active-background: var(--p-surface-500);
+	--p-button-secondary-border-color: var(--p-surface-700);
+	--p-button-secondary-hover-border-color: var(--p-surface-600);
+}
+
+.p-button-success,
+.p-button-warn,
+.p-button-danger,
+.p-button-info,
+.p-button-secondary {
+	@apply font-semibold rounded-xl border-0;
+}
+
+.p-button-contrast {
+	@apply font-semibold;
+	color: rgba(21, 21, 21, 95%);
+	color: rgb(255, 128, 0);
+}
+
+.p-button-info {
+	@apply bg-[#4141ff]/30 hover:bg-[#4141ff]/50 active:bg-[#4141ff]/70 backdrop-blur-2xl;
+}
+
+.p-button-warn {
+	@apply bg-[#ffa200]/30 hover:bg-[#ffa200]/50 active:bg-[#ffa200]/70 backdrop-blur-2xl;
+}

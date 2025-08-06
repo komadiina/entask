@@ -1,0 +1,14 @@
+@import 'tailwindcss';
+@plugin "tailwindcss-primeui";
+
+input {
+	@apply bg-zinc-900 p-2 rounded-xl min-w-auto text-lg placeholder:text-[0.875rem] placeholder:opacity-50 border-2 border-[#fff]/15 space-x-2;
+}
+
+.hover-scale-up {
+	@apply transition-all scale-100 hover:scale-105 duration-200 delay-75 ease-in-out;
+}
+
+.clickable {
+	@apply hover:cursor-pointer;
+}

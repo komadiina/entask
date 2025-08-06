@@ -16,7 +16,17 @@ services:
       - "50006:50006"
     networks:
       - entask
-    
+
+  backend:
+    build: ./api
+    volumes:
+      - "./api/:/api/"
+    networks:
+      - entask
+    ports:
+      - "4201:4201"
+
+  # converter section
   # mp4 to gif conversion service + dapr sidecar 
   videogif:
     build: ./converters/videogif
