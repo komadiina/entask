@@ -7,7 +7,7 @@ import logging
 import os
 from typing import Optional
 
-# TODO: testing, [[REMOVE]] in prod
+# TODO: testing - didnt setup ssl/tls on dev yet, [[REMOVE]] in prod 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '0'
 os.environ['OAUTHLIB_RELAX_TOKEN_SCOPE'] = '1'
 
