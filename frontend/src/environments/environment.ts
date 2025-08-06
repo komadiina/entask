@@ -5,7 +5,5 @@ export const environment: {
 	backendUrl: string;
 } = {
 	production: true,
-	googleClientID: '123456789.apps.googleusercontent.com',
-	googleAPIKey: '123456789',
-	backendUrl: 'http://localhost:4300',
+	backendUrl: 'http://localhost:4201',
 };
