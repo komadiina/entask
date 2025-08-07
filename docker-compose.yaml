@@ -1,12 +1,20 @@
 services:
   redis:
+    container_name: entask-redis
     image: redis:alpine
     ports:
       - "6379:6379"
     networks:
       - entask
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 30s
+      retries: 3
+      start_period: 10s
       
   placement:
+    container_name: entask-dapr-placement
     image: daprio/dapr
     command: [
       "./placement",
@@ -17,18 +25,113 @@ services:
     networks:
       - entask
 
+  pgsql-root:
+    container_name: entask-postgres
+    image: postgres:alpine
+    restart: unless-stopped
+    shm_size: 2g
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER", "-d", "$POSTGRES_DB"]
+      interval: 60s
+      timeout: 30s
+      retries: 5
+      start_period: 10s
+    environment:
+      PGUSER: ${POSTGRES_USER}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    networks:
+      - entask
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./postgres/scripts/:/docker-entrypoint-initdb.d/
+      
+  flyway:
+    container_name: entask-flyway-migrations
+    image: flyway/flyway
+    depends_on:
+      pgsql-root:
+        condition: service_healthy
+    shm_size: 256mb
+    environment:
+      - DATABASE_URL=jdbc:postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgsql-root:5432/${POSTGRES_DB}
+      - DATABASE_USER=${POSTGRES_USER}
+      - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - entask
+    volumes:
+      - "./pgsql/scripts/:/flyway/sql/"
+    command: [
+      "-schemas=${POSTGRES_DB}",
+      "-user=${POSTGRES_USER}",
+      "-password=${POSTGRES_PASSWORD}",
+      "-url=jdbc:postgresql://pgsql-root:5432/${POSTGRES_DB}",
+      "-connectRetries=5",
+      "migrate",
+      "-X"
+    ]
+  
+  pgadmin:
+    container_name: entask-pgadmin
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - entask
+    ports:
+      - "5433:80"
+    volumes:
+      - ./pgadmin:/var/lib/pgadmin
+      
   backend:
+    container_name: entask-api
     build: ./api
+    environment:
+      REDIS_HOST: "redis"
+      REDIS_PORT: 6379
+      API_PORT: 4201
+      FRONTEND_PORT: 4200
+      API_VERSION: "v1"
+      CLIENT_SECRET_FILE: "/api/secrets/client_secret.json"
     volumes:
       - "./api/:/api/"
     networks:
       - entask
     ports:
       - "4201:4201"
-
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./api
+          target: /api
+    depends_on:
+      redis:
+        condition: service_healthy
+      
+  frontend:
+    container_name: entask-frontend
+    build: ./frontend
+    ports:
+      - "4200:4200"
+    volumes: 
+      - "./frontend/:/frontend/"
+      - "node_modules:/frontend/node_modules"
+    networks:
+      - entask
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./frontend
+          target: /frontend
+    
   # converter section
   # mp4 to gif conversion service + dapr sidecar 
   videogif:
+    container_name: entask-converters-videogif
     build: ./converters/videogif
     depends_on:
       - redis
@@ -41,6 +144,7 @@ services:
       - "8000:8000"
       
   videogif-dapr:
+    container_name: entask-converters-videogif-dapr
     image: daprio/daprd:edge
     command: [
       "./daprd",
@@ -57,7 +161,9 @@ services:
     volumes:
       - "./converters/videogif/components/:/converters/videogif/components/"
     network_mode: "service:videogif"
-      
     
+volumes:
+  node_modules:
+  
 networks:
   entask: null

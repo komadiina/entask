@@ -178,7 +178,6 @@ dmypy.json
 cython_debug/
 
 # Dapr logs
-
 /.dapr
 
 # PyCharm
@@ -189,3 +188,4 @@ cython_debug/
 #.idea/
 
 /api/secrets/client_secret.json
+/pgadmin
