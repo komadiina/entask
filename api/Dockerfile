@@ -5,6 +5,7 @@ COPY . /api
 
 RUN pip install --no-cache-dir --upgrade -r /api/requirements.txt
 RUN export PYTHONPATH=$PYTHONPATH:/api
+EXPOSE 4201
 
 ENTRYPOINT ["python"]
 CMD ["app.py"]

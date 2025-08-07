@@ -1,0 +1,15 @@
+FROM node:22.9.0
+
+WORKDIR /frontend
+
+RUN npm i -g npm@10.8.3
+RUN npm i -s -g @angular/cli@19
+RUN npm i -s -g @angular/compiler-cli@19 @angular/language-service@19 @angular-devkit/build-angular@19
+
+
+COPY . .
+RUN npm install
+
+
+EXPOSE 4200
+CMD ["ng", "serve", "--host", "0.0.0.0", "--disable-host-check"]

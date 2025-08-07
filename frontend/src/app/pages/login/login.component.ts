@@ -1,9 +1,17 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+	AfterViewInit,
+	ChangeDetectionStrategy,
+	Component,
+	OnChanges,
+	OnInit,
+	SimpleChanges,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { Toast } from 'primeng/toast';
+import { APIService } from '@entask-root/services/api.service';
 import { RedirectService } from '@entask-root/services/redirect.service';
 import { AuthService } from '@entask-services/auth.service';
 
@@ -15,7 +23,7 @@ import { AuthService } from '@entask-services/auth.service';
 	styleUrl: './login.component.css',
 	changeDetection: ChangeDetectionStrategy.Default,
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit, OnChanges, AfterViewInit {
 	usernameControl = new FormControl('');
 	passwordControl = new FormControl('');
 
@@ -23,10 +31,27 @@ export class LoginComponent {
 		private authService: AuthService,
 		private messageService: MessageService,
 		private redirectService: RedirectService,
+		private apiService: APIService,
 	) {
 		if (authService.isLoggedIn()) {
 			this.redirectService.redirect({ path: '/dashboard' });
 		}
+	}
+
+	ngOnInit(): void {
+		console.log('ngOnInit');
+
+		this.apiService.getApiVersion().subscribe((res) => {
+			console.log(res);
+		});
+	}
+
+	ngAfterViewInit(): void {
+		console.log('ngAfterViewInit');
+	}
+
+	ngOnChanges(changes: SimpleChanges): void {
+		console.log('ngOnChanges', changes);
 	}
 
 	public show(sev: string): void {
