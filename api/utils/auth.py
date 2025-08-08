@@ -1,10 +1,10 @@
-from google.auth.credentials import Credentials
-import redis
-from redis.retry import Retry
-from redis.backoff import ConstantBackoff
-
-import os
 import logging
+import os
+
+import redis
+from google.auth.credentials import Credentials
+from redis.backoff import ConstantBackoff
+from redis.retry import Retry
 
 logger = logging.getLogger()
 

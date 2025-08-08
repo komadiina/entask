@@ -12,3 +12,7 @@ input {
 .clickable {
 	@apply hover:cursor-pointer;
 }
+
+.p-invalid {
+	@apply border-red-400 border-2;
+}

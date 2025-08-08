@@ -5,9 +5,13 @@ import { Route } from '@angular/router';
 	providedIn: 'root',
 })
 export class RedirectService {
-	public redirect(destination: Route): void {
+	public redirect(destination: Route, replace = false): void {
 		if (window.location.pathname != destination.path) {
-			window.location.replace(destination.path!);
+			if (replace) {
+				window.location.replace(destination.path!);
+			} else {
+				window.location.assign(destination.path!);
+			}
 		}
 	}
 }

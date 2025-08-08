@@ -2,7 +2,7 @@ import { HttpClient } from '@angular/common/http';
 import { EnvironmentInjector, Injectable } from '@angular/core';
 import { Observer } from 'rxjs';
 import { LogLevel } from '@entask-root/constants/logger.constants';
-import { LoggerService } from '@entask-root/utilities/logger.service';
+import { LoggerService } from '@entask-root/services/logger.service';
 import { environment } from '@entask-environments/environment';
 import { RedirectService } from './redirect.service';
 

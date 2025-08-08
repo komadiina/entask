@@ -17,6 +17,24 @@ export const routes: Routes = [
 		title: 'Entask | Login',
 	},
 	{
+		path: 'register',
+		pathMatch: 'full',
+		loadComponent: () =>
+			import('@entask-pages/register/register.component').then(
+				(c) => c.RegisterComponent,
+			),
+		title: 'Entask | Register',
+	},
+	{
+		path: 'forgotten-password',
+		pathMatch: 'full',
+		loadComponent: () =>
+			import(
+				'@entask-pages/forgotten-password/forgotten-password.component'
+			).then((c) => c.ForgottenPasswordComponent),
+		title: 'Entask | Reset password',
+	},
+	{
 		path: 'profile',
 		pathMatch: 'full',
 		loadComponent: () =>

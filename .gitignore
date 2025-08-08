@@ -189,3 +189,5 @@ cython_debug/
 
 /api/secrets/client_secret.json
 /pgadmin
+!/pgsql
+/.vscode

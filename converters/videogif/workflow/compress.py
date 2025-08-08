@@ -1,9 +1,9 @@
-from dapr.ext.workflow import WorkflowActivityContext, WorkflowRuntime
+import time
+
 from dapr.clients import DaprClient
+from dapr.ext.workflow import WorkflowActivityContext, WorkflowRuntime
 from models.request import ConversionRequest
 from models.workflow import CompressionWorkflowOutput
-
-import time
 
 
 def main(

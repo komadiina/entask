@@ -1,16 +1,20 @@
 import json
+import os
+
+import google_auth_oauthlib.flow
+import requests
+import utils.auth as uauth
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
-import google_auth_oauthlib.flow
-import os
-import utils.auth as uauth
-from constants.responses import (
+
+from constants.auth_responses import (
     InvalidClientResponse,
     InvalidCSRFTokenResponse,
-    UnauthorizedResponse,
     InvalidJWTResponse,
+    InvalidRegistrationResponse,
+    UnauthorizedResponse,
 )
-import requests
+from models.auth import RegisterRequestModel
 
 SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
@@ -85,6 +89,11 @@ async def oauth2_callback(request: Request, code: str, state: str):
 
 
 @auth_router.post("/auth/register")
+async def register_user(details: RegisterRequestModel):
+    if details.is_incomplete():
+        return InvalidRegistrationResponse("Missing required fields.")
+
+
 @auth_router.get("/auth/me")
 async def get_user_details(request: Request):
     auth_header = request.headers.get("Authorization")

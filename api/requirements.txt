@@ -9,3 +9,6 @@ google-auth-oauthlib
 google-auth-httplib2
 
 redis[hiredis]
+psycopg[binary]
+
+isort[requirements_deprecated_finder]

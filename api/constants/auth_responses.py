@@ -31,3 +31,13 @@ class InvalidJWTResponse(Response):
 
     def __init__(self):
         super().__init__({"error": "Invalid authorization token."})
+
+
+class InvalidRegistrationResponse(Response):
+    status_code = 422
+    media_type = "application/json"
+
+    def __init__(self, message: str):
+        super().__init__(
+            {"error": "Invalid registration request." if message is None else message}
+        )

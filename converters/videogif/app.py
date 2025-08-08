@@ -1,8 +1,9 @@
-import os
 import logging
+import os
+
+from dotenv import load_dotenv
 from fastapi import FastAPI
 from models.request import ConversionRequest
-from dotenv import load_dotenv
 
 app = FastAPI()
 logger = logging.getLogger("videogif-host")

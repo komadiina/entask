@@ -1,11 +1,18 @@
-from fastapi import FastAPI, APIRouter
 import logging
 import os
 from typing import List
+
+from fastapi import APIRouter, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from routers.auth import auth_router
 
 logger = logging.getLogger()
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[f"http://localhost:{os.environ.get('FRONTEND_PORT')}"],
+)
 
 
 @app.get("/api/version")

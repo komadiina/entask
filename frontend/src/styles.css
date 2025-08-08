@@ -3,6 +3,7 @@
 @import url('./app/styles/primeng-custom/primeng-toast.css');
 
 @import 'tailwindcss';
+@import '/frontend/node_modules/primeicons/primeicons.css';
 @plugin "tailwindcss-primeui";
 
 @custom-variant dark (&:where(.dark-mode, .dark-mode *));

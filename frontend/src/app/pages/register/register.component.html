@@ -1,0 +1,106 @@
+<div
+	class="flex flex-col justify-center gap-2 h-screen items-center place-items-centers align-middle w-screen transition-opacity duration-1000 ease-in-out starting:opacity-0 ending:opacity-100"
+>
+	<div
+		class="flex flex-col justify-start items-start place-items-start w-[20vw] gap-2"
+	>
+		<div class="text-7xl font-semibold place-items-start w-full">Entask</div>
+		<div class="text-2xl font-light opacity-75 place-items-start">
+			One registration for John Doe, please.
+		</div>
+		<hr
+			class="h-2 border-2 border-white opacity-75 my-2 rounded-3xl transition-all w-full starting:w-0 ending:w-full duration-1000 ease-in-out"
+		/>
+
+		<span class="text-lg font-light text-[#9e9e9e]"
+			>Please fill in the form below to register.
+		</span>
+		<form
+			[formGroup]="registrationForm"
+			class="gap-2 flex flex-col w-full"
+		>
+			<input
+				type="text"
+				name="givenName"
+				formControlName="givenName"
+				id="givenName"
+				placeholder="First (given) name"
+				tabindex="1"
+				class="animated w-full"
+			/>
+
+			<input
+				type="text"
+				name="lastName"
+				formControlName="lastName"
+				id="lastName"
+				placeholder="Last (family) name"
+				tabindex="2"
+				class="animated w-full"
+			/>
+
+			<input
+				type="email"
+				name="email"
+				formControlName="email"
+				id="email"
+				placeholder="E-mail"
+				tabindex="3"
+				class="animated w-full"
+			/>
+
+			<input
+				type="email"
+				name="emailConfirm"
+				formControlName="emailConfirm"
+				id="emailConfirm"
+				placeholder="Confirm e-mail"
+				tabindex="4"
+				class="animated w-full"
+			/>
+
+			<input
+				type="text"
+				name="username"
+				formControlName="username"
+				id="username"
+				placeholder="Username"
+				tabindex="5"
+				class="animated w-full"
+			/>
+
+			<input
+				type="password"
+				name="password"
+				formControlName="password"
+				id="password"
+				placeholder="Password"
+				class="animated w-full"
+				tabindex="6"
+			/>
+			<input
+				type="password"
+				name="passwordConfirm"
+				formControlName="passwordConfirm"
+				id="passwordConfirm"
+				placeholder="Confirm password"
+				class="animated w-full"
+				tabindex="7"
+			/>
+
+			<button
+				pButton
+				pRipple
+				severity="info"
+				class="w-2/3 self-center"
+				(click)="this.submitRegister()"
+				tabindex="8"
+				[disabled]="!this.registrationForm.valid"
+			>
+				Register
+			</button>
+		</form>
+	</div>
+</div>
+
+<p-toast position="top-right" />

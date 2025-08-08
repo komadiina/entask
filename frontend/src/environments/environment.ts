@@ -3,5 +3,5 @@ export const environment: {
 	backendUrl: string;
 } = {
 	production: true,
-	backendUrl: 'http://localhost:4200',
+	backendUrl: 'http://localhost:4200/',
 };

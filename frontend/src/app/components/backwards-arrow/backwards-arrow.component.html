@@ -1,0 +1,10 @@
+<div
+	(click)="navigateBackward()"
+	(keypress)="navigateBackward()"
+	tabindex="1"
+	class="cursor-pointer border-2 rounded-xl p-2 m-2 absolute bottom-0 left-0 border-zinc-600 hover:bg-zinc-600 hover:text-zinc-100 transition-all duration-200 ease-in-out"
+	*ngIf="this.notRoot()"
+>
+	<i class="pi pi-arrow-left text-sm relative"></i>
+	<span class="relative pb-2 pl-2 mb-2">Back</span>
+</div>

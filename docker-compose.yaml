@@ -31,11 +31,11 @@ services:
     restart: unless-stopped
     shm_size: 2g
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER", "-d", "$POSTGRES_DB"]
-      interval: 60s
-      timeout: 30s
+      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER", "-d", "$POSTGRES_DB", "-p", "$POSTGRES_PORT"]
+      interval: 30s
+      timeout: 15s
       retries: 5
-      start_period: 10s
+      start_period: 5s
     environment:
       PGUSER: ${POSTGRES_USER}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -43,10 +43,13 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     networks:
       - entask
+    expose:
+      - $POSTGRES_PORT
     ports:
-      - "5432:5432"
+      - "5433:$POSTGRES_PORT"
     volumes:
       - ./postgres/scripts/:/docker-entrypoint-initdb.d/
+    command: ["-p", "$POSTGRES_PORT"]
       
   flyway:
     container_name: entask-flyway-migrations
@@ -67,7 +70,7 @@ services:
       "-schemas=${POSTGRES_DB}",
       "-user=${POSTGRES_USER}",
       "-password=${POSTGRES_PASSWORD}",
-      "-url=jdbc:postgresql://pgsql-root:5432/${POSTGRES_DB}",
+      "-url=jdbc:postgresql://pgsql-root:${POSTGRES_PORT}/${POSTGRES_DB}",
       "-connectRetries=5",
       "migrate",
       "-X"
@@ -83,7 +86,7 @@ services:
     networks:
       - entask
     ports:
-      - "5433:80"
+      - "5434:80"
     volumes:
       - ./pgadmin:/var/lib/pgadmin
       
@@ -97,6 +100,11 @@ services:
       FRONTEND_PORT: 4200
       API_VERSION: "v1"
       CLIENT_SECRET_FILE: "/api/secrets/client_secret.json"
+      PGSQL_DATABASE: ${POSTGRES_DB}
+      PGSQL_USER: ${POSTGRES_USER}
+      PGSQL_PASSWORD: ${POSTGRES_PASSWORD}
+      PGSQL_HOST: "pgsql-root"
+      PGSQL_PORT: ${POSTGRES_PORT}
     volumes:
       - "./api/:/api/"
     networks:
@@ -111,6 +119,8 @@ services:
     depends_on:
       redis:
         condition: service_healthy
+      flyway:
+        condition: service_completed_successfully
       
   frontend:
     container_name: entask-frontend
@@ -119,7 +129,7 @@ services:
       - "4200:4200"
     volumes: 
       - "./frontend/:/frontend/"
-      - "node_modules:/frontend/node_modules"
+      # - "node_modules:/frontend/node_modules"
     networks:
       - entask
     develop:

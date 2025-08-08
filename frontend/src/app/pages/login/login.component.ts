@@ -34,7 +34,7 @@ export class LoginComponent implements OnInit, OnChanges, AfterViewInit {
 		private apiService: APIService,
 	) {
 		if (authService.isLoggedIn()) {
-			this.redirectService.redirect({ path: '/dashboard' });
+			this.redirectService.redirect({ path: '/dashboard' }, true);
 		}
 	}
 
@@ -81,11 +81,11 @@ export class LoginComponent implements OnInit, OnChanges, AfterViewInit {
 	}
 
 	public async signup(): Promise<void> {
-		this.redirectService.redirect({ path: '/signup' });
+		this.redirectService.redirect({ path: '/register' }, false);
 	}
 
 	public async forgotPassword(): Promise<void> {
-		this.redirectService.redirect({ path: '/forgot-password' });
+		this.redirectService.redirect({ path: '/forgotten-password' }, false);
 	}
 
 	public async signupGoogle(): Promise<void> {

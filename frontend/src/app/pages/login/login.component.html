@@ -1,39 +1,82 @@
 <div
-  class="flex flex-col md:flex-row justify-center gap-2 h-screen items-center place-items-centers align-middle w-screen transition-opacity duration-1000 ease-in-out starting:opacity-0 ending:opacity-100">
-  <div class="flex flex-col gap-2 items-start md:items-end">
-    <span class="text-7xl font-semibold">Entask</span>
-    <span class="text-4xl font-light text-[#9e9e9e]">Your daily workflow driver.</span>
-  </div>
+	class="flex flex-col md:flex-row justify-center gap-2 h-screen items-center place-items-centers align-middle w-screen transition-opacity duration-1000 ease-in-out starting:opacity-0 ending:opacity-100"
+>
+	<div class="flex flex-col gap-2 items-start md:items-end">
+		<span class="text-7xl font-semibold">Entask</span>
+		<span class="text-4xl font-light text-[#9e9e9e]"
+			>Your daily workflow driver</span
+		>
+	</div>
 
-  <div class="bg-zinc-100 md:w-1 w-[60%] md:h-80 h-1 md:mx-6 my-6"></div>
-  <div class="flex flex-col gap-2 w-80">
-    <span class="text-lg font-light text-[#9e9e9e]">Please sign in to continue.</span>
-    <input type="text" name="username" id="username" placeholder="Username or e-mail address" tabindex="1"
-      [formControl]="usernameControl" />
+	<div class="bg-zinc-100 md:w-1 w-[60%] md:h-80 h-1 md:mx-6 my-6"></div>
+	<div class="flex flex-col gap-2 w-80">
+		<span class="text-lg font-light text-[#9e9e9e]"
+			>Please sign in to continue.</span
+		>
+		<input
+			type="text"
+			name="username"
+			id="username"
+			placeholder="Username or e-mail address"
+			tabindex="1"
+			[formControl]="usernameControl"
+		/>
 
-    <input type="password" name="password" id="password" placeholder="Password" class="animated" tabindex="2"
-      [formControl]="passwordControl" />
+		<input
+			type="password"
+			name="password"
+			id="password"
+			placeholder="Password"
+			class="animated"
+			tabindex="2"
+			[formControl]="passwordControl"
+		/>
 
-    <button pButton pRipple severity="info" class="w-full" (click)="this.login()" tabindex="3">
-      Login
-    </button>
+		<button
+			pButton
+			pRipple
+			severity="info"
+			class="w-full"
+			(click)="this.login()"
+			tabindex="3"
+		>
+			Login
+		</button>
 
-    <div class="text-[1.05rem] text-[#9e9e9e] mt-2 flex flex-col gap-1">
-      <div class="hover-scale-up clickable">
-        Don't have an account?
-        <span class="font-bold hover:cursor-pointer hover:text-[#bebebe] transition-colors duration-300"
-          (click)="this.signup()" (keypress)="this.signup()" tabindex="4">Sign up here!</span>
-      </div>
+		<div class="text-[1.05rem] text-[#9e9e9e] mt-2 flex flex-col gap-1">
+			<div
+				class="hover-scale-up clickable"
+				(click)="this.signup()"
+				(keypress)="this.signup()"
+				tabindex="4"
+			>
+				Don't have an account?
+				<span
+					class="font-bold hover:cursor-pointer hover:text-[#bebebe] transition-colors duration-300"
+					>Sign up here!</span
+				>
+			</div>
 
-      <div class="hover-scale-up clickable left-0" (click)="this.forgotPassword()" (keypress)="this.forgotPassword()"
-        tabindex="5">
-        Forgotten password?
-      </div>
-      <div class="hover-scale-up clickable left-0" (click)="this.signupGoogle()" (keypress)="this.signupGoogle()"
-        tabindex="6">
-        Sign in with <span class="text-blue-400">Google!</span>
-      </div>
-    </div>
-  </div>
+			<div
+				class="hover-scale-up clickable left-0"
+				(click)="this.forgotPassword()"
+				(keypress)="this.forgotPassword()"
+				tabindex="5"
+			>
+				Forgotten password?
+			</div>
+			<div
+				class="hover-scale-up clickable left-0"
+				(click)="this.signupGoogle()"
+				(keypress)="this.signupGoogle()"
+				tabindex="6"
+			>
+				Sign in with <span class="text-blue-400">Google!</span>
+			</div>
+		</div>
+	</div>
 </div>
-<p-toast position="top-right" class="w-0 h-0 absolute right-0 top-0 overflow-hidden" />
+<p-toast
+	position="top-right"
+	class="w-0 h-0 absolute right-0 top-0 overflow-hidden"
+/>

@@ -1,8 +1,8 @@
-from dapr.ext.workflow import WorkflowActivityContext, WorkflowRuntime
-from dapr.clients import DaprClient
-from models.request import ConversionRequest
-
 import time
+
+from dapr.clients import DaprClient
+from dapr.ext.workflow import WorkflowActivityContext, WorkflowRuntime
+from models.request import ConversionRequest
 
 
 def main(ctx: WorkflowActivityContext, data: ConversionRequest):
