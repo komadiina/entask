@@ -16,6 +16,7 @@
 			>Please fill in the form below to register.
 		</span>
 		<form
+			id="registrationForm"
 			[formGroup]="registrationForm"
 			class="gap-2 flex flex-col w-full"
 		>
@@ -27,6 +28,7 @@
 				placeholder="First (given) name"
 				tabindex="1"
 				class="animated w-full"
+				required="true"
 			/>
 
 			<input
@@ -37,6 +39,7 @@
 				placeholder="Last (family) name"
 				tabindex="2"
 				class="animated w-full"
+				required="true"
 			/>
 
 			<input
@@ -44,9 +47,10 @@
 				name="email"
 				formControlName="email"
 				id="email"
-				placeholder="E-mail"
+				placeholder="E-mail. Must be a valid e-mail address."
 				tabindex="3"
 				class="animated w-full"
+				required="true"
 			/>
 
 			<input
@@ -57,6 +61,7 @@
 				placeholder="Confirm e-mail"
 				tabindex="4"
 				class="animated w-full"
+				required="true"
 			/>
 
 			<input
@@ -67,6 +72,7 @@
 				placeholder="Username"
 				tabindex="5"
 				class="animated w-full"
+				required="true"
 			/>
 
 			<input
@@ -74,9 +80,10 @@
 				name="password"
 				formControlName="password"
 				id="password"
-				placeholder="Password"
+				placeholder="Password. Minimum 8 characters."
 				class="animated w-full"
 				tabindex="6"
+				required="true"
 			/>
 			<input
 				type="password"
@@ -86,6 +93,7 @@
 				placeholder="Confirm password"
 				class="animated w-full"
 				tabindex="7"
+				required="true"
 			/>
 
 			<button
@@ -95,12 +103,9 @@
 				class="w-2/3 self-center"
 				(click)="this.submitRegister()"
 				tabindex="8"
-				[disabled]="!this.registrationForm.valid"
 			>
 				Register
 			</button>
 		</form>
 	</div>
 </div>
-
-<p-toast position="top-right" />

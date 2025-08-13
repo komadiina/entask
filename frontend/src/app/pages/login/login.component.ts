@@ -1,11 +1,4 @@
-import {
-	AfterViewInit,
-	ChangeDetectionStrategy,
-	Component,
-	OnChanges,
-	OnInit,
-	SimpleChanges,
-} from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
@@ -15,6 +8,7 @@ import { APIService } from '@entask-root/services/api.service';
 import { RedirectService } from '@entask-root/services/redirect.service';
 import { AuthService } from '@entask-services/auth.service';
 
+
 @Component({
 	selector: 'app-login',
 	imports: [Toast, Ripple, ButtonModule, ReactiveFormsModule],
@@ -22,6 +16,7 @@ import { AuthService } from '@entask-services/auth.service';
 	templateUrl: './login.component.html',
 	styleUrl: './login.component.css',
 	changeDetection: ChangeDetectionStrategy.Default,
+	standalone: true,
 })
 export class LoginComponent implements OnInit, OnChanges, AfterViewInit {
 	usernameControl = new FormControl('');

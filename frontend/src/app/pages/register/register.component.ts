@@ -1,23 +1,16 @@
 import { Component, inject } from '@angular/core';
-import {
-	AbstractControl,
-	FormBuilder,
-	FormGroup,
-	ReactiveFormsModule,
-	ValidationErrors,
-} from '@angular/forms';
-import { registrationForm } from '@entask-constants/forms/registration.constants';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
-import { Toast } from 'primeng/toast';
-import { RegistrationPartial } from '@entask-root/types/registration/registration_form.type';
+import { registrationForm } from '@entask-root/constants/forms/register/register.forms';
 
 @Component({
 	selector: 'app-register',
-	imports: [ButtonModule, Ripple, ReactiveFormsModule, Toast],
+	imports: [ButtonModule, Ripple, ReactiveFormsModule],
 	templateUrl: './register.component.html',
 	styleUrl: './register.component.css',
+	standalone: true,
 })
 export class RegisterComponent {
 	private formBuilder = inject(FormBuilder);
@@ -29,6 +22,17 @@ export class RegisterComponent {
 
 	public submitRegister(): void {
 		let invalidRequest = false;
+
+		if (this.registrationForm.invalid) {
+			invalidRequest = true;
+			this.highlightEmptyFields();
+			this.messageService.add({
+				severity: 'error',
+				summary: 'Oops!',
+				detail: 'Please fill in all required fields.',
+				life: 4000,
+			});
+		}
 
 		if (this.registrationForm.hasError('passwordMismatch')) {
 			invalidRequest = true;
@@ -53,6 +57,7 @@ export class RegisterComponent {
 		}
 
 		if (!invalidRequest) {
+			this.removeAllHighlights();
 			this.messageService.add({
 				severity: 'success',
 				summary: 'Success',
@@ -62,28 +67,43 @@ export class RegisterComponent {
 		}
 	}
 
+	private highlightEmptyFields(): void {
+		const form: HTMLElement = document.getElementById('registrationForm')!;
+		form.querySelectorAll('input').forEach((input) => {
+			if (input.getAttribute('required') != null && input.value.trim() === '') {
+				input.classList.add('p-invalid');
+			}
+		});
+	}
+ 
+	private removeAllHighlights(): void {
+		this.removeHighlights([
+			'email',
+			'emailConfirm',
+			'password',
+			'passwordConfirm',
+			'givenName',
+			'lastName',
+			'username',
+		]);
+	}
+
 	private highlightFields(fields: string[]): void {
 		fields.forEach((field) => {
-			this.registrationForm.get(field)?.setErrors({ invalid: true });
 			document.getElementById(field)?.classList.add('p-invalid');
 		});
 	}
 
 	private removeHighlights(fields: string[]): void {
 		fields.forEach((field) => {
-			this.registrationForm.get(field)?.setErrors(null);
 			document.getElementById(field)?.classList.remove('p-invalid');
 		});
 	}
 
 	private initForm(builder: FormBuilder): FormGroup {
-		let form: FormGroup = registrationForm(builder);
+		const form: FormGroup = registrationForm(builder);
 
-		form = this.initCustomValidators(form);
-
-		form.valueChanges.subscribe((value: RegistrationPartial) => {
-			console.log(value);
-
+		form.statusChanges.subscribe(() => {
 			if (form.hasError('passwordMismatch')) {
 				console.log('passwordMismatch');
 				this.highlightFields(['password', 'passwordConfirm']);
@@ -100,33 +120,5 @@ export class RegisterComponent {
 		});
 
 		return form;
-	}
-
-	private initCustomValidators(formGroup: FormGroup): FormGroup {
-		// -- Check for password/passwordConfirm mismatch
-		formGroup.get('passwordConfirm')?.addValidators([
-			(control: AbstractControl): ValidationErrors | null => {
-				if (control.value !== formGroup.get('password')?.value) {
-					formGroup.setErrors({ invalid: true, passwordMismatch: true });
-					return { invalid: true, passwordMismatch: true };
-				}
-
-				return null;
-			},
-		]);
-
-		// -- Check for email/emailConfirm mismatch
-		formGroup.get('emailConfirm')?.addValidators([
-			(control: AbstractControl): ValidationErrors | null => {
-				if (control.value !== formGroup.get('email')?.value) {
-					formGroup.setErrors({ invalid: true, emailMismatch: true });
-					return { invalid: true, emailMismatch: true };
-				}
-
-				return null;
-			},
-		]);
-
-		return formGroup;
 	}
 }

@@ -1,13 +1,14 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { BackwardsArrowComponent } from './components/backwards-arrow/backwards-arrow.component';
+import { Toast } from 'primeng/toast';
 import { APIService } from './services/api.service';
 
 @Component({
 	selector: 'app-root',
-	imports: [RouterOutlet, BackwardsArrowComponent],
+	imports: [RouterOutlet, Toast],
 	templateUrl: './app.component.html',
 	styleUrl: './app.component.css',
+	standalone: true,
 })
 export class AppComponent {
 	isCollapsed = false;

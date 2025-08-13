@@ -5,6 +5,15 @@ input {
 	@apply bg-zinc-900 p-2 rounded-xl min-w-auto text-lg placeholder:text-[0.875rem] placeholder:opacity-50 border-2 border-[#fff]/15 space-x-2;
 }
 
+body {
+	@apply transition-all 
+    duration-1000 ease-in-out
+    starting:-translate-y-full after:translate-y-0 
+    starting:overflow-hidden after:overflow-auto
+    starting:opacity-0 after:opacity-100
+    starting:z-[-1] after:z-0;
+}
+
 .hover-scale-up {
 	@apply transition-all scale-100 hover:scale-105 duration-200 delay-75 ease-in-out;
 }

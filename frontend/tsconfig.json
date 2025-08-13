@@ -24,6 +24,9 @@
       "@entask-constants/*": [
         "./src/app/constants/*"
       ],
+      "@entask-validators/*": [
+        "./src/app/constants/validators/*"
+      ],
       "@entask-utilities/*": [
         "./src/app/utilities/*"
       ],

@@ -129,7 +129,7 @@ services:
       - "4200:4200"
     volumes: 
       - "./frontend/:/frontend/"
-      # - "node_modules:/frontend/node_modules"
+      - node_modules:/frontend/node_modules
     networks:
       - entask
     develop:
