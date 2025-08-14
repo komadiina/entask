@@ -4,25 +4,28 @@ import os
 import google_auth_oauthlib.flow
 import requests
 import utils.auth as uauth
+import urllib.parse
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
 
 from constants.auth_responses import (
     InvalidClientResponse,
-    InvalidCSRFTokenResponse,
     InvalidJWTResponse,
     InvalidRegistrationResponse,
     UnauthorizedResponse,
 )
-from models.auth import RegisterRequestModel
+from models.auth import RegisterRequestModel, LoginRequestModel
 
+API_PREFIX = f"/api/{os.environ.get('API_VERSION')}/public/auth"
 SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
 ]
-API_PREFIX = f"/api/{os.environ.get('API_VERSION')}/auth"
 FLOW_REDIRECT_URI = (
     f"http://localhost:{os.environ.get('API_PORT')}{API_PREFIX}/oauth2/callback"
+)
+FRONTEND_HOST = (
+    f"http://{os.environ.get('FRONTEND_HOST')}:{os.environ.get('FRONTEND_PORT')}"
 )
 
 auth_router = APIRouter(prefix=API_PREFIX)
@@ -48,12 +51,10 @@ async def oauth2(request: Request):
     else:
         return InvalidClientResponse()
 
-    print("oauth2:", state)
-
     return RedirectResponse(url=auth_url)
 
 
-@auth_router.get("/oauth2/callback")
+@auth_router.get("/oauth2/callback", response_class=RedirectResponse)
 async def oauth2_callback(request: Request, code: str, state: str):
     stored_state = ""
     if request.client is not None:
@@ -63,35 +64,40 @@ async def oauth2_callback(request: Request, code: str, state: str):
     else:
         return InvalidClientResponse()
 
-    if state != stored_state:
-        return InvalidCSRFTokenResponse()
+    # if state != stored_state:
+    #     return InvalidCSRFTokenResponse()
 
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         client_secrets_file=os.environ.get("CLIENT_SECRET_FILE"),
         scopes=SCOPES,
         state=state,
     )
-
     flow.redirect_uri = FLOW_REDIRECT_URI
-
     flow.fetch_token(code=code, state=state)
 
-    return {
-        "destination": "/dashboard",
-        "credentials": {
-            "client_id": flow.credentials.client_id,
-            "scopes": flow.credentials.scopes,
-            "token": flow.credentials.token,
-            "refresh_token": flow.credentials.refresh_token,
-            "expiry": flow.credentials.expiry,
-        },
-    }
+    query = urllib.parse.urlencode(
+        {
+            "access_token": flow.credentials.token,
+            "refresh_token": flow.credentials.refresh_token or "",
+            "expiry": flow.credentials.expiry.isoformat(),  # pyright: ignore[reportOptionalMemberAccess]
+        }
+    )
+    url = f"{FRONTEND_HOST}/oauth2/callback?{query}"
+
+    return RedirectResponse(url=url)
 
 
-@auth_router.post("/auth/register")
-async def register_user(details: RegisterRequestModel):
+@auth_router.post("/register")
+async def register_user(request: Request, details: RegisterRequestModel):
     if details.is_incomplete():
         return InvalidRegistrationResponse("Missing required fields.")
+
+    return uauth.register_user(details)
+
+
+@auth_router.post("/login")
+async def login_user(request: Request, details: LoginRequestModel):
+    return uauth.check_login(details)
 
 
 @auth_router.get("/auth/me")

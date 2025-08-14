@@ -14,4 +14,8 @@ export class RedirectService {
 			}
 		}
 	}
+
+	public absoluteRedirect(uri: string): void {
+		window.location.href = uri;
+	}
 }

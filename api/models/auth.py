@@ -1,12 +1,15 @@
-from pydantic import BaseModel
+from models.camelizer import BaseSchema
 
 
-class RegisterRequestModel(BaseModel):
+class RegisterRequestModel(BaseSchema):
     given_name: str
     family_name: str
     email: str
     email_confirmed: str
-    picture_url: str
+    # picture_url: str
+    username: str
+    password: str
+    password_confirmed: str
 
     def is_incomplete(self) -> bool:
         if (
@@ -21,3 +24,8 @@ class RegisterRequestModel(BaseModel):
             return True
 
         return False
+
+
+class LoginRequestModel(BaseSchema):
+    username_email: str
+    password: str

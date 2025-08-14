@@ -19,7 +19,7 @@ export const registrationForm = (formBuilder: FormBuilder) =>
 				Validators.min(8),
 				Validators.max(255),
 			]),
-			passwordConfirm: new FormControl(null, [
+			passwordConfirmed: new FormControl(null, [
 				Validators.required,
 				Validators.min(8),
 				Validators.max(255),
@@ -28,12 +28,12 @@ export const registrationForm = (formBuilder: FormBuilder) =>
 				Validators.required,
 				Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
 			]),
-			emailConfirm: new FormControl(null, [
+			emailConfirmed: new FormControl(null, [
 				Validators.required,
 				Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
 			]),
 			givenName: new FormControl(null, [Validators.required]),
-			lastName: new FormControl(null, [Validators.required]),
+			familyName: new FormControl(null, [Validators.required]),
 		},
 		{
 			validators: [passwordsMatchValidator, emailsMatchValidator],

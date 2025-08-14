@@ -4,16 +4,16 @@ export const passwordsMatchValidator = (
 	group: AbstractControl,
 ): ValidationErrors | null => {
 	const password = group.get('password')?.value;
-	const passwordConfirm = group.get('passwordConfirm')?.value;
-	return password === passwordConfirm ? null : { passwordMismatch: true };
+	const passwordConfirmed = group.get('passwordConfirmed')?.value;
+	return password === passwordConfirmed ? null : { passwordMismatch: true };
 };
 
 export const emailsMatchValidator = (
 	group: AbstractControl,
 ): ValidationErrors | null => {
 	const email = group.get('email')?.value;
-	const emailConfirm = group.get('emailConfirm')?.value;
-	return email === emailConfirm ? null : { emailMismatch: true };
+	const emailConfirmed = group.get('emailConfirmed')?.value;
+	return email === emailConfirmed ? null : { emailMismatch: true };
 };
 
 export const passwordLengthValidator = (

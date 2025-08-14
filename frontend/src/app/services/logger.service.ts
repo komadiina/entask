@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AppComponent } from '@entask-root/app.component';
-import { LogLevel } from '@entask-root/constants/logger.constants';
+import { LogLevel } from '@entask-constants/logger.constants';
 
 @Injectable({
 	providedIn: 'root',

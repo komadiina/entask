@@ -1,4 +1,4 @@
-from constants import auth_responses
+from constants import auth_responses, paths
 from constants.auth_responses import (
     InvalidClientResponse,
     InvalidCSRFTokenResponse,
@@ -6,6 +6,7 @@ from constants.auth_responses import (
     InvalidRegistrationResponse,
     UnauthorizedResponse,
 )
+from constants.paths import PUBLIC_PATHS
 
 __all__ = [
     "auth_responses",
@@ -14,4 +15,6 @@ __all__ = [
     "InvalidJWTResponse",
     "InvalidRegistrationResponse",
     "UnauthorizedResponse",
+    "paths",
+    "PUBLIC_PATHS",
 ]

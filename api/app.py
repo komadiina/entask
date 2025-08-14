@@ -3,19 +3,27 @@ import os
 from typing import List
 
 from fastapi import APIRouter, FastAPI
+from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 from routers.auth import auth_router
 
-logger = logging.getLogger()
-app = FastAPI()
+from middleware.jwt import AuthMiddleware
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=[f"http://localhost:{os.environ.get('FRONTEND_PORT')}"],
+logger = logging.getLogger()
+app = FastAPI(
+    middleware=[
+        Middleware(AuthMiddleware),
+        Middleware(
+            CORSMiddleware,
+            allow_origins=[f"http://localhost:{os.environ.get('FRONTEND_PORT')}", "*"],
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    ]
 )
 
 
-@app.get("/api/version")
+@app.get("/api/public/version")
 async def version():
     return {"version": os.environ.get("API_VERSION")}
 

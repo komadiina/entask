@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { Toast } from 'primeng/toast';
-import { APIService } from './services/api.service';
+import { APIService } from '@entask-services/api.service';
+import { LocalStorageService } from '@entask-services/local-storage.service';
 
 @Component({
 	selector: 'app-root',
@@ -14,9 +15,10 @@ export class AppComponent {
 	isCollapsed = false;
 	history: History = window.history;
 
-	constructor(private apiClient: APIService) {
-		this.apiClient.getApiVersion().subscribe((res) => {
-			localStorage.setItem('apiVersion', res.version);
-		});
+	constructor(
+		private apiClient: APIService,
+		private localStorageService: LocalStorageService,
+	) {
+		this.apiClient.initApi();
 	}
 }

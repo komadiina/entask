@@ -2,6 +2,8 @@ fastapi[standard]
 pydantic
 typing
 requests
+urllib3
+python-jose[cryptography]
 
 google-api-python-client
 google-auth

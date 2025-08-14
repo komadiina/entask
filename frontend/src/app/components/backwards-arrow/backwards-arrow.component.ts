@@ -1,6 +1,9 @@
 import { NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 
+/**
+ * @deprecated Minimal functionality, use Router instead.
+ */
 @Component({
 	selector: 'app-backwards-arrow',
 	imports: [NgIf],

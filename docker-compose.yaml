@@ -32,8 +32,8 @@ services:
     shm_size: 2g
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER", "-d", "$POSTGRES_DB", "-p", "$POSTGRES_PORT"]
-      interval: 30s
-      timeout: 15s
+      interval: 5s
+      timeout: 10s
       retries: 5
       start_period: 5s
     environment:
@@ -49,6 +49,7 @@ services:
       - "5433:$POSTGRES_PORT"
     volumes:
       - ./postgres/scripts/:/docker-entrypoint-initdb.d/
+      - ./postgres/data/:/var/lib/postgresql/data/
     command: ["-p", "$POSTGRES_PORT"]
       
   flyway:
@@ -57,15 +58,16 @@ services:
     depends_on:
       pgsql-root:
         condition: service_healthy
-    shm_size: 256mb
+    shm_size: 512mb
     environment:
       - DATABASE_URL=jdbc:postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@pgsql-root:5432/${POSTGRES_DB}
       - DATABASE_USER=${POSTGRES_USER}
       - DATABASE_PASSWORD=${POSTGRES_PASSWORD}
+      - FLYWAY_BASELINE_ON_MIGRATE=true
     networks:
       - entask
     volumes:
-      - "./pgsql/scripts/:/flyway/sql/"
+      - "./postgres/scripts/:/flyway/sql/"
     command: [
       "-schemas=${POSTGRES_DB}",
       "-user=${POSTGRES_USER}",
@@ -97,6 +99,7 @@ services:
       REDIS_HOST: "redis"
       REDIS_PORT: 6379
       API_PORT: 4201
+      FRONTEND_HOST: "localhost"
       FRONTEND_PORT: 4200
       API_VERSION: "v1"
       CLIENT_SECRET_FILE: "/api/secrets/client_secret.json"
@@ -105,6 +108,8 @@ services:
       PGSQL_PASSWORD: ${POSTGRES_PASSWORD}
       PGSQL_HOST: "pgsql-root"
       PGSQL_PORT: ${POSTGRES_PORT}
+      JWT_SECRET_KEY: "secret123!"
+      JWT_ALGORITHM: "HS256"
     volumes:
       - "./api/:/api/"
     networks:
@@ -128,8 +133,7 @@ services:
     ports:
       - "4200:4200"
     volumes: 
-      - "./frontend/:/frontend/"
-      - node_modules:/frontend/node_modules
+      - ./frontend:/frontend
     networks:
       - entask
     develop:
@@ -171,9 +175,9 @@ services:
     volumes:
       - "./converters/videogif/components/:/converters/videogif/components/"
     network_mode: "service:videogif"
-    
+  
 volumes:
-  node_modules:
+  pgdata:
   
 networks:
   entask: null

@@ -1,4 +1,10 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnChanges,
+	OnInit,
+	SimpleChanges,
+} from '@angular/core';
 import { AuthService } from '@entask-services/auth.service';
 
 @Component({
@@ -9,6 +15,12 @@ import { AuthService } from '@entask-services/auth.service';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit, OnChanges {
 	constructor(private authService: AuthService) {}
+
+	ngOnInit(): void {
+	}
+
+	ngOnChanges(changes: SimpleChanges): void {
+	}
 }

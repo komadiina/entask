@@ -1,37 +1,32 @@
 {
-  "tabWidth": 2,
-  "useTabs": true,
-  "singleQuote": true,
-  "semi": true,
-  "arrowParens": "always",
-  "bracketSameLine": false,
-  "embeddedLanguageFormatting": "auto",
-  "bracketSpacing": true,
-  "singleAttributePerLine": true,
-  "importOrder": [
-    "^@entask-pages/(.*)$",
-    "^@entask-models/(.*)$",
-    "^@entask-root/(.*)$",
-    "^@entask-services/(.*)$",
-    "^@entask-utils/(.*)$",
-    "^@entask-environments/(.*)$",
-    "^[./]"
-  ],
-  "importOrderParserPlugins": [
-    "typescript",
-    "decorators-legacy"
-  ],
-  "importOrderSeparation": false,
-  "importOrderSortSpecifiers": true,
-  "plugins": [
-    "@trivago/prettier-plugin-sort-imports"
-  ],
-  "overrides": [
-    {
-      "files": "*.ts",
-      "options": {
-        "parser": "typescript"
-      }
-    }
-  ]
+	"tabWidth": 2,
+	"useTabs": true,
+	"singleQuote": true,
+	"semi": true,
+	"arrowParens": "always",
+	"bracketSameLine": false,
+	"embeddedLanguageFormatting": "auto",
+	"bracketSpacing": true,
+	"singleAttributePerLine": true,
+	"importOrder": [
+		"^@entask-pages/(.*)$",
+		"^@entask-models/(.*)$",
+		"^@entask-root/(.*)$",
+		"^@entask-services/(.*)$",
+		"^@entask-utils/(.*)$",
+		"^@entask-environments/(.*)$",
+		"^[./]"
+	],
+	"importOrderParserPlugins": ["typescript", "decorators-legacy"],
+	"importOrderSeparation": false,
+	"importOrderSortSpecifiers": true,
+	"plugins": ["@trivago/prettier-plugin-sort-imports"],
+	"overrides": [
+		{
+			"files": "*.ts",
+			"options": {
+				"parser": "typescript"
+			}
+		}
+	]
 }

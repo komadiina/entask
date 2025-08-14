@@ -4,6 +4,8 @@ import { MessageService } from 'primeng/api';
 import { ButtonModule } from 'primeng/button';
 import { Ripple } from 'primeng/ripple';
 import { registrationForm } from '@entask-root/constants/forms/register/register.forms';
+import { RegisterService } from '@entask-root/services/pages/register.service';
+import { registerObservers } from '@entask-root/utilities/rxjs/observers/register/register.observers';
 
 @Component({
 	selector: 'app-register',
@@ -13,10 +15,13 @@ import { registrationForm } from '@entask-root/constants/forms/register/register
 	standalone: true,
 })
 export class RegisterComponent {
+	public registrationForm: FormGroup;
 	private formBuilder = inject(FormBuilder);
-	registrationForm: FormGroup;
 
-	constructor(private messageService: MessageService) {
+	constructor(
+		private messageService: MessageService,
+		private registerService: RegisterService,
+	) {
 		this.registrationForm = this.initForm(this.formBuilder);
 	}
 
@@ -36,7 +41,7 @@ export class RegisterComponent {
 
 		if (this.registrationForm.hasError('passwordMismatch')) {
 			invalidRequest = true;
-			this.highlightFields(['password', 'passwordConfirm']);
+			this.highlightFields(['password', 'passwordConfirmed']);
 			this.messageService.add({
 				severity: 'error',
 				summary: 'Oops!',
@@ -47,7 +52,7 @@ export class RegisterComponent {
 
 		if (this.registrationForm.hasError('emailMismatch')) {
 			invalidRequest = true;
-			this.highlightFields(['email', 'emailConfirm']);
+			this.highlightFields(['email', 'emailConfirmed']);
 			this.messageService.add({
 				severity: 'error',
 				summary: 'Oops!',
@@ -59,11 +64,16 @@ export class RegisterComponent {
 		if (!invalidRequest) {
 			this.removeAllHighlights();
 			this.messageService.add({
-				severity: 'success',
-				summary: 'Success',
-				detail: 'Registration requested successfully.',
-				life: 4000,
+				severity: 'info',
+				summary: 'Registration',
+				detail:
+					'Registration requested successfully. You may now go back to log-in.',
+				life: 5000,
 			});
+
+			this.registerService
+				.register(this.registrationForm.value)
+				.subscribe(registerObservers.registrationSubmit.context(this));
 		}
 	}
 
@@ -75,15 +85,15 @@ export class RegisterComponent {
 			}
 		});
 	}
- 
+
 	private removeAllHighlights(): void {
 		this.removeHighlights([
 			'email',
-			'emailConfirm',
+			'emailConfirmed',
 			'password',
-			'passwordConfirm',
+			'passwordConfirmed',
 			'givenName',
-			'lastName',
+			'familyName',
 			'username',
 		]);
 	}
@@ -105,17 +115,15 @@ export class RegisterComponent {
 
 		form.statusChanges.subscribe(() => {
 			if (form.hasError('passwordMismatch')) {
-				console.log('passwordMismatch');
-				this.highlightFields(['password', 'passwordConfirm']);
+				this.highlightFields(['password', 'passwordConfirmed']);
 			} else {
-				this.removeHighlights(['password', 'passwordConfirm']);
+				this.removeHighlights(['password', 'passwordConfirmed']);
 			}
 
 			if (form.hasError('emailMismatch')) {
-				console.log('emailMismatch');
-				this.highlightFields(['email', 'emailConfirm']);
+				this.highlightFields(['email', 'emailConfirmed']);
 			} else {
-				this.removeHighlights(['email', 'emailConfirm']);
+				this.removeHighlights(['email', 'emailConfirmed']);
 			}
 		});
 

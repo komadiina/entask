@@ -17,6 +17,13 @@ export const routes: Routes = [
 		title: 'Entask | Login',
 	},
 	{
+		path: 'oauth2/callback',
+		loadComponent: () =>
+			import(
+				'@entask-root/middleware/callbacks/oauth2-callback.component'
+			).then((c) => c.OAuth2CallbackComponent),
+	},
+	{
 		path: 'register',
 		pathMatch: 'full',
 		loadComponent: () =>

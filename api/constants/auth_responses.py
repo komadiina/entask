@@ -2,35 +2,35 @@ from starlette.responses import Response
 
 
 class InvalidClientResponse(Response):
-    status_code = 400
     media_type = "application/json"
 
     def __init__(self):
-        super().__init__({"error": "Invalid client"})
+        super().__init__(content={"error": "Invalid client"}, status_code=400)
 
 
 class InvalidCSRFTokenResponse(Response):
-    status_code = 400
     media_type = "application/json"
 
     def __init__(self):
-        super().__init__({"error": "Possible CSRF attack, request revoked."})
+        super().__init__(
+            content={"error": "Possible CSRF attack, request revoked."}, status_code=400
+        )
 
 
 class UnauthorizedResponse(Response):
-    status_code = 401
     media_type = "application/json"
 
     def __init__(self):
-        super().__init__({"error": "Unauthorized"})
+        super().__init__(content={"error": "Unauthorized"}, status_code=401)
 
 
 class InvalidJWTResponse(Response):
-    status_code = 401
     media_type = "application/json"
 
     def __init__(self):
-        super().__init__({"error": "Invalid authorization token."})
+        super().__init__(
+            content={"error": "Invalid authorization token."}, status_code=401
+        )
 
 
 class InvalidRegistrationResponse(Response):

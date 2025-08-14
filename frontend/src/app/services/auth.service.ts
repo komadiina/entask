@@ -1,51 +1,45 @@
 import { HttpClient } from '@angular/common/http';
-import { EnvironmentInjector, Injectable } from '@angular/core';
-import { Observer } from 'rxjs';
-import { LogLevel } from '@entask-root/constants/logger.constants';
-import { LoggerService } from '@entask-root/services/logger.service';
-import { environment } from '@entask-environments/environment';
-import { RedirectService } from './redirect.service';
+import { Injectable } from '@angular/core';
+import { LogLevel } from '@entask-constants/logger.constants';
+import { TLocalStorage } from '@entask-types/local-storage/local-storage.type';
+import { ApiUtil } from '@entask-utilities/api/api.util';
+import { LocalStorageService } from '@entask-services/local-storage.service';
+import { LoggerService } from '@entask-services/logger.service';
+import { RedirectService } from '@entask-services/redirect.service';
 
 @Injectable({
-	providedIn: 'root',
+  providedIn: 'root',
 })
 export class AuthService {
-	constructor(
-		private redirectService: RedirectService,
-		private logService: LoggerService,
-		private envInjector: EnvironmentInjector,
-		private httpClient: HttpClient,
-	) {
-		logService.init({ logLevel: LogLevel.DEBUG, logPrefix: 'AuthService' });
+  constructor(
+    private redirectService: RedirectService,
+    private logService: LoggerService,
+    private httpClient: HttpClient,
+    private localStorageService: LocalStorageService,
+  ) {
+    logService.init({ logLevel: LogLevel.DEBUG, logPrefix: 'AuthService' });
 
-		if (this.isLoggedIn() == false) {
-			this.redirectService.redirect({ path: '/login' });
-		}
-	}
+    if (this.isLoggedIn() == false) {
+      this.redirectService.redirect({ path: '/login' });
+    }
+  }
 
-	public isLoggedIn(): boolean {
-		return localStorage.getItem('token') ? true : false;
-	}
+  /**
+   *
+   * @deprecated JWT verification has been implemented on backend, this just provides an additional, minimal layer of security
+   */
+  public isLoggedIn(): boolean {
+    return (
+      this.localStorageService.get('accessToken' as keyof TLocalStorage) != null
+    );
+  }
 
-	public login(username: string, password: string): void {
-		this.logService.log([username, password]);
-	}
+  public login(username: string, password: string): void {
+    this.logService.log([username, password]);
+  }
 
-	public async signupGoogle(): Promise<void> {
-		const observer: Observer<object> = {
-			next: (res) => {
-				console.log(res);
-			},
-			complete: () => {
-				console.log('complete');
-			},
-			error: (err) => {
-				console.log(err);
-			},
-		};
-
-		this.httpClient
-			.post(environment.backendUrl + '/auth/google', {})
-			.subscribe(observer);
-	}
+  public async signupGoogle(): Promise<void> {
+    const uri = ApiUtil.buildUrl('/public/auth/oauth2');
+    this.redirectService.absoluteRedirect(uri);
+  }
 }
