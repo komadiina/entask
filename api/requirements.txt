@@ -4,6 +4,8 @@ typing
 requests
 urllib3
 python-jose[cryptography]
+bcrypt
+fastapi-decorators
 
 google-api-python-client
 google-auth

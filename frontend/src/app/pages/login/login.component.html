@@ -15,10 +15,15 @@
 		<span class="text-lg font-light text-[#9e9e9e]"
 			>Please sign in to continue.</span
 		>
+		<!-- <form
+			class="w-full flex flex-col gap-2"
+			(submit)="this.login()"
+		> -->
 		<input
 			type="text"
 			name="username"
 			id="username"
+			autocomplete="username"
 			placeholder="Username or e-mail address"
 			tabindex="1"
 			[formControl]="usernameControl"
@@ -28,6 +33,7 @@
 			type="password"
 			name="password"
 			id="password"
+			autocomplete="current-password"
 			placeholder="Password"
 			class="animated"
 			tabindex="2"
@@ -39,11 +45,13 @@
 			pRipple
 			severity="info"
 			class="w-full"
+			type="submit"
 			(click)="this.login()"
 			tabindex="3"
 		>
 			Login
 		</button>
+		<!-- </form> -->
 
 		<div class="text-[1.05rem] text-[#9e9e9e] mt-2 flex flex-col gap-1">
 			<div

@@ -8,32 +8,32 @@ import {
 export const registrationForm = (formBuilder: FormBuilder) =>
 	formBuilder.group(
 		{
-			username: new FormControl(null, [
+			username: new FormControl('', [
 				Validators.required,
-				Validators.pattern(/^[a-zA-Z ]+$/),
-				Validators.min(3),
-				Validators.max(24),
+				Validators.pattern(/^[a-zA-Z_]+$/),
+				Validators.minLength(3),
+				Validators.maxLength(24),
 			]),
-			password: new FormControl(null, [
+			password: new FormControl('', [
 				Validators.required,
-				Validators.min(8),
-				Validators.max(255),
+				Validators.minLength(8),
+				Validators.maxLength(255),
 			]),
-			passwordConfirmed: new FormControl(null, [
+			passwordConfirmed: new FormControl('', [
 				Validators.required,
-				Validators.min(8),
-				Validators.max(255),
+				Validators.minLength(8),
+				Validators.maxLength(255),
 			]),
-			email: new FormControl(null, [
-				Validators.required,
-				Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
-			]),
-			emailConfirmed: new FormControl(null, [
+			email: new FormControl('', [
 				Validators.required,
 				Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
 			]),
-			givenName: new FormControl(null, [Validators.required]),
-			familyName: new FormControl(null, [Validators.required]),
+			emailConfirmed: new FormControl('', [
+				Validators.required,
+				Validators.pattern(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/),
+			]),
+			givenName: new FormControl('', [Validators.required]),
+			familyName: new FormControl('', [Validators.required]),
 		},
 		{
 			validators: [passwordsMatchValidator, emailsMatchValidator],

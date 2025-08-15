@@ -7,16 +7,17 @@ import utils.auth as uauth
 import urllib.parse
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
+import functions.auth
 
 from constants.auth_responses import (
     InvalidClientResponse,
-    InvalidJWTResponse,
     InvalidRegistrationResponse,
     UnauthorizedResponse,
 )
 from models.auth import RegisterRequestModel, LoginRequestModel
+from decorators.auth import authorized
 
-API_PREFIX = f"/api/{os.environ.get('API_VERSION')}/public/auth"
+API_PREFIX = f"/api/{os.environ.get('API_VERSION')}/auth"
 SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
@@ -55,18 +56,7 @@ async def oauth2(request: Request):
 
 
 @auth_router.get("/oauth2/callback", response_class=RedirectResponse)
-async def oauth2_callback(request: Request, code: str, state: str):
-    stored_state = ""
-    if request.client is not None:
-        stored_state = uauth.retrieve_temp_state(
-            f"{request.client.host}{request.client.port}"
-        )
-    else:
-        return InvalidClientResponse()
-
-    # if state != stored_state:
-    #     return InvalidCSRFTokenResponse()
-
+async def oauth2_callback(code: str, state: str):
     flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
         client_secrets_file=os.environ.get("CLIENT_SECRET_FILE"),
         scopes=SCOPES,
@@ -75,11 +65,17 @@ async def oauth2_callback(request: Request, code: str, state: str):
     flow.redirect_uri = FLOW_REDIRECT_URI
     flow.fetch_token(code=code, state=state)
 
+    id_token = flow.oauth2session.token.get("id_token")
+    access_token = flow.credentials.token
+    refresh_token = flow.credentials.refresh_token
+    expiry = flow.credentials.expiry
+
     query = urllib.parse.urlencode(
         {
-            "access_token": flow.credentials.token,
-            "refresh_token": flow.credentials.refresh_token or "",
-            "expiry": flow.credentials.expiry.isoformat(),  # pyright: ignore[reportOptionalMemberAccess]
+            "id_token": id_token,
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "expiry": expiry,
         }
     )
     url = f"{FRONTEND_HOST}/oauth2/callback?{query}"
@@ -88,19 +84,23 @@ async def oauth2_callback(request: Request, code: str, state: str):
 
 
 @auth_router.post("/register")
-async def register_user(request: Request, details: RegisterRequestModel):
+async def register_user(details: RegisterRequestModel):
     if details.is_incomplete():
         return InvalidRegistrationResponse("Missing required fields.")
 
-    return uauth.register_user(details)
+    return functions.auth.register_user(details)
 
 
 @auth_router.post("/login")
-async def login_user(request: Request, details: LoginRequestModel):
-    return uauth.check_login(details)
+async def login_user(details: LoginRequestModel):
+    print(details)
+    res = functions.auth.login_user(details)
+    print(res)
+    return res
 
 
-@auth_router.get("/auth/me")
+@auth_router.get("/me")
+@authorized
 async def get_user_details(request: Request):
     auth_header = request.headers.get("Authorization")
     if auth_header is None:
@@ -108,13 +108,12 @@ async def get_user_details(request: Request):
 
     token = auth_header.split(" ")[1]
 
+    print(token)
+
     res = requests.get(
         "https://www.googleapis.com/oauth2/v3/userinfo",
         headers={"Authorization": f"Bearer {token}"},
     )
-
-    if res.status_code != 200:
-        return InvalidJWTResponse()
 
     body = res.json()
 

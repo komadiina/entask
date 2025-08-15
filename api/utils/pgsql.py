@@ -2,6 +2,7 @@ import os
 from typing import Any
 
 import psycopg
+from psycopg.rows import dict_row, DictRow
 
 
 def get_connection() -> psycopg.Connection:
@@ -21,8 +22,9 @@ def close_connection(conn: psycopg.Connection) -> None:
     return
 
 
-def get_cursor(conn: psycopg.Connection) -> psycopg.Cursor[Any]:
-    return conn.cursor()
+# pyright workaround
+def get_cursor(conn: psycopg.Connection[Any]):
+    return conn.cursor(row_factory=dict_row)
 
 
 def close_cursor(cur: psycopg.Cursor) -> None:

@@ -1,5 +1,8 @@
 import { Injectable } from '@angular/core';
-import { TLocalStorage } from '@entask-types/local-storage/local-storage.type';
+import {
+	KLocalStorage,
+	TLocalStorage,
+} from '@entask-types/local-storage/local-storage.type';
 
 @Injectable({
 	providedIn: 'root',
@@ -10,7 +13,7 @@ export class LocalStorageService {
 	public getAll(): Partial<TLocalStorage> {
 		const result: Partial<TLocalStorage> = {};
 
-		(Object.keys(localStorage) as (keyof TLocalStorage)[]).forEach(
+		(Object.keys(localStorage) as KLocalStorage[]).forEach(
 			(key: string): void => {
 				const value = this.storage.getItem(key);
 				if (value !== null) result[key] = value;
@@ -20,24 +23,19 @@ export class LocalStorageService {
 		return result;
 	}
 
-	public get<K extends keyof TLocalStorage>(key: K): TLocalStorage[K] | null {
+	public get<K extends KLocalStorage>(key: K): TLocalStorage[K] | null {
 		return this.storage.getItem(key) as TLocalStorage[K] | null;
 	}
 
-	public static get<K extends keyof TLocalStorage>(
-		key: K,
-	): TLocalStorage[K] | null {
+	public static get<K extends KLocalStorage>(key: K): TLocalStorage[K] | null {
 		return window.localStorage.getItem(key) as TLocalStorage[K] | null;
 	}
 
-	public set<K extends keyof TLocalStorage>(
-		key: K,
-		value: TLocalStorage[K],
-	): void {
+	public set<K extends KLocalStorage>(key: K, value: TLocalStorage[K]): void {
 		this.storage.setItem(key, value);
 	}
 
-	public static set<K extends keyof TLocalStorage>(
+	public static set<K extends KLocalStorage>(
 		key: K,
 		value: TLocalStorage[K],
 	): void {
@@ -50,7 +48,7 @@ export class LocalStorageService {
 		}
 	}
 
-	public remove<K extends keyof TLocalStorage>(key: K): void {
+	public remove<K extends KLocalStorage>(key: K): void {
 		this.storage.removeItem(key);
 	}
 

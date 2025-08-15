@@ -17,12 +17,9 @@ async def root():
 
 @app.post("/test")
 async def test(input: ConversionRequest):
-    print(input.model_dump_json())
     return {"message": "Hello World"}
 
 
 if __name__ == "__main__":
     import uvicorn
-
-    print(os.environ.get("DAPR_APP_ID_VIDEO_COMPRESSOR"))
     uvicorn.run(app, host="0.0.0.0", port=8000)

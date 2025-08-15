@@ -4,9 +4,9 @@ export class BaseObserver<T, C = unknown> implements Observer<T> {
 	protected ctx: C | null = null;
 
 	public constructor(
-		private onNext: (value: T, ctx: C | null) => void,
-		private onError: (error: Error, ctx: C | null) => void,
-		private onComplete: (ctx: C | null) => void,
+		private onNext: (value: T, ctx?: C | null) => void,
+		private onError: (error: Error, ctx?: C | null) => void,
+		private onComplete: (ctx?: C | null) => void,
 	) {}
 
 	public context(component: C): BaseObserver<T, C> {
@@ -18,8 +18,7 @@ export class BaseObserver<T, C = unknown> implements Observer<T> {
 		this.onNext(value, this.ctx);
 	}
 
-  public error(error: Error): void {
-    
+	public error(error: Error): void {
 		this.onError(error, this.ctx);
 	}
 

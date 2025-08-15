@@ -3,7 +3,7 @@ import { Injectable } from '@angular/core';
 import { TLocalStorage } from '@entask-types/local-storage/local-storage.type';
 import { Observable, lastValueFrom } from 'rxjs';
 import { LocalStorageService } from '@entask-services/local-storage.service';
-import { environment } from '@entask-environments/environment';
+import { ApiUtil } from '@entask-utils/api/api.util';
 
 @Injectable({
 	providedIn: 'root',
@@ -16,7 +16,7 @@ export class APIService {
 
 	public getApiVersion(): Observable<{ version: string }> {
 		return this.http.get<{ version: string }>(
-			environment.backendUrl + '/public/version',
+			ApiUtil.buildUrl('/version', false),
 		);
 	}
 

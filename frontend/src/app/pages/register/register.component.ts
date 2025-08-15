@@ -25,10 +25,15 @@ export class RegisterComponent {
 		this.registrationForm = this.initForm(this.formBuilder);
 	}
 
+	get getMessageService(): MessageService {
+		return this.messageService;
+	}
+
 	public submitRegister(): void {
 		let invalidRequest = false;
 
 		if (this.registrationForm.invalid) {
+			console.log(this.registrationForm);
 			invalidRequest = true;
 			this.highlightEmptyFields();
 			this.messageService.add({

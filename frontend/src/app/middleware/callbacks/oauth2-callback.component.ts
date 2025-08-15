@@ -17,8 +17,13 @@ export class OAuth2CallbackComponent {
 		this.route.queryParams.subscribe((params) => {
 			const accessToken = params['access_token'];
 			const refreshToken = params['refresh_token'];
+			const idToken = params['id_token'];
 
-			this.localStorageService.updateMany({ accessToken, refreshToken });
+			this.localStorageService.updateMany({
+				idToken,
+				accessToken,
+				refreshToken,
+			});
 
 			this.router.navigate(['/dashboard']);
 		});

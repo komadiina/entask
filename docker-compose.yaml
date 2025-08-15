@@ -94,7 +94,9 @@ services:
       
   backend:
     container_name: entask-api
-    build: ./api
+    build: 
+      context: ./api
+      dockerfile: Dockerfile
     environment:
       REDIS_HOST: ${REDIS_HOST}
       REDIS_PORT: ${REDIS_PORT}
@@ -106,7 +108,7 @@ services:
       PGSQL_DATABASE: ${POSTGRES_DB}
       PGSQL_USER: ${POSTGRES_USER}
       PGSQL_PASSWORD: ${POSTGRES_PASSWORD}
-      PGSQL_HOST: ${POSTGRES_HOST}
+      PGSQL_HOST: ${PGSQL_HOST}
       PGSQL_PORT: ${POSTGRES_PORT}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       JWT_ALGORITHM: ${JWT_ALGORITHM}

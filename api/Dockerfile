@@ -1,11 +1,14 @@
 FROM python:3.12-alpine
 
-WORKDIR /api
-COPY . /api
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-RUN pip install --no-cache-dir --upgrade -r /api/requirements.txt
+WORKDIR /api
 RUN export PYTHONPATH=$PYTHONPATH:/api
+
+COPY . /api
 EXPOSE 4201
 
 ENTRYPOINT ["python"]
 CMD ["app.py"]
+

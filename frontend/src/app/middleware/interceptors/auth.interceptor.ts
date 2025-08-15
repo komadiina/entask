@@ -1,5 +1,5 @@
 import { HttpEvent, HttpHandlerFn, HttpRequest } from '@angular/common/http';
-import { TLocalStorage } from '@entask-types/local-storage/local-storage.type';
+import { KLocalStorage } from '@entask-types/local-storage/local-storage.type';
 import { Observable } from 'rxjs';
 import { LocalStorageService } from '@entask-services/local-storage.service';
 
@@ -7,9 +7,13 @@ export function authInterceptor(
 	req: HttpRequest<unknown>,
 	next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
-	req.headers.append(
-		'Authorization',
-		'Bearer ' + LocalStorageService.get('accessToken' as keyof TLocalStorage),
-	);
+	// append opaque access token (for authorization)
+	const accessToken = LocalStorageService.get('accessToken' as KLocalStorage);
+	req.headers.append('Authorization', `Bearer ${accessToken}`);
+
+	// append id token (for authorization)
+	const idToken = LocalStorageService.get('idToken' as KLocalStorage);
+	req.headers.append('g-id-token', `${idToken}`);
+
 	return next(req);
 }

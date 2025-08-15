@@ -13,7 +13,7 @@ export class RegisterService {
 
 	public register(user: User): Observable<RegistrationResponse> {
 		return this.http.post<RegistrationResponse>(
-			ApiUtil.buildUrl('/public/auth/register'),
+			ApiUtil.buildUrl('/auth/register'),
 			user,
 		);
 	}

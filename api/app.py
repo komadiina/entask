@@ -7,12 +7,10 @@ from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 from routers.auth import auth_router
 
-from middleware.jwt import AuthMiddleware
 
 logger = logging.getLogger()
 app = FastAPI(
     middleware=[
-        Middleware(AuthMiddleware),
         Middleware(
             CORSMiddleware,
             allow_origins=[f"http://localhost:{os.environ.get('FRONTEND_PORT')}", "*"],
@@ -23,7 +21,7 @@ app = FastAPI(
 )
 
 
-@app.get("/api/public/version")
+@app.get("/api/version")
 async def version():
     return {"version": os.environ.get("API_VERSION")}
 
