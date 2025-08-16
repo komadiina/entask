@@ -37,7 +37,7 @@ def get_connection() -> Connection[DictRow]:
     return pool.getconn()
 
 
-def exec_query(sql: SQL | Composed, params: tuple | None) -> list[DictRow] | None:
+def exec_query(sql: SQL | Composed, params: tuple | str | None) -> list[DictRow] | None:
     """Executes a parametrized (composed) query.
 
     Args:

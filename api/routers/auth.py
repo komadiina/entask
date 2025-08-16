@@ -94,6 +94,7 @@ async def oauth2_callback(code: str, state: str):
             "access_token": access_token,
             "refresh_token": refresh_token,
             "expiry": expiry,
+            "provider": "google"
         }
     )
     url = f"{FRONTEND_HOST}/oauth2/callback?{query}"
@@ -122,8 +123,9 @@ async def get_user_details(request: Request):
     if auth_header is None:
         return UnauthorizedResponse()
 
-    # retrieve from datbase
-    user_details = functions.auth.get_user_details(utils.auth.get_credentials(request))
+    credentials = utils.auth.get_credentials(request)
+    email = utils.auth.get_email(request, credentials)
+    user_details = functions.auth.get_user_details(email=email)
 
     if user_details is None:
         return Response(

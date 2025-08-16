@@ -127,23 +127,17 @@ def login_user(user: LoginRequestModel):
     raise HTTPException(status_code=400, detail="User does not exist")
 
 
-def get_user_details(credentials: Credentials) -> User | None:
-    decoded_it = jwt.decode(
-        credentials.access_token,
-        os.environ.get("JWT_SECRET_KEY") or "",
-        algorithms=[os.environ.get("JWT_ALGORITHM") or ""],
-    )
-
+def get_user_details(email: str) -> User | None:
     result = exec_query(
         sql=sql.SQL("SELECT * FROM {table} WHERE {v1} LIKE %s;").format(
             table=sql.Identifier("users"),
-            v1=sql.Identifier("username"),
+            v1=sql.Identifier("email"),
         ),
-        params=(decoded_it["claims"]["sub"]),
+        params=(email),
     )
 
     if result is not None and len(result):
         for row in result:
             return User(**row)
-      
+
     return None

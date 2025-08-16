@@ -8,11 +8,11 @@ import redis
 from fastapi.exceptions import HTTPException
 from google.auth.credentials import Credentials
 from jose import jwt
-from jose.exceptions import JWTError
 import models.auth
 from redis.backoff import ConstantBackoff
 from redis.retry import Retry
 from utils.pgsql import *
+import flows.auth
 import google.oauth2.id_token
 from google.auth.transport import requests as grequests
 
@@ -61,28 +61,10 @@ async def store_credentials(credentials: Credentials) -> bool:
 
 
 def get_credentials(request: fastapi.Request) -> models.auth.Credentials:
-    if request is None:
-        raise ValueError("property 'request' cannot be of NoneType")
-
-    if request.headers is None:
-        raise ValueError("property 'request.headers' cannot be of NoneType")
-
-    access_token = request.headers.get("Authorization") or ""
-    refresh_token = request.headers.get("x-refresh-token") or ""
-    id_token = request.headers.get("x-id-token") or ""
-
-    decoded_at = jwt.decode(
-        access_token,
-        os.environ.get("JWT_SECRET_KEY") or "",
-        algorithms=[os.environ.get("JWT_ALGORITHM") or ""],
-    )
-    return models.auth.Credentials(
-        access_token=access_token,
-        refresh_token=refresh_token,
-        id_token=id_token,
-        access_token_expiry=decoded_at["claims"]["exp"],
-        refresh_token_expiry=decoded_at["claims"]["exp"],
-    )
+    if request.headers.get("x-auth-type") == "google":
+        return flows.auth.google_oauth2_flow(request)
+    else:
+        return flows.auth.entask_auth_flow(request)
 
 
 def generate_credentials(username: str, email: str) -> models.auth.Credentials:
@@ -151,10 +133,17 @@ def check_password(plaintext: str, hashed: str) -> bool:
     return True
 
 
-def get_user_goauth2_details(id_token: str) -> models.db.User:
-    payload = google.oauth2.id_token.verify_oauth2_token(
-        id_token,
-        grequests.Request(),
-        os.environ.get("GOOGLE_OAUTH_CLIENT_ID"),
-        clock_skew_in_seconds=60,
-    )
+def get_email(request: fastapi.Request, credentials: models.auth.Credentials) -> str:
+    if request.headers.get("x-auth-type") == "google":
+        return google.oauth2.id_token.verify_oauth2_token(
+            credentials.id_token,
+            grequests.Request(),
+            os.environ.get("GOOGLE_OAUTH_CLIENT_ID"),
+            clock_skew_in_seconds=60,
+        )["email"]
+    else:
+        return jwt.decode(
+            credentials.id_token,
+            os.environ.get("JWT_OIDC_KEY") or "",
+            algorithms=[os.environ.get("JWT_ALGORITHM") or ""],
+        )["claims"]["email"]

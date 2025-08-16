@@ -40,3 +40,4 @@ class Credentials(BaseSchema):
     token_type: str = "bearer"
     access_token_expiry: int
     refresh_token_expiry: int
+    provider: str = "entask"
