@@ -1,5 +1,6 @@
-from models.camelizer import BaseSchema
 from datetime import timedelta
+
+from models.camelizer import BaseSchema
 
 
 class RegisterRequestModel(BaseSchema):
@@ -37,5 +38,5 @@ class Credentials(BaseSchema):
     refresh_token: str
     id_token: str
     token_type: str = "bearer"
-    access_token_expiry: timedelta
-    refresh_token_expiry: timedelta
+    access_token_expiry: int
+    refresh_token_expiry: int

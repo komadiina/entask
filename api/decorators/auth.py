@@ -1,13 +1,14 @@
-from fastapi import Request, HTTPException, Depends
+import os
+
+import requests
+from fastapi import Depends, HTTPException, Request
 from fastapi.security import APIKeyHeader
 from fastapi_decorators import depends
-from jose import jwt
-from jose.exceptions import JWTError
-import requests
-import os
-from google.oauth2 import id_token
 from google.auth.exceptions import GoogleAuthError
 from google.auth.transport import requests as grequests
+from google.oauth2 import id_token
+from jose import jwt
+from jose.exceptions import JWTError
 
 # your app secret
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or ""

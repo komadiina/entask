@@ -1,21 +1,20 @@
 import json
 import os
-
+import urllib.parse
+import utils
+import functions.auth
 import google_auth_oauthlib.flow
 import requests
 import utils.auth as uauth
-import urllib.parse
-from fastapi import APIRouter, Request
-from fastapi.responses import RedirectResponse, Response
-import functions.auth
-
 from constants.auth_responses import (
     InvalidClientResponse,
     InvalidRegistrationResponse,
     UnauthorizedResponse,
 )
-from models.auth import RegisterRequestModel, LoginRequestModel
 from decorators.auth import authorized
+from fastapi import APIRouter, Request
+from fastapi.responses import RedirectResponse, Response
+from models.auth import LoginRequestModel, RegisterRequestModel
 
 API_PREFIX = f"/api/{os.environ.get('API_VERSION')}/auth"
 SCOPES = [
@@ -70,6 +69,25 @@ async def oauth2_callback(code: str, state: str):
     refresh_token = flow.credentials.refresh_token
     expiry = flow.credentials.expiry
 
+    # get user details from google
+    body = requests.get(
+        "https://www.googleapis.com/oauth2/v3/userinfo",
+        headers={"Authorization": f"Bearer {access_token}"},
+    ).json()
+
+    # save user to database
+    functions.auth.register_user(
+        RegisterRequestModel(
+            given_name=body["given_name"],
+            family_name=body["family_name"],
+            email=body["email"],
+            email_confirmed=body["email"],
+            username=body["email"],
+            password="<google-oauth2>",
+            password_confirmed="<google-oauth2>",
+        )
+    )
+
     query = urllib.parse.urlencode(
         {
             "id_token": id_token,
@@ -93,9 +111,7 @@ async def register_user(details: RegisterRequestModel):
 
 @auth_router.post("/login")
 async def login_user(details: LoginRequestModel):
-    print(details)
     res = functions.auth.login_user(details)
-    print(res)
     return res
 
 
@@ -106,23 +122,32 @@ async def get_user_details(request: Request):
     if auth_header is None:
         return UnauthorizedResponse()
 
-    token = auth_header.split(" ")[1]
+    # retrieve from datbase
+    user_details = functions.auth.get_user_details(utils.auth.get_credentials(request))
 
-    print(token)
-
-    res = requests.get(
-        "https://www.googleapis.com/oauth2/v3/userinfo",
-        headers={"Authorization": f"Bearer {token}"},
-    )
-
-    body = res.json()
-
-    return Response(
-        content=json.dumps(
-            {
-                "name": body["name"],
-                "email": body["email"],
-                "picture": body["picture"],
-            }
+    if user_details is None:
+        return Response(
+            {"message": "User not found with the supplied credentials."},
+            status_code=404,
         )
+
+    return Response(content=user_details.model_dump_json())
+
+
+@auth_router.post("/refresh-tokens")
+@authorized
+async def refresh_tokens(request: Request):
+    access_token = request.headers.get("Authorization") or ""
+    refresh_token = request.headers.get("x-refresh-token") or ""
+    id_token = request.headers.get("x-id-token") or ""
+
+    if access_token is not None or access_token is not "":
+        access_token = access_token.split(" ")[1]
+
+    return functions.auth.refresh_credentials(
+        {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "id_token": id_token,
+        }
     )

@@ -13,7 +13,10 @@ export function authInterceptor(
 
 	// append id token (for authorization)
 	const idToken = LocalStorageService.get('idToken' as KLocalStorage);
-	req.headers.append('g-id-token', `${idToken}`);
+	req.headers.append('x-id-token', `${idToken}`);
+
+	const refreshToken = LocalStorageService.get('refreshToken' as KLocalStorage);
+	req.headers.append('x-refresh-token', `${refreshToken}`);
 
 	return next(req);
 }

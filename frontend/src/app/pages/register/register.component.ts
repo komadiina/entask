@@ -33,7 +33,6 @@ export class RegisterComponent {
 		let invalidRequest = false;
 
 		if (this.registrationForm.invalid) {
-			console.log(this.registrationForm);
 			invalidRequest = true;
 			this.highlightEmptyFields();
 			this.messageService.add({
@@ -71,8 +70,7 @@ export class RegisterComponent {
 			this.messageService.add({
 				severity: 'info',
 				summary: 'Registration',
-				detail:
-					'Registration requested successfully. You may now go back to log-in.',
+				detail: 'Registration request sent.',
 				life: 5000,
 			});
 

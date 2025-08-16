@@ -23,7 +23,7 @@ export class LoginComponent {
 	constructor(
 		private authService: AuthService,
 		private messageService: MessageService,
-		private redirectService: RedirectService
+		public redirectService: RedirectService,
 	) {
 		if (authService.isLoggedIn()) {
 			this.redirectService.redirect({ path: '/dashboard' }, true);
@@ -40,7 +40,10 @@ export class LoginComponent {
 	}
 
 	public async login(): Promise<void> {
-		if (this.usernameControl.value == '' || this.passwordControl.value == '') {
+		if (
+			this.usernameControl.value?.trim() == '' ||
+			this.passwordControl.value?.trim() == ''
+		) {
 			this.messageService.add({
 				severity: 'error',
 				summary: 'Error',
@@ -53,7 +56,9 @@ export class LoginComponent {
 		this.authService.login(
 			this.usernameControl.value!,
 			this.passwordControl.value!,
-		);
+    ).add(() => {
+      this.redirectService.redirect({ path: '/dashboard' }, false);
+    });
 	}
 
 	public async signup(): Promise<void> {

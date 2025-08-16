@@ -1,62 +1,149 @@
-from sqlite3 import Row
-from utils.pgsql import *
-from utils.auth import check_password, generate_credentials
+from typing import Any, Dict
+
+from datetime import datetime
+import os
+from jose import jwt
 import bcrypt
-from models.auth import LoginRequestModel, RegisterRequestModel
 from fastapi.exceptions import HTTPException
-from typing import Dict, Any, Sequence
+from models.auth import LoginRequestModel, RegisterRequestModel
+from psycopg import sql
+from utils.auth import check_password, generate_credentials
+from utils.pgsql import exec_query
+from jose.exceptions import JWSSignatureError, ExpiredSignatureError
+from models.auth import Credentials, LoginRequestModel
+from models.db.user import User
 
 BCRYPT_EFF = 16
 
 
+def refresh_credentials(tokens: Dict[str, str]) -> Credentials:
+    try:
+        decoded_atoken = jwt.decode(
+            tokens["access_token"],
+            os.environ.get("JWT_SECRET_KEY") or "",
+            algorithms=[os.environ.get("JWT_ALGORITHM") or "HS256"],
+        )
+
+        decoded_rtoken = jwt.decode(
+            tokens["refresh_token"],
+            os.environ.get("JWT_REFRESH_KEY") or "",
+            algorithms=[os.environ.get("JWT_ALGORITHM") or "HS256"],
+        )
+
+        decoded_itoken = jwt.decode(
+            tokens["id_token"],
+            os.environ.get("JWT_OIDC_KEY") or "",
+            algorithms=[os.environ.get("JWT_ALGORITHM") or "HS256"],
+        )
+
+        if decoded_atoken["claims"]["sub"] != decoded_rtoken["claims"]["sub"]:
+            raise HTTPException(status_code=401, detail="Invalid tokens supplied.")
+
+        if (
+            decoded_atoken["claims"]["type"] != "access"
+            or decoded_rtoken["claims"]["type"] != "refresh"
+            or decoded_itoken["claims"]["type"] != "oidc"
+        ):
+            raise HTTPException(status_code=401, detail="Invalid tokens supplied.")
+
+        if decoded_atoken["claims"]["exp"] < datetime.now().timestamp():
+            if decoded_rtoken["claims"]["exp"] < datetime.now().timestamp():
+                raise HTTPException(status_code=401, detail="Refresh token expired")
+            else:
+                return generate_credentials(
+                    decoded_atoken["claims"]["sub"], decoded_atoken["claims"]["email"]
+                )
+        else:
+            raise HTTPException(status_code=401, detail="Access token expired.")
+    except ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Access token expired.")
+    except JWSSignatureError:
+        raise HTTPException(status_code=401, detail="Invalid signature received.")
+
+
 def register_user(user: RegisterRequestModel) -> Dict[str, Any]:
-    # open pgsql connection
-    conn = get_connection()
-    cur = get_cursor(conn)
 
     # check if user already exists (username && email criteria)
-    cur = cur.execute(
-        query="SELECT * FROM users WHERE username = %s OR email = %s;",
-        params=(user.username, user.email),
+    q = sql.SQL(
+        "select * from {table} where {username} LIKE %s OR {email} LIKE %s;"
+    ).format(
+        table=sql.Identifier("users"),
+        username=sql.Identifier("username"),
+        email=sql.Identifier("email"),
     )
-    result = cur.fetchall()
-    if len(result) > 0:
+
+    result = exec_query(q, (user.username, user.email))
+
+    if result is not None and len(result) > 0:
         raise HTTPException(status_code=400, detail="User already exists")
 
-    # save into pgsql 'users' table
-    cur = cur.execute(
-        query="INSERT INTO users (username, email, given_name, family_name, password) VALUES (%s, %s, %s, %s, %s);",
-        params=(
-            user.username,
-            user.email,
-            user.given_name,
-            user.family_name,
-            bcrypt.hashpw(
-                user.password.encode("utf-8"), bcrypt.gensalt(BCRYPT_EFF)
-            ).decode("utf-8"),
-        ),
-    )
-    conn.commit()
-    close_connection(conn)
+    try:
+        q = sql.SQL(
+            "INSERT INTO {table} ({columns}) VALUES (%s, %s, %s, %s, %s);"
+        ).format(
+            table=sql.Identifier("users"),
+            columns=sql.SQL(", ").join(
+                map(
+                    sql.Identifier,
+                    ["username", "email", "given_name", "family_name", "password"],
+                )
+            ),
+        )
+
+        result = exec_query(
+            q,
+            (
+                user.username,
+                user.email,
+                user.given_name,
+                user.family_name,
+                bcrypt.hashpw(
+                    user.password.encode("utf-8"), bcrypt.gensalt(BCRYPT_EFF)
+                ).decode("utf-8"),
+            ),
+        )
+
+    except RuntimeError as e:
+        raise HTTPException(status_code=400, detail="Unable to register user.")
 
     return {"message": "User registered successfully"}
 
 
 def login_user(user: LoginRequestModel):
-    # open pgsql connection
-    conn = get_connection()
-    cur = get_cursor(conn)
-
     # check if user already exists (username && email criteria)
-    cur = cur.execute(
-        query="SELECT * FROM users WHERE username LIKE %s OR email LIKE %s;",
-        params=(user.username_email, user.username_email),
+    q = sql.SQL("SELECT * FROM {table} WHERE {v1} LIKE %s OR {v2} LIKE %s;").format(
+        table=sql.Identifier("users"),
+        v1=sql.Identifier("username"),
+        v2=sql.Identifier("email"),
     )
-    result = cur.fetchall()
-    print(result)
-    if len(result):
+
+    result = exec_query(q, (user.username_email, user.username_email))
+
+    if result is not None and len(result):
         for row in result:
             if check_password(user.password, row["password"]):
-                return generate_credentials(user)
+                return generate_credentials(row["username"], row["email"])
 
     raise HTTPException(status_code=400, detail="User does not exist")
+
+
+def get_user_details(credentials: Credentials) -> User | None:
+    decoded_it = jwt.decode(
+        credentials.access_token,
+        os.environ.get("JWT_SECRET_KEY") or "",
+        algorithms=[os.environ.get("JWT_ALGORITHM") or ""],
+    )
+
+    result = exec_query(
+        sql=sql.SQL("SELECT * FROM {table} WHERE {v1} LIKE %s;").format(
+            table=sql.Identifier("users"),
+            v1=sql.Identifier("username"),
+        ),
+        params=(decoded_it["claims"]["sub"]),
+    )
+
+    if result is not None and len(result):
+        for row in result:
+            return User(**row)
+      
+    return None

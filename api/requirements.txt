@@ -14,5 +14,6 @@ google-auth-httplib2
 
 redis[hiredis]
 psycopg[binary]
+psycopg_pool
 
 isort[requirements_deprecated_finder]

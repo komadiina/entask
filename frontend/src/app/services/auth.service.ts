@@ -34,9 +34,9 @@ export class AuthService {
 		return this.localStorageService.get('accessToken' as KLocalStorage) != null;
 	}
 
-	public login(usernameEmail: string, password: string): void {
-		this.logService.log([usernameEmail, password]);
-		this.httpClient
+	public login(usernameEmail: string, password: string) {
+		this.logService.log(['AuthService: login']);
+		return this.httpClient
 			.post<LoginResponse>(ApiUtil.buildUrl('/auth/login'), {
 				usernameEmail,
 				password,

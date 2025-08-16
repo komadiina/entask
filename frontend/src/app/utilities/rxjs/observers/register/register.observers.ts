@@ -5,7 +5,6 @@ import { RegistrationResponse } from '@entask-models/register/registration-respo
 export const registerObservers = {
 	registrationSubmit: new BaseObserver<RegistrationResponse, RegisterComponent>(
 		(value: RegistrationResponse, ctx?: RegisterComponent | null) => {
-			console.log(value);
 			ctx?.registrationForm.reset();
 		},
 

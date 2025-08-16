@@ -7,7 +7,6 @@ from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 from routers.auth import auth_router
 
-
 logger = logging.getLogger()
 app = FastAPI(
     middleware=[

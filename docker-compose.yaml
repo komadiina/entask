@@ -111,7 +111,10 @@ services:
       PGSQL_HOST: ${PGSQL_HOST}
       PGSQL_PORT: ${POSTGRES_PORT}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_REFRESH_KEY: ${JWT_REFRESH_KEY}
+      JWT_OIDC_KEY: ${JWT_OIDC_KEY}
       JWT_ALGORITHM: ${JWT_ALGORITHM}
+      BCRYPT_EFF: ${BCRYPT_EFF}
     volumes:
       - "./api/:/api/"
     networks:
