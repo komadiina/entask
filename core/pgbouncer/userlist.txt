@@ -1,0 +1,4 @@
+"root" "root"
+"auth_service_user" "plainpassword"
+"user_service_user" "plainpassword"
+"conversion_service_user" "plainpassword"

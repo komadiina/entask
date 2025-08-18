@@ -1,0 +1,1 @@
+CREATE ROLE gateway_service_user WITH LOGIN PASSWORD 'plainpassword' CREATEDB CREATEROLE;

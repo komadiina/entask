@@ -2,7 +2,7 @@ import os
 
 import fastapi
 import google.oauth2.id_token
-import jwt
+from jose import jwt
 import models.auth
 from google.auth.transport import requests as grequests
 
@@ -27,9 +27,6 @@ def google_oauth2_flow(request: fastapi.Request) -> models.auth.Credentials:
 
 
 def entask_auth_flow(request: fastapi.Request) -> models.auth.Credentials:
-    if request is None:
-        raise ValueError("property 'request' cannot be of NoneType")
-
     if request.headers is None:
         raise ValueError("property 'request.headers' cannot be of NoneType")
 

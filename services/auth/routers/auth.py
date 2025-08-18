@@ -7,15 +7,17 @@ import google_auth_oauthlib.flow
 import requests
 import utils
 import utils.auth as uauth
-from constants.auth_responses import (InvalidClientResponse,
-                                      InvalidRegistrationResponse,
-                                      UnauthorizedResponse)
+from constants.auth_responses import (
+    InvalidClientResponse,
+    InvalidRegistrationResponse,
+    UnauthorizedResponse,
+)
 from decorators.auth import authorized
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response
 from models.auth import LoginRequestModel, RegisterRequestModel
 
-API_PREFIX = f"/api/{os.environ.get('API_VERSION')}/auth"
+API_PREFIX = f"/api/{os.environ.get('AUTH_API_VERSION')}/auth"
 SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
@@ -93,7 +95,7 @@ async def oauth2_callback(code: str, state: str):
             "access_token": access_token,
             "refresh_token": refresh_token,
             "expiry": expiry,
-            "provider": "google"
+            "provider": "google",
         }
     )
     url = f"{FRONTEND_HOST}/oauth2/callback?{query}"
@@ -142,7 +144,7 @@ async def refresh_tokens(request: Request):
     refresh_token = request.headers.get("x-refresh-token") or ""
     id_token = request.headers.get("x-id-token") or ""
 
-    if access_token is not None or access_token is not "":
+    if access_token is not None or access_token != "":
         access_token = access_token.split(" ")[1]
 
     return functions.auth.refresh_credentials(

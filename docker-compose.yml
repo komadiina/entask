@@ -1,4 +1,74 @@
 services:
+  postgres:
+    container_name: entask-postgres
+    image: postgres:alpine
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - ./core/postgres/initdb.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./core/postgres/data:/var/lib/postgresql/data
+    networks:
+      - entask
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-p", "${POSTGRES_PORT}"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 5s
+      
+  pgbouncer:
+    container_name: entask-pgbouncer
+    image: bitnami/pgbouncer:1.24.1
+    environment:
+      - PGBOUNCER_PORT=${PGBOUNCER_PORT}
+      - POSTGRESQL_HOST=${POSTGRES_HOST}
+      - POSTGRESQL_PORT=${POSTGRES_PORT}
+      - POSTGRESQL_PASSWORD=${AUTH_DB_USER}
+      - POSTGRESQL_USER=${AUTH_DB_PASSWORD}
+    volumes:
+      - ./core/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
+      - ./core/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+    depends_on:
+      - postgres
+    networks:
+      - entask
+      
+  flyway:
+    container_name: entask-flyway
+    build:
+      context: /core/flyway
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      - POSTGRES_HOST=${POSTGRES_HOST}
+      - POSTGRES_PORT=${POSTGRES_PORT}
+      - POSTGRES_MIGRATIONS_USER=${POSTGRES_MIGRATIONS_USER}
+      - POSTGRES_MIGRATIONS_PASSWORD=${POSTGRES_MIGRATIONS_PASSWORD}
+      - AUTH_DB=${AUTH_DB}
+      - GATEWAY_DB=${GATEWAY_DB}
+      - CONVERSION_DB=${CONVERSION_DB}
+    volumes:
+      - "./core/flyway/scripts:/flyway/sql/"
+    networks:
+      - entask
+    
+
+  pgadmin:
+    container_name: entask-pgadmin
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${POSTGRES_PASSWORD}
+    networks:
+      - entask
+    ports:
+      - "5434:80"
+
   frontend: 
     container_name: entask-frontend
     build: ./frontend
@@ -18,8 +88,11 @@ services:
     container_name: entask-gateway-redis
     image: redis:alpine
     environment:
-      - G_REDIS_PORT: ${G_REDIS_PORT}
-    command: ["--port", "${G_REDIS_PORT}"]
+      - G_REDIS_PORT=${G_REDIS_PORT}
+    command: [
+      "--port", 
+      "${G_REDIS_PORT}"
+      ]
     ports:
       - "${G_REDIS_PORT}:${G_REDIS_PORT}"
     networks:
@@ -29,25 +102,20 @@ services:
     container_name: entask-gateway-router
     build: ./gateway/router
     environment:
-      - G_ROUTER_PORT: ${GATEWAY_ROUTER_PORT}
-      - G_REDIS_HOST: ${GATEWAY_REDIS_HOST}
-      - G_REDIS_PORT: ${GATEWAY_REDIS_PORT}
+      - G_ROUTER_PORT=${G_ROUTER_PORT}
+      - G_REDIS_HOST=${G_REDIS_HOST}
+      - G_REDIS_PORT=${G_REDIS_PORT}
     depends_on:
-      - gateway-redis
+      - gateway-service-registry
     ports:
       - "${G_ROUTER_PORT}:${G_ROUTER_PORT}"
     networks:
       - entask
-  
-  gateway-auth-check:
-    container_name: entask-gateway-auth-check
-    build: ./gateway/auth-check
-    environment:
-      - G_AUTH_CHECK_PORT: ${G_AUTH_CHECK_PORT}
-    ports:
-      - "${G_AUTH_CHECK_PORT}:${G_AUTH_CHECK_PORT}"
-    networks:
-      - entask
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./gateway/router
+          target: /gateway
   
   auth-service:
     container_name: entask-auth
@@ -55,70 +123,31 @@ services:
       context: ./services/auth
       dockerfile: Dockerfile
     environment:
-      AUTH_API_VERSION: ${API_VERSION}
-      AUTH_API_PORT: ${API_PORT}
+      AUTH_API_VERSION: ${AUTH_API_VERSION}
+      AUTH_API_PORT: ${AUTH_API_PORT}
       FRONTEND_HOST: ${FRONTEND_HOST}
       FRONTEND_PORT: ${FRONTEND_PORT}
       CLIENT_SECRET_FILE: ${CLIENT_SECRET_FILE}
-      PGSQL_DATABASE: ${POSTGRES_DB}
-      PGSQL_USER: ${POSTGRES_USER}
-      PGSQL_PASSWORD: ${POSTGRES_PASSWORD}
-      PGSQL_HOST: ${PGSQL_HOST}
-      PGSQL_PORT: ${POSTGRES_PORT}
+      AUTH_DB_USER: ${AUTH_DB_USER}
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD}
+      AUTH_DB: ${AUTH_DB}
+      AUTH_DB_HOST: ${POSTGRES_HOST}
+      AUTH_DB_PORT: ${POSTGRES_PORT}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       JWT_REFRESH_KEY: ${JWT_REFRESH_KEY}
       JWT_OIDC_KEY: ${JWT_OIDC_KEY}
       JWT_ALGORITHM: ${JWT_ALGORITHM}
       BCRYPT_EFF: ${BCRYPT_EFF}
+    ports:
+      - "${AUTH_API_PORT}:${AUTH_API_PORT}"
     networks:
       - entask
-    
-  auth-db:
-    container_name: entask-auth-db
-    image: postgres:alpine
-    command: ["-p", "$POSTGRES_PORT"]
-    environment:
-      PGUSER: ${AUTH_DB_USER}
-      POSTGRES_USER: ${AUTH_DB_USER}
-      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
-      POSTGRES_DB: ${AUTH_DB}
-    ports:
-      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
-    expose:
-      - "${POSTGRES_PORT}"
-    volumes:
-      - ./databases/auth/scripts/:/docker-entrypoint-initdb.d/
-      - ./databases/auth/data/:/var/lib/postgresql/data/
-    healthcheck:
-      test: ["CMD", "pg_isready", "-U", "$POSTGRES_USER", "-d", "$POSTGRES_DB", "-p", "$POSTGRES_PORT"]
-      interval: 5s
-      timeout: 10s
-      retries: 5
-      start_period: 5s
-    networks: 
-      - entask
-  
-  auth-flyway:
-    container_name: entask-auth-flyway
-    image: flyway/flyway
-    depends_on:
-      auth-db:
-        condition: service_healthy
-  user-service:
-  
-  user-db:
-  
-  user-flyway:
-  
-  conversion-api-service:
-  
-  conversion-api-db:
-  
-  conversion-api-flyway:
-  
-  nats:
-    image: nats:2.11-alpine
-  
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./services/auth
+          target: /services/auth
+      
   placement:
     container_name: entask-dapr-placement
     image: daprio/dapr
@@ -130,25 +159,6 @@ services:
       - "50006:50006"
     networks:
       - entask
-  
-  conversion-video-to-gif:
-  
-  conversion-video-to-gif-dapr:
-  
-  
-  pgadmin:
-    container_name: entask-pgadmin
-    image: dpage/pgadmin4
-    restart: unless-stopped
-    environment:
-      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
-      - PGADMIN_DEFAULT_PASSWORD=${POSTGRES_PASSWORD}
-    networks:
-      - entask
-    ports:
-      - "5434:80"
-    volumes:
-      - ./pgadmin:/var/lib/pgadmin
   
   
 networks:

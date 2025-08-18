@@ -21,14 +21,14 @@ BCRYPT_EFF = os.environ["BCRYPT_EFF"]
 
 
 def __init_redis(should_decode: bool = True, db: int = 0) -> redis.Redis:
-    _host = os.environ.get("REDIS_HOST")
-    _port = os.environ.get("REDIS_PORT")
+    _host = os.environ.get("AUTH_REDIS_HOST")
+    _port = os.environ.get("AUTH_REDIS_PORT")
 
     if _host is None or _port is None:
         logger.error(
             "REDIS_HOST or REDIS_PORT not set - using localhost:6379 as default parameters"
         )
-        raise RuntimeError("REDIS_HOST or REDIS_PORT not set")
+        raise RuntimeError("AUTH_REDIS_HOST or AUTH_REDIS_PORT not set")
 
     r = redis.Redis(
         host=f"{_host}",
@@ -49,15 +49,6 @@ async def save_temp_state(uuid: str, state: str) -> None:
 def retrieve_temp_state(uuid: str):
     r = __init_redis()
     return r.hget(uuid, "state")
-
-
-async def store_credentials(credentials: Credentials) -> bool:
-    if credentials is None:
-        raise ValueError("property 'credentials' cannot be of NoneType")
-
-    r = __init_redis()
-
-    return True
 
 
 def get_credentials(request: fastapi.Request) -> models.auth.Credentials:

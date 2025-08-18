@@ -191,4 +191,5 @@ client_secret.json
 /pgadmin
 !/pgsql
 /.vscode
-/postgres/data/*
+**/postgres/data/*
+!/core/flyway/*

@@ -6,7 +6,7 @@ from typing import Any, Dict, Optional
 import httpx
 import redis.asyncio as redis
 from fastapi import FastAPI, HTTPException, Request, Response
-from router.models.payloads import HeartbeatPayload, RegisterPayload
+from models.payloads import HeartbeatPayload, RegisterPayload
 
 REDIS_HOST = os.getenv("G_REDIS_HOST", "localhost")
 REDIS_PORT = os.getenv("G_REDIS_PORT", 6380)
