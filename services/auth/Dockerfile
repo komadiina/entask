@@ -3,10 +3,10 @@ FROM python:3.12-alpine
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-WORKDIR /api
-RUN export PYTHONPATH=$PYTHONPATH:/api
+WORKDIR /services/auth
+RUN export PYTHONPATH=$PYTHONPATH:/services/auth
 
-COPY . /api
+COPY . /services/auth
 EXPOSE 4201
 
 ENTRYPOINT ["python"]

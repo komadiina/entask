@@ -1,16 +1,15 @@
 import json
 import os
 import urllib.parse
-import utils
+
 import functions.auth
 import google_auth_oauthlib.flow
 import requests
+import utils
 import utils.auth as uauth
-from constants.auth_responses import (
-    InvalidClientResponse,
-    InvalidRegistrationResponse,
-    UnauthorizedResponse,
-)
+from constants.auth_responses import (InvalidClientResponse,
+                                      InvalidRegistrationResponse,
+                                      UnauthorizedResponse)
 from decorators.auth import authorized
 from fastapi import APIRouter, Request
 from fastapi.responses import RedirectResponse, Response

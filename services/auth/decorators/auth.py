@@ -18,7 +18,7 @@ ALGORITHM = os.environ.get("JWT_ALGORITHM") or ""
 GOOGLE_KEYS_URL = os.environ.get("GOOGLE_KEYS_URL") or ""
 _google_keys = None
 
-VERSION = os.environ.get("API_VERSION")
+VERSION = os.environ.get("AUTH_API_VERSION")
 
 
 def get_google_keys():

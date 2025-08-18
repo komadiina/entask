@@ -1,20 +1,20 @@
 import logging
 import os
 from datetime import datetime
-import fastapi
 
 import bcrypt
+import fastapi
+import flows.auth
+import google.oauth2.id_token
+import models.auth
 import redis
 from fastapi.exceptions import HTTPException
 from google.auth.credentials import Credentials
+from google.auth.transport import requests as grequests
 from jose import jwt
-import models.auth
 from redis.backoff import ConstantBackoff
 from redis.retry import Retry
 from utils.pgsql import *
-import flows.auth
-import google.oauth2.id_token
-from google.auth.transport import requests as grequests
 
 logger = logging.getLogger()
 BCRYPT_EFF = os.environ["BCRYPT_EFF"]

@@ -22,7 +22,7 @@ app = FastAPI(
 
 @app.get("/api/version")
 async def version():
-    return {"version": os.environ.get("API_VERSION")}
+    return {"version": os.environ.get("AUTH_API_VERSION")}
 
 
 def __init_app(app: FastAPI, routers: List[APIRouter]) -> FastAPI:
@@ -43,5 +43,5 @@ if __name__ == "__main__":
     __init_app(app, included_routers)
 
     uvicorn.run(
-        app=app, host="0.0.0.0", port=int(f"{os.environ.get("API_PORT")}") or 4201
+        app=app, host="0.0.0.0", port=int(f"{os.environ.get("AUTH_API_PORT")}") or 4201
     )

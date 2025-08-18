@@ -1,9 +1,9 @@
-import fastapi
-import jwt
 import os
-import models.auth
 
+import fastapi
 import google.oauth2.id_token
+import jwt
+import models.auth
 from google.auth.transport import requests as grequests
 
 

@@ -1,17 +1,16 @@
+import os
+from datetime import datetime
 from typing import Any, Dict
 
-from datetime import datetime
-import os
-from jose import jwt
 import bcrypt
 from fastapi.exceptions import HTTPException
-from models.auth import LoginRequestModel, RegisterRequestModel
+from jose import jwt
+from jose.exceptions import ExpiredSignatureError, JWSSignatureError
+from models.auth import Credentials, LoginRequestModel, RegisterRequestModel
+from models.db.user import User
 from psycopg import sql
 from utils.auth import check_password, generate_credentials
 from utils.pgsql import exec_query
-from jose.exceptions import JWSSignatureError, ExpiredSignatureError
-from models.auth import Credentials, LoginRequestModel
-from models.db.user import User
 
 BCRYPT_EFF = 16
 
