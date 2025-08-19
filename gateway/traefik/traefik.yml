@@ -1,20 +1,22 @@
 providers:
   docker:
-    defaultRule: "Host(`{{ trimPrefix `/` .Name}}.docker.localhost`)"
-    exposedByDefault: true
     network: "entask"
     watch: true
 
 api:
   dashboard: true
   insecure: true
-
-http:
+  
+http:    
   routers:
-    version:
-      rule: "PathRegexp(`/api/version(.*?)`)"
-      service: "version-service"
-      
     auth:
       rule: "PathRegexp(`/api/auth(.*?)`)"
-      service: "auth-service"
+      service: auth-service
+    
+    version:
+      rule: "PathRegexp(`/api/version(.*?)`)"
+      service: version-service
+
+log:
+  level: DEBUG
+  maxBackups: 3

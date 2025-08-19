@@ -1,5 +1,4 @@
 import os
-from json import dumps as json_dumps
 
 import requests
 from fastapi import Depends, HTTPException, Request
@@ -11,23 +10,9 @@ from google.oauth2 import id_token
 from jose import jwt
 from jose.exceptions import JWTError
 
-# your app secret
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or ""
 ALGORITHM = os.environ.get("JWT_ALGORITHM") or ""
-
-# Google public keys URL
-GOOGLE_KEYS_URL = os.environ.get("GOOGLE_KEYS_URL") or ""
-_google_keys = None
-
 VERSION = os.environ.get("AUTH_API_VERSION")
-
-
-def get_google_keys():
-    global _google_keys
-    if _google_keys is None:
-        r = requests.get(GOOGLE_KEYS_URL)
-        _google_keys = r.json()["keys"]
-    return _google_keys
 
 
 oauth2_scheme = APIKeyHeader(name="g-id-token", auto_error=False)

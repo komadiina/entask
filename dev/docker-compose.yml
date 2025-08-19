@@ -1,5 +1,6 @@
 services:
   postgres:
+    container_name: entask-core-postgres
     image: postgres:alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -24,23 +25,9 @@ services:
       timeout: 15s
       retries: 5
       start_period: 5s
-    labels:
-      - "traefik.enable=false"
-      
-  pgadmin:
-    image: dpage/pgadmin4
-    restart: unless-stopped
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD}
-    networks:
-      - entask
-    ports:
-      - "5434:80"
-    labels:
-      - "traefik.enable=false"
 
   pgbouncer:
+    container_name: entask-core-pgbouncer
     image: bitnami/pgbouncer:1.24.1
     environment:
       PGBOUNCER_PORT: ${PGBOUNCER_PORT}
@@ -55,10 +42,9 @@ services:
       - postgres
     networks:
       - entask
-    labels:
-      - "traefik.enable=false"
 
   flyway:
+    container_name: entask-core-flyway
     build:
       context: /core/flyway
       dockerfile: Dockerfile
@@ -77,33 +63,9 @@ services:
       - "./core/flyway/scripts:/flyway/sql/"
     networks:
       - entask
-    labels:
-      - "traefik.enable=false"
-
-  redis:
-    image: redis:alpine
-    environment:
-      REDIS_PORT: ${REDIS_PORT}
-      REDIS_HOST: ${REDIS_HOST}
-    ports:
-      - "${REDIS_PORT}:${REDIS_PORT}"
-    networks:
-      - entask
-    labels:
-      - "traefik.enable=false"
-
-  placement:
-    image: daprio/dapr
-    command: ["./placement", "-port", "50006"]
-    ports:
-      - "50006:50006"
-    networks:
-      - entask
-    labels:
-      - "traefik.enable=false"
-
 
   traefik:
+    container_name: entask-core-traefik
     image: traefik:latest
     ports:
       - target: 80
@@ -128,7 +90,59 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./gateway/traefik/traefik.yml:/etc/traefik/traefik.yml
     networks:
-      - entask   
+      - entask
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - entask
+    ports:
+      - "5434:80"
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    volumes:
+      - ./frontend:/frontend
+    networks:
+      - entask
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./frontend
+          target: /frontend
+          
+  auth-proxy:
+    build: ./gateway/proxy/auth
+    environment:
+      AUTH_PROXY_PORT: ${AUTH_PROXY_PORT}
+      AUTH_PROXY_HOST: ${AUTH_PROXY_HOST}
+      REDIS_HOST: ${REDIS_HOST}
+      REDIS_PORT: ${REDIS_PORT}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_OIDC_KEY: ${JWT_OIDC_KEY}
+    volumes:
+      - ./gateway/proxy/auth:/gateway/proxy/auth
+    networks:
+      - entask
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.auth-proxy.loadbalancer.server.port=${AUTH_PROXY_PORT}"
+      - "traefik.http.middlewares.auth-proxy.forwardauth.address=http://localhost:${AUTH_PROXY_PORT}/proxy/auth/authorize"
+      - "traefik.http.middlewares.auth-proxy.forwardauth.authRequestHeaders=Accept,x-id-token,x-refresh-token,Authorization"
+      - "traefik.http.middlewares.auth-proxy.forwardauth.trustForwardHeader=true"
+      - "traefik.http.middlewares.auth-proxy.forwardauth.forwardBody=true"
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${AUTH_PROXY_PORT}/proxy/auth/health"]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 5s    
   
   version-service:
     build:
@@ -155,10 +169,10 @@ services:
       retries: 5
       start_period: 5s
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.version-service.loadbalancer.server.port=${VERSION_API_PORT}"
-      - "traefik.http.routers.version.rule=PathRegexp(`/api/version(.*?)`)"
-      - "traefik.http.routers.version.service=version-service"
+      - traefik.enable=true
+      - traefik.http.routers.version.rule=PathRegexp(`/api/version(.*?)`)
+      - traefik.http.routers.version.service=version-service
+      - traefik.http.services.version-service.loadbalancer.server.port=${VERSION_API_PORT}
 
   auth-service:
     build:
@@ -203,31 +217,34 @@ services:
       retries: 5
       start_period: 5s
     labels:
-      - "traefik.enable=true"
-      - "traefik.http.services.auth-service.loadbalancer.server.port=${AUTH_API_PORT}"
-      - "traefik.http.routers.auth.rule=PathRegexp(`/api/auth(.*?)`)"
-      - "traefik.http.routers.auth.service=auth-service"
+      - traefik.enable=true
+      - traefik.http.routers.auth.rule=PathRegexp(`/api/auth(.*?)`)
+      - traefik.http.routers.auth.service=auth-service
+      - traefik.http.services.auth-service.loadbalancer.server.port=${AUTH_API_PORT}
+      - traefik.http.routers.auth.middlewares=auth-proxy@docker
     develop:
       watch:
         - action: sync+restart
           path: ./services/auth
           target: /services/auth
-  
-  frontend:
-    build: ./frontend
+
+  redis:
+    image: redis:alpine
+    environment:
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_HOST: ${REDIS_HOST}
     ports:
-      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
-    volumes:
-      - ./frontend:/frontend
+      - "${REDIS_PORT}:${REDIS_PORT}"
     networks:
       - entask
-    develop:
-      watch:
-        - action: sync+restart
-          path: ./frontend
-          target: /frontend
-          
-          
+
+  placement:
+    image: daprio/dapr
+    command: ["./placement", "-port", "50006"]
+    ports:
+      - "50006:50006"
+    networks:
+      - entask
+
 networks:
-  entask:
-    name: entask
+  entask: null
