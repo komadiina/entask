@@ -7,9 +7,13 @@ echo "[Husky] Formatting ./frontend using 'prettier'"
 npm run format-frontend
 
 echo "[Husky] Organizing imports using 'isort'"
+echo "[Husky] Checking for isort installation"
+pip install isort > /dev/null
 npm run format-isort
 
 echo "[Husky] Formatting *.py files using 'black'"
+echo "[Husky] Checking for black installation"
+pip install black > /dev/null
 npm run format-black
 
 rm -rf ./node_modules
