@@ -1,0 +1,10 @@
+providers:
+  docker:
+    defaultRule: "Host(`{{ trimPrefix `/` .Name}}.docker.localhost`)"
+    exposedByDefault: true
+    network: "entask"
+    watch: true
+
+api:
+  dashboard: true
+  insecure: true

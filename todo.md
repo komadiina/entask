@@ -16,13 +16,13 @@
   - communicates with frontend webapp via websockets using (client_id), sending:
 ```json
   {
-    message: {
-      summary: '', 
-      detail: '', 
-      type: ''
+    "message": {
+      "summary": '', 
+      "detail": '', 
+      "type": ''
     }, 
-    metadata: {...}, 
-    client_id: '',
-    notifier_id: ''
+    "metadata": {}, 
+    "client_id": '',
+    "notifier_id": ''
   }
-```
+``` 

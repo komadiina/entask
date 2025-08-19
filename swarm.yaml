@@ -1,6 +1,39 @@
 services:
+  traefik:
+    image: traefik:v3-nanoserver-ltsc2022
+    command:
+      - --providers.docker.swarmMode=true
+      - --providers.docker.exposedbydefault=false
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --providers.docker.network=entask
+      - --api.insecure=true  # remove or secure in production
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - entask
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager
+      replicas: 1
+      restart_policy:
+        condition: on-failure
+
   postgres:
-    container_name: entask-postgres
     image: postgres:alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -17,9 +50,10 @@ services:
       timeout: 15s
       retries: 5
       start_period: 5s
-      
+    deploy:
+      replicas: 1
+
   pgbouncer:
-    container_name: entask-pgbouncer
     image: bitnami/pgbouncer:1.24.1
     environment:
       PGBOUNCER_PORT: ${PGBOUNCER_PORT}
@@ -30,19 +64,13 @@ services:
     volumes:
       - ./core/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
       - ./core/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
-    depends_on:
-      - postgres
     networks:
       - entask
-      
+    deploy:
+      replicas: 1
+
   flyway:
-    container_name: entask-flyway
-    build:
-      context: /core/flyway
-      dockerfile: Dockerfile
-    depends_on:
-      postgres:
-        condition: service_healthy
+    image: flyway-entask:latest
     environment:
       POSTGRES_HOST: ${POSTGRES_HOST}
       POSTGRES_PORT: ${POSTGRES_PORT}
@@ -52,35 +80,14 @@ services:
       GATEWAY_DB: ${GATEWAY_DB}
       CONVERSION_DB: ${CONVERSION_DB}
     volumes:
-      - "./core/flyway/scripts:/flyway/sql/"
+      - ./core/flyway/scripts:/flyway/sql/
     networks:
       - entask
-    
-  traefik:
-    image: traefik:latest
-    ports:
-      - target: 80
-        published: 80
-        protocol: tcp
-        mode: host
-      - target: 443
-        published: 443
-        protocol: tcp
-        mode: host
-      - target: 8080
-        published: 8080
-        protocol: tcp
-        mode: host
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock:ro
-      - ./gateway/traefik/traefik.yml:/etc/traefik/traefik.yml
-    networks:
-      - entask
+    deploy:
+      replicas: 1
 
   pgadmin:
-    container_name: entask-pgadmin
     image: dpage/pgadmin4
-    restart: unless-stopped
     environment:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD}
@@ -88,27 +95,31 @@ services:
       - entask
     ports:
       - "5434:80"
+    deploy:
+      replicas: 1
 
-  frontend: 
-    container_name: entask-frontend
-    build: ./frontend
-    ports:
-      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
-    volumes: 
+  frontend:
+    image: frontend-entask:latest
+    environment:
+      FRONTEND_PORT: ${FRONTEND_PORT}
+    volumes:
       - ./frontend:/frontend
     networks:
       - entask
-    develop:
-      watch:
-        - action: sync+restart
-          path: ./frontend
-          target: /frontend
-  
+    ports:
+      - target: ${FRONTEND_PORT:-4200}
+        published: ${FRONTEND_PORT:-4200}
+        protocol: tcp
+        mode: host
+    deploy:
+      replicas: 1
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frontend.rule=PathPrefix(`/`)
+      - traefik.http.services.frontend.loadbalancer.server.port=${FRONTEND_PORT}
+
   auth-service:
-    container_name: entask-auth
-    build:
-      context: ./services/auth
-      dockerfile: Dockerfile
+    image: auth-service-entask:latest
     environment:
       SERVICE_GROUP: ${AUTH_SERVICE_GROUP}
       AUTH_API_VERSION: ${AUTH_API_VERSION}
@@ -126,28 +137,25 @@ services:
       JWT_OIDC_KEY: ${JWT_OIDC_KEY}
       JWT_ALGORITHM: ${JWT_ALGORITHM}
       BCRYPT_EFF: ${BCRYPT_EFF}
-    ports:
-      - "${AUTH_API_PORT}:${AUTH_API_PORT}"
     networks:
       - entask
-    develop:
-      watch:
-        - action: sync+restart
-          path: ./services/auth
-          target: /services/auth
-      
+    deploy:
+      replicas: ${AUTH_REPLICAS:-3}
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.auth.rule=PathPrefix(`/api/auth`)
+        - traefik.http.services.auth-service.loadbalancer.server.port=${AUTH_API_PORT}
+
   placement:
-    container_name: entask-dapr-placement
     image: daprio/dapr
-    command: [
-      "./placement",
-        "-port", "50006"
-    ]
+    command: ["./placement", "-port", "50006"]
     ports:
       - "50006:50006"
     networks:
       - entask
-  
-  
+    deploy:
+      replicas: 1
+
 networks:
-  entask: null
+  entask:
+    driver: overlay
