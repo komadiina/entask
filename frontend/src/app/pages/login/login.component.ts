@@ -53,12 +53,11 @@ export class LoginComponent {
 			return;
 		}
 
-		this.authService.login(
-			this.usernameControl.value!,
-			this.passwordControl.value!,
-    ).add(() => {
-      this.redirectService.redirect({ path: '/dashboard' }, false);
-    });
+		this.authService
+			.login(this.usernameControl.value!, this.passwordControl.value!)
+			.add(() => {
+				this.redirectService.redirect({ path: '/dashboard' }, false);
+			});
 	}
 
 	public async signup(): Promise<void> {

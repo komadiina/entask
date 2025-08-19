@@ -3,5 +3,5 @@ export const environment: {
 	backendUrl: string;
 } = {
 	production: false,
-	backendUrl: 'http://localhost:4201/api',
+	backendUrl: 'http://localhost:80/api',
 };

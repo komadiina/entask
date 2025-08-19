@@ -1,0 +1,9 @@
+{
+  "scripts": {
+    "lint": "cd frontend && ng lint && cd ..",
+    "format-frontend": "cd frontend && prettier -c . --write && cd ..",
+    "format-isort": "isort .",
+    "format-black": "black .",
+    "prepare": "husky"
+  }
+}

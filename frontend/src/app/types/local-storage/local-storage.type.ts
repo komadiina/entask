@@ -1,8 +1,8 @@
 export interface TLocalStorage {
-  idToken: string;
+	idToken: string;
 	accessToken: string;
 	refreshToken: string;
-  apiVersion: string;
+	apiVersion: string;
 }
 
 export type KLocalStorage = keyof TLocalStorage;

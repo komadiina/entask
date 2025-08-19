@@ -1,4 +1,5 @@
 import os
+from json import dumps as json_dumps
 
 import requests
 from fastapi import Depends, HTTPException, Request
@@ -56,6 +57,8 @@ def auth_dependency(request: Request, token: str = Depends(oauth2_scheme)):
             )
         except ValueError or GoogleAuthError as e:
             payload = None
+    except Exception as e:
+        raise HTTPException(status_code=401, detail=e.__format__(""))
 
     if not payload:
         raise HTTPException(status_code=401, detail="Unauthorized")

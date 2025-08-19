@@ -20,9 +20,14 @@ app = FastAPI(
 )
 
 
-@app.get("/api/version")
+@app.get("/api/auth/health", status_code=200)
+async def health():
+    return {"status": "ok"}
+
+
+@app.get("/api/auth/version")
 async def version():
-    return {"version": os.environ.get("AUTH_API_VERSION")}
+    return {"service": "auth-service", "version": os.environ.get("AUTH_API_VERSION")}
 
 
 def __init_app(app: FastAPI, routers: List[APIRouter]) -> FastAPI:

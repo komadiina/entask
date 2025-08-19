@@ -8,3 +8,13 @@ providers:
 api:
   dashboard: true
   insecure: true
+
+http:
+  routers:
+    version:
+      rule: "PathRegexp(`/api/version(.*?)`)"
+      service: "version-service"
+      
+    auth:
+      rule: "PathRegexp(`/api/auth(.*?)`)"
+      service: "auth-service"

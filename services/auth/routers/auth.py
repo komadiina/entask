@@ -14,17 +14,22 @@ from constants.auth_responses import (
 )
 from decorators.auth import authorized
 from fastapi import APIRouter, Request
+from fastapi.exceptions import HTTPException
 from fastapi.responses import RedirectResponse, Response
 from models.auth import LoginRequestModel, RegisterRequestModel
 
-API_PREFIX = f"/api/{os.environ.get('AUTH_API_VERSION')}/auth"
+API_PREFIX = f"/api/auth"
 SCOPES = [
     "https://www.googleapis.com/auth/userinfo.email",
     "https://www.googleapis.com/auth/userinfo.profile",
 ]
-FLOW_REDIRECT_URI = (
-    f"http://localhost:{os.environ.get('API_PORT')}{API_PREFIX}/oauth2/callback"
+USES_HTTP = bool(os.getenv("TRAEFIK_USES_HTTP", False))
+EXPOSED_PORT = (
+    os.getenv("TRAEFIK_HTTP_PORT", 80)
+    if USES_HTTP
+    else os.getenv("TRAEFIK_HTTPS_PORT", 443)
 )
+FLOW_REDIRECT_URI = f"http://localhost:{EXPOSED_PORT}{API_PREFIX}/oauth2/callback"
 FRONTEND_HOST = (
     f"http://{os.environ.get('FRONTEND_HOST')}:{os.environ.get('FRONTEND_PORT')}"
 )
@@ -113,8 +118,13 @@ async def register_user(details: RegisterRequestModel):
 
 @auth_router.post("/login")
 async def login_user(details: LoginRequestModel):
-    res = functions.auth.login_user(details)
-    return res
+    try:
+        res = functions.auth.login_user(details)
+        return res
+    except HTTPException as e:
+        return Response(
+            content=json.dumps({"message": e.detail}), status_code=e.status_code
+        )
 
 
 @auth_router.get("/me")

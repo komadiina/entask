@@ -1,4 +1,0 @@
-httpx
-fastapi[standard]
-uvicorn
-redis[hiredis]

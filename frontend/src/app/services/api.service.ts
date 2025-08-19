@@ -16,7 +16,7 @@ export class APIService {
 
 	public getApiVersion(): Observable<{ version: string }> {
 		return this.http.get<{ version: string }>(
-			ApiUtil.buildUrl('/version', false),
+			ApiUtil.buildUrl('/auth/version'),
 		);
 	}
 

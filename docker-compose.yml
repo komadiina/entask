@@ -1,6 +1,6 @@
 services:
   postgres:
-    container_name: entask-postgres
+    container_name: entask-core-postgres
     image: postgres:alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
@@ -12,14 +12,22 @@ services:
     networks:
       - entask
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "${POSTGRES_USER}", "-p", "${POSTGRES_PORT}"]
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "${POSTGRES_USER}",
+          "-p",
+          "${POSTGRES_PORT}",
+        ]
       interval: 30s
       timeout: 15s
       retries: 5
       start_period: 5s
-      
+
   pgbouncer:
-    container_name: entask-pgbouncer
+    container_name: entask-core-pgbouncer
     image: bitnami/pgbouncer:1.24.1
     environment:
       PGBOUNCER_PORT: ${PGBOUNCER_PORT}
@@ -34,9 +42,9 @@ services:
       - postgres
     networks:
       - entask
-      
+
   flyway:
-    container_name: entask-flyway
+    container_name: entask-core-flyway
     build:
       context: /core/flyway
       dockerfile: Dockerfile
@@ -55,8 +63,9 @@ services:
       - "./core/flyway/scripts:/flyway/sql/"
     networks:
       - entask
-    
+
   traefik:
+    container_name: entask-core-traefik
     image: traefik:latest
     ports:
       - target: 80
@@ -71,6 +80,12 @@ services:
         published: 8080
         protocol: tcp
         mode: host
+    healthcheck:
+      test: ["CMD", "traefik", "version"]
+      interval: 10s
+      timeout: 15s
+      retries: 5
+      start_period: 5s
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - ./gateway/traefik/traefik.yml:/etc/traefik/traefik.yml
@@ -89,12 +104,12 @@ services:
     ports:
       - "5434:80"
 
-  frontend: 
+  frontend:
     container_name: entask-frontend
     build: ./frontend
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
-    volumes: 
+    volumes:
       - ./frontend:/frontend
     networks:
       - entask
@@ -103,9 +118,39 @@ services:
         - action: sync+restart
           path: ./frontend
           target: /frontend
-  
+
+  version-service:
+    container_name: entask-service-version
+    build:
+      context: ./services/version-api
+      dockerfile: Dockerfile
+    environment:
+      VERSION_API_PORT: ${VERSION_API_PORT}
+      AUTH_API_PORT: ${AUTH_API_PORT}
+      USER_API_PORT: ${USER_API_PORT}
+    networks:
+      - entask
+    volumes:
+      - ./services/version-api:/services/version-api
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "http://localhost:${VERSION_API_PORT}/api/version",
+        ]
+      interval: 30s
+      timeout: 15s
+      retries: 5
+      start_period: 5s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.version.rule=PathPrefix(`/api/version`)
+      - traefik.http.services.version-service.loadbalancer.server.port=${VERSION_API_PORT}
+
   auth-service:
-    container_name: entask-auth
+    container_name: entask-service-auth
     build:
       context: ./services/auth
       dockerfile: Dockerfile
@@ -113,6 +158,8 @@ services:
       SERVICE_GROUP: ${AUTH_SERVICE_GROUP}
       AUTH_API_VERSION: ${AUTH_API_VERSION}
       AUTH_API_PORT: ${AUTH_API_PORT}
+      AUTH_REDIS_HOST: ${REDIS_HOST}
+      AUTH_REDIS_PORT: ${REDIS_PORT}
       FRONTEND_HOST: ${FRONTEND_HOST}
       FRONTEND_PORT: ${FRONTEND_PORT}
       CLIENT_SECRET_FILE: ${CLIENT_SECRET_FILE}
@@ -126,28 +173,54 @@ services:
       JWT_OIDC_KEY: ${JWT_OIDC_KEY}
       JWT_ALGORITHM: ${JWT_ALGORITHM}
       BCRYPT_EFF: ${BCRYPT_EFF}
-    ports:
-      - "${AUTH_API_PORT}:${AUTH_API_PORT}"
+      TRAEFIK_USES_HTTP: ${TRAEFIK_USES_HTTP}
+      TRAEFIK_HTTP_PORT: ${TRAEFIK_HTTP_PORT}
+      TRAEFIK_HTTPS_PORT: ${TRAEFIK_HTTPS_PORT}
     networks:
       - entask
+    volumes:
+      - ./services/auth:/services/auth
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "http://localhost:${AUTH_API_PORT}/api/auth/health",
+        ]
+      interval: 10s
+      timeout: 15s
+      retries: 5
+      start_period: 5s
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.auth.rule=PathPrefix(`/api/auth`)
+      - traefik.http.services.auth-service.loadbalancer.server.port=${AUTH_API_PORT}
     develop:
       watch:
         - action: sync+restart
           path: ./services/auth
           target: /services/auth
-      
+
+  redis:
+    container_name: entask-core-redis
+    image: redis:alpine
+    environment:
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    networks:
+      - entask
+
   placement:
     container_name: entask-dapr-placement
     image: daprio/dapr
-    command: [
-      "./placement",
-        "-port", "50006"
-    ]
+    command: ["./placement", "-port", "50006"]
     ports:
       - "50006:50006"
     networks:
       - entask
-  
-  
+
 networks:
   entask: null

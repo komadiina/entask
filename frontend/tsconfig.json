@@ -13,7 +13,7 @@
 			"@entask-utilities/*": ["./src/app/utilities/*"],
 			"@entask-middleware/*": ["./src/app/middleware/*"],
 			"@entask-types/*": ["./src/app/types/*"],
-      "@entask-root/*": ["./src/app/*"],
+			"@entask-root/*": ["./src/app/*"]
 		},
 		"outDir": "./dist/out-tsc",
 		"strict": true,

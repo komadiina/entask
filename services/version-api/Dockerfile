@@ -4,11 +4,11 @@ RUN apk add curl
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
-WORKDIR /services/auth
-RUN export PYTHONPATH=$PYTHONPATH:/services/auth
+WORKDIR /services/version-api
+RUN export PYTHONPATH=$PYTHONPATH:/services/version-api
 
-COPY . /services/auth
-EXPOSE ${AUTH_API_PORT}
+COPY . /services/version-api
+EXPOSE ${VERSION_API_PORT}
 
 ENTRYPOINT ["python"]
 CMD ["app.py"]

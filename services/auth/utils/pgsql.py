@@ -1,11 +1,11 @@
 import os
+from typing import Any
 
 import psycopg
 from psycopg import Connection, Cursor
 from psycopg.errors import ProgrammingError
-from psycopg.rows import DictRow, dict_row, RowMaker
+from psycopg.rows import DictRow, RowMaker, dict_row
 from psycopg.sql import SQL, Composed
-from typing import Any
 
 user = os.environ["AUTH_DB_USER"]
 password = os.environ["AUTH_DB_PASSWORD"]
@@ -13,7 +13,6 @@ host = os.environ["AUTH_DB_HOST"]
 port = os.environ["AUTH_DB_PORT"]
 database = os.environ["AUTH_DB"]
 conn_str = f"postgresql://{user}:{password}@{host}:{port}/{database}"
-
 
 
 def get_connection() -> Connection[Any]:
@@ -33,13 +32,13 @@ def exec_query(sql: SQL | Composed, params: tuple | str | None) -> list[DictRow]
     conn = get_connection()
     cursor = conn.cursor(row_factory=dict_row)
     cursor.execute(SQL("SET search_path TO {schema};").format(schema=database))
-    
+
     try:
         cursor = cursor.execute(sql, params)
         result_set = cursor.fetchall()
         cursor.close()
         conn.close()
-        
+
         return result_set
     except ProgrammingError as e:
         # thrown from fetchall() method - can't fetch on produced empty records

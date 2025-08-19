@@ -1,0 +1,15 @@
+echo "[Husky] Running pre-commit hooks..."
+
+echo "[Husky] Linting ./frontend using 'eslint'"
+npm run lint
+
+echo "[Husky] Formatting ./frontend using 'prettier'"
+npm run format-frontend
+
+echo "[Husky] Organizing imports using 'isort'"
+npm run format-isort
+
+echo "[Husky] Formatting *.py files using 'black'"
+npm run format-black
+
+rm -rf ./node_modules
