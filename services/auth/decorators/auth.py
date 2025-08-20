@@ -7,8 +7,10 @@ from fastapi_decorators import depends
 from google.auth.exceptions import GoogleAuthError
 from google.auth.transport import requests as grequests
 from google.oauth2 import id_token
+import json
 from jose import jwt
 from jose.exceptions import JWTError
+from redis.asyncio import Redis
 
 SECRET_KEY = os.environ.get("JWT_SECRET_KEY") or ""
 ALGORITHM = os.environ.get("JWT_ALGORITHM") or ""
@@ -17,8 +19,13 @@ VERSION = os.environ.get("AUTH_API_VERSION")
 
 oauth2_scheme = APIKeyHeader(name="g-id-token", auto_error=False)
 
+r = Redis.from_url(
+    f"redis://{os.getenv('REDIS_HOST', 'redis')}:{os.getenv('REDIS_PORT', 6379)}",
+    decode_respones=True,
+)
 
-def auth_dependency(request: Request, token: str = Depends(oauth2_scheme)):
+
+async def auth_dependency(request: Request, token: str = Depends(oauth2_scheme)):
     """
       JWT authentication flow (Google OAuth2, Entask-issued).
 
@@ -29,6 +36,14 @@ def auth_dependency(request: Request, token: str = Depends(oauth2_scheme)):
     Raises:
         HTTPException: If 'token' is not supplied in payload, or is invalid.
     """
+
+    # check if cached in redis
+    cached = await r.get(token)
+    if cached:
+        payload = json.loads(cached)
+        request.state.user = payload
+        return
+
     payload = None
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
@@ -47,6 +62,9 @@ def auth_dependency(request: Request, token: str = Depends(oauth2_scheme)):
 
     if not payload:
         raise HTTPException(status_code=401, detail="Unauthorized")
+
+    # cache token for 5 minutes
+    await r.setex(token, 300, json.dumps(payload))
 
     request.state.user = payload
 

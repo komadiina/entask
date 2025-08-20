@@ -1,0 +1,12 @@
+http:
+  middlewares:
+    forward-auth:
+      forwardAuth:
+        address: "http://auth-gate:8081/verify"
+        trustForwardHeader: true
+        authResponseHeaders:
+          - "X-User-Id"
+          - "X-Roles"
+          - "x-id-token"
+          - "x-refresh-token"
+          - "Authentication"

@@ -193,3 +193,4 @@ client_secret.json
 /.vscode
 **/postgres/data/*
 !/core/flyway/*
+/core/minio/*
