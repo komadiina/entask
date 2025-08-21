@@ -8,18 +8,15 @@ export function authInterceptor(
 	next: HttpHandlerFn,
 ): Observable<HttpEvent<unknown>> {
 	// append opaque access token (for authorization)
-  const accessToken = LocalStorageService.get('accessToken' as KLocalStorage);
-  if (accessToken)
-    req.headers.append('Authorization', `Bearer ${accessToken}`);
+	const accessToken = LocalStorageService.get('accessToken' as KLocalStorage);
+	if (accessToken) req.headers.append('Authorization', `Bearer ${accessToken}`);
 
 	// append id token (for authorization)
-  const idToken = LocalStorageService.get('idToken' as KLocalStorage);
-  if (idToken)
-	  req.headers.append('x-id-token', `${idToken}`);
+	const idToken = LocalStorageService.get('idToken' as KLocalStorage);
+	if (idToken) req.headers.append('x-id-token', `${idToken}`);
 
-  const refreshToken = LocalStorageService.get('refreshToken' as KLocalStorage);
-  if (refreshToken)
-    req.headers.append('x-refresh-token', `${refreshToken}`);
-  
+	const refreshToken = LocalStorageService.get('refreshToken' as KLocalStorage);
+	if (refreshToken) req.headers.append('x-refresh-token', `${refreshToken}`);
+
 	return next(req);
 }

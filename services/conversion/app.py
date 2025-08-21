@@ -1,6 +1,7 @@
-from fastapi import FastAPI, Request
 import logging
 import os
+
+from fastapi import FastAPI, Request
 
 app = FastAPI()
 logger = logging.getLogger(__name__)
