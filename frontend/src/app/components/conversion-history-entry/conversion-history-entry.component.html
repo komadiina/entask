@@ -1,0 +1,10 @@
+<div
+	class="w-full flex flex-col gap-1 items-start justify-start p-4 hover-highlight-smooth border-zinc-200/30 border-[1px] bg-zinc-700/30 rounded-xl"
+>
+	<span class="text-4xl font-bold">{{ entry?.title }}</span>
+	<span class="text-lg font-semibold">{{ entry?.type }}</span>
+	<span class="text-lg font-light">{{
+		entry?.description ?? 'No description provided.'
+	}}</span>
+	<span class="">{{ entry?.createdAt | date: 'medium' }}</span>
+</div>

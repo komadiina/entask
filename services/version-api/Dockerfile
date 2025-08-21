@@ -8,7 +8,7 @@ WORKDIR /services/version-api
 RUN export PYTHONPATH=$PYTHONPATH:/services/version-api
 
 COPY . /services/version-api
-EXPOSE ${VERSION_API_PORT}
+EXPOSE ${VERSION_SERVICE_PORT}
 
 ENTRYPOINT ["python"]
 CMD ["app.py"]

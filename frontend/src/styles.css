@@ -1,4 +1,5 @@
 @import url('./app/styles/root.css');
+@import url('./app/styles/zard/zard-button.css');
 @import url('./app/styles/primeng-custom/primeng-button.css');
 @import url('./app/styles/primeng-custom/primeng-toast.css');
 
@@ -14,13 +15,17 @@ body {
 	/* https://www.magicpattern.design/tools/css-backgrounds */
 	background-color: #151515;
 	opacity: 1;
-	background-image: radial-gradient(#424242 0.85px, #151515 0.85px);
+	/* background-image: radial-gradient(#424242 0.85px, #151515 0.85px);
 	background-size: 32px 32px;
-	backdrop-filter: blur(2px);
+	backdrop-filter: blur(2px); */
+	background-image: url('../public/assets/background.svg');
+	background-position: center;
+	background-size: cover;
+	backdrop-filter: blur(64px);
 }
 
 body > * {
-	font-family: 'Lexend', sans-serif;
+	font-family: 'Roboto', sans-serif;
 	font-optical-sizing: auto;
 	font-style: normal;
 }

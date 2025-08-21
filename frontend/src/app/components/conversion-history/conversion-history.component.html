@@ -1,0 +1,7 @@
+<div *ngIf="this.history$ | async">
+	<app-conversion-history-entry
+		*ngFor="let entry of history$ | async"
+		[entry]="entry"
+		class="my-4"
+	></app-conversion-history-entry>
+</div>

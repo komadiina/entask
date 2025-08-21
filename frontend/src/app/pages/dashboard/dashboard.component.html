@@ -1,9 +1,77 @@
-<div class="w-full flex flex-row gap-2 my-2 mx-auto items-center">
-	<div class="flex flex-row items-center justify-between w-full">
-		<div>hey</div>
-		<div>hello</div>
-		<div>ola</div>
-		<div>chica</div>
-		<div>hey</div>
+<div
+	class="flex flex-col gap-2 items-start justify-start align-middle place-items-start w-full"
+>
+	<div>
+		<button
+			z-button
+			z-dropdown
+			zVariant="outline"
+			zType="outline"
+			[zDropdownMenu]="menu"
+			class="clickable border-[0.5px] rounded-lg w-full text-left"
+		>
+			Select
+		</button>
+
+		<div
+			class="flex flex-row gap-2 items-start justify-start"
+			w-full
+		>
+			<z-dropdown-menu-content
+				#menu="zDropdownMenuContent"
+				class="w-64 rounded-lg bg-zinc-800/0 starting:opacity-0 after:opacity-100 transition-all duration-150 ease-in-out p-2"
+			>
+				<z-dropdown-menu-item
+					*ngFor="let entry of conversions"
+					class="clickable w-56 mx-auto h-min"
+					(click)="this.selectConversion(entry.value)"
+					>{{ entry.name }}</z-dropdown-menu-item
+				>
+			</z-dropdown-menu-content>
+
+			<p
+				*ngIf="selectedConversion !== null"
+				class="text-lg my-2 font-light text-zinc-100"
+			>
+				Selected: {{ selectedConversion }}
+			</p>
+		</div>
 	</div>
+
+	<ng-container
+		*ngIf="selectedConversion === 'text-recognizer'"
+		class="w-full flex-col items-start justify-start"
+	>
+		<input
+			type="file"
+			accept=".jpg,.jpeg"
+			(change)="onFileSelected($event)"
+			class="clickable hover-smooth-higlight"
+			placeholder="Upload image (.JPG, .JPEG)"
+		/>
+		<div
+			*ngIf="recognizerForm.file"
+			class="w-full flex-col items-start justify-start"
+		>
+			<input
+				z-input
+				id="recognizerResultName"
+				placeholder="Result file name"
+				(input)="onResultNameChange($event)"
+			/>
+
+			<textarea
+				id="recognizerDescription"
+				placeholder="Description (optional)"
+				(input)="onDescriptionChange($event)"
+			></textarea>
+		</div>
+		<div class="flex justify-end mt-2">
+			<z-button
+				(click)="submitRecognizer()"
+				class="zard-button clickable"
+				>Upload</z-button
+			>
+		</div>
+	</ng-container>
 </div>

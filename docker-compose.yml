@@ -150,9 +150,9 @@ services:
       context: ./services/version-api
       dockerfile: Dockerfile
     environment:
-      VERSION_API_PORT: ${VERSION_API_PORT}
-      AUTH_API_PORT: ${AUTH_API_PORT}
-      USER_API_PORT: ${USER_API_PORT}
+      VERSION_SERVICE_PORT: ${VERSION_SERVICE_PORT}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+      USER_SERVICE_PORT: ${USER_SERVICE_PORT}
     networks:
       - entask
     volumes:
@@ -163,7 +163,7 @@ services:
           "CMD",
           "curl",
           "--fail",
-          "http://localhost:${VERSION_API_PORT}/api/version",
+          "http://localhost:${VERSION_SERVICE_PORT}/api/version",
         ]
       interval: 30s
       timeout: 15s
@@ -171,7 +171,7 @@ services:
       start_period: 5s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.version-service.loadbalancer.server.port=${VERSION_API_PORT}"
+      - "traefik.http.services.version-service.loadbalancer.server.port=${VERSION_SERVICE_PORT}"
       - "traefik.http.routers.version.rule=PathRegexp(`/api/version(.*?)`)"
       - "traefik.http.routers.version.service=version-service"
       
@@ -182,7 +182,7 @@ services:
     environment:
       SERVICE_GROUP: ${AUTH_SERVICE_GROUP}
       AUTH_API_VERSION: ${AUTH_API_VERSION}
-      AUTH_API_PORT: ${AUTH_API_PORT}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
       AUTH_REDIS_HOST: ${REDIS_HOST}
       AUTH_REDIS_PORT: ${REDIS_PORT}
       FRONTEND_HOST: ${FRONTEND_HOST}
@@ -211,7 +211,7 @@ services:
           "CMD",
           "curl",
           "--fail",
-          "http://localhost:${AUTH_API_PORT}/api/auth/health",
+          "http://localhost:${AUTH_SERVICE_PORT}/api/auth/health",
         ]
       interval: 10s
       timeout: 15s
@@ -219,7 +219,7 @@ services:
       start_period: 5s
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.auth-service.loadbalancer.server.port=${AUTH_API_PORT}"
+      - "traefik.http.services.auth-service.loadbalancer.server.port=${AUTH_SERVICE_PORT}"
       - "traefik.http.routers.auth.rule=PathRegexp(`/api/auth(.*?)`)"
       - "traefik.http.routers.auth.service=auth-service"
     develop:
@@ -234,6 +234,7 @@ services:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
     volumes:
       - ./frontend:/frontend
+      - node_modules:/frontend/node_modules:rw
     networks:
       - entask
     develop:
@@ -242,6 +243,8 @@ services:
           path: ./frontend
           target: /frontend
           
+volumes:
+  node_modules: {}
           
 networks:
   entask:

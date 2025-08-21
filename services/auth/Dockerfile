@@ -8,7 +8,7 @@ WORKDIR /services/auth
 RUN export PYTHONPATH=$PYTHONPATH:/services/auth
 
 COPY . /services/auth
-EXPOSE ${AUTH_API_PORT}
+EXPOSE ${AUTH_SERVICE_PORT}
 
 ENTRYPOINT ["python"]
 CMD ["app.py"]

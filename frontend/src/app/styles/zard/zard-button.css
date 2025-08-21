@@ -1,0 +1,11 @@
+@import 'tailwindcss';
+@plugin "tailwindcss-primeui";
+
+
+.zard-button {
+  @apply bg-zinc-900 p-4 rounded-xl min-w-auto text-sm placeholder:text-[0.875rem] placeholder:opacity-50 border-2 border-[#fff]/15 space-x-2;
+}
+
+.zard-button.clickable {
+  @apply hover:cursor-pointer hover:bg-zinc-600 transition-all duration-150 ease-in-out;
+}

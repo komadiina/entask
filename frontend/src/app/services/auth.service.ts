@@ -3,6 +3,7 @@ import { Injectable } from '@angular/core';
 import { LogLevel } from '@entask-constants/logger.constants';
 import { KLocalStorage } from '@entask-types/local-storage/local-storage.type';
 import { ApiUtil } from '@entask-utilities/api/api.util';
+import { Subscription } from 'rxjs';
 import { LoginResponse } from '@entask-models/login/login-response.model';
 import { LocalStorageService } from '@entask-services/local-storage.service';
 import { LoggerService } from '@entask-services/logger.service';
@@ -34,7 +35,7 @@ export class AuthService {
 		return this.localStorageService.get('accessToken' as KLocalStorage) != null;
 	}
 
-	public login(usernameEmail: string, password: string) {
+	public login(usernameEmail: string, password: string): Subscription {
 		this.logService.log(['AuthService: login']);
 		return this.httpClient
 			.post<LoginResponse>(ApiUtil.buildUrl('/auth/login'), {
@@ -42,6 +43,11 @@ export class AuthService {
 				password,
 			})
 			.subscribe(loginObservers.loginSubmit);
+	}
+
+	public async logout(): Promise<void> {
+		this.httpClient.post(ApiUtil.buildUrl('/auth/logout'), {}).subscribe();
+		this.localStorageService.clear();
 	}
 
 	public async signupGoogle(): Promise<void> {

@@ -47,4 +47,4 @@ if __name__ == "__main__":
 
     __init_app(app, included_routers)
 
-    uvicorn.run(app=app, host="0.0.0.0", port=int(os.getenv("AUTH_API_PORT", 5201)))
+    uvicorn.run(app=app, host="0.0.0.0", port=int(os.getenv("AUTH_SERVICE_PORT", 5201)))

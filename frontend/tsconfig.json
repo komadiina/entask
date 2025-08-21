@@ -37,7 +37,10 @@
         "./src/app/*"
       ],
       "@shared/*": [
-        "src/app/shared/*"
+        "src/app/*"
+      ],
+      "@public/*": [
+        "public/*"
       ]
     },
     "outDir": "./dist/out-tsc",
@@ -60,6 +63,7 @@
     "enableI18nLegacyMessageIdFormat": false,
     "strictInjectionParameters": true,
     "strictInputAccessModifiers": true,
-    "strictTemplates": true
+    "strictTemplates": true,
+    "noExplicitAny": false
   }
 }
