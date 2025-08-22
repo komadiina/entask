@@ -1,7 +1,29 @@
 @import 'tailwindcss';
 @plugin "tailwindcss-primeui";
 
-input {
+/* Scroll bar stylings */
+::-webkit-scrollbar {
+	width: 6px;
+	height: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	background: var(--lightestgrey);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: #888;
+	border-radius: 6px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: #555;
+}
+
+.input-styled {
 	@apply bg-zinc-900 p-2 rounded-xl min-w-auto text-lg placeholder:text-[0.875rem] placeholder:opacity-50 border-2 border-[#fff]/15 space-x-2;
 }
 
@@ -27,6 +49,37 @@ body {
 	@apply transition-all starting:w-0 duration-1000 ease-in-out;
 }
 
-.hover-highlight-smooth {
+/* .hover-highlight-smooth {
 	@apply transition-all duration-200 ease-in-out hover:bg-zinc-600/75 hover:text-zinc-100;
+} */
+
+.hover-highlight-smooth {
+	position: relative;
+	overflow: hidden; /* clip the blurred pseudo element to border-radius */
+	@apply transition-all duration-200 ease-in-out;
+}
+
+/* the blurred background layer */
+.hover-highlight-smooth::before {
+	content: '';
+	position: absolute;
+	inset: 0;
+	background: rgba(63, 63, 70, 0.75); /* same visible fill */
+	filter: blur(6px);
+	transform: scale(1.04); /* avoid hard edge artifacts from blur */
+	opacity: 0;
+	transition: opacity 0.2s ease;
+	z-index: 0;
+	pointer-events: none;
+}
+
+/* reveal on hover */
+.hover-highlight-smooth:hover::before {
+	opacity: 1;
+}
+
+/* keep children above the blurred layer */
+.hover-highlight-smooth > * {
+	position: relative;
+	z-index: 1;
 }

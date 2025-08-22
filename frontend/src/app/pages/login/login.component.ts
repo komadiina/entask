@@ -25,9 +25,15 @@ export class LoginComponent {
 		private messageService: MessageService,
 		public redirectService: RedirectService,
 	) {
+		this.authService.hostComponent = this;
+
 		if (authService.isLoggedIn()) {
 			this.redirectService.redirect({ path: '/dashboard' }, true);
 		}
+	}
+
+	public get getMessageService(): MessageService {
+		return this.messageService;
 	}
 
 	public show(sev: string): void {
@@ -53,11 +59,10 @@ export class LoginComponent {
 			return;
 		}
 
-		this.authService
-			.login(this.usernameControl.value!, this.passwordControl.value!)
-			.add(() => {
-				this.redirectService.redirect({ path: '/dashboard' }, false);
-			});
+		this.authService.login(
+			this.usernameControl.value!,
+			this.passwordControl.value!,
+		);
 	}
 
 	public async signup(): Promise<void> {

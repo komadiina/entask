@@ -1,5 +1,6 @@
 import os
 from datetime import datetime
+from logging import getLogger
 from typing import Any, Dict
 
 import bcrypt
@@ -13,6 +14,7 @@ from utils.auth import check_password, generate_credentials
 from utils.pgsql import exec_query
 
 BCRYPT_EFF = 16
+logger = getLogger(__name__)
 
 
 def refresh_credentials(tokens: Dict[str, str]) -> Credentials:
@@ -61,27 +63,22 @@ def refresh_credentials(tokens: Dict[str, str]) -> Credentials:
 
 
 def register_user(user: RegisterRequestModel) -> Dict[str, Any]:
-
     # check if user already exists (username && email criteria)
-    q = sql.SQL(
-        "select * from {table} where {username} LIKE %s OR {email} LIKE %s;"
-    ).format(
+    q = sql.SQL("select * from {table} where {p1} LIKE %s OR {p2} LIKE %s;").format(
         table=sql.Identifier("users"),
-        username=sql.Identifier("username"),
-        email=sql.Identifier("email"),
+        p1=sql.Identifier("username"),
+        p2=sql.Identifier("email"),
     )
 
-    result = exec_query(q, (user.username, user.email))
+    result = exec_query(q, (user.username, user.email), produces_results=True)
 
     if result is not None and len(result) > 0:
         raise HTTPException(status_code=400, detail="User already exists")
 
     try:
-        q = sql.SQL(
-            "INSERT INTO {table} ({columns}) VALUES (%s, %s, %s, %s, %s);"
-        ).format(
-            table=sql.Identifier("users"),
-            columns=sql.SQL(", ").join(
+        q = sql.SQL("INSERT INTO {} ({}) VALUES (%s, %s, %s, %s, %s);").format(
+            sql.Identifier("users"),
+            sql.SQL(", ").join(
                 map(
                     sql.Identifier,
                     ["username", "email", "given_name", "family_name", "password"],
@@ -100,15 +97,28 @@ def register_user(user: RegisterRequestModel) -> Dict[str, Any]:
                     user.password.encode("utf-8"), bcrypt.gensalt(BCRYPT_EFF)
                 ).decode("utf-8"),
             ),
+            produces_results=False,
         )
 
-    except RuntimeError as e:
+        # ---------------------
+        # Does not output any data
+        q = sql.SQL("select * from {table} where {p1} LIKE %s OR {p2} LIKE %s;").format(
+            table=sql.Identifier("users"),
+            p1=sql.Identifier("username"),
+            p2=sql.Identifier("email"),
+        )
+
+        result = exec_query(q, (user.username, user.email), produces_results=True)
+
+        print("fin!")
+
+    except:
         raise HTTPException(status_code=400, detail="Unable to register user.")
 
     return {"message": "User registered successfully"}
 
 
-def login_user(user: LoginRequestModel):
+def login_user(user: LoginRequestModel) -> Credentials:
     # check if user already exists (username && email criteria)
     q = sql.SQL("SELECT * FROM {table} WHERE {v1} LIKE %s OR {v2} LIKE %s;").format(
         table=sql.Identifier("users"),

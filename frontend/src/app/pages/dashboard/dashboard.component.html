@@ -1,77 +1,229 @@
-<div
-	class="flex flex-col gap-2 items-start justify-start align-middle place-items-start w-full"
->
-	<div>
-		<button
-			z-button
-			z-dropdown
-			zVariant="outline"
-			zType="outline"
-			[zDropdownMenu]="menu"
-			class="clickable border-[0.5px] rounded-lg w-full text-left"
+<app-header class="w-full absolute top-4 right-0 mx-auto"></app-header>
+
+<div class="flex flex-col gap-2 items-center w-[50vw]">
+	<button
+		z-button
+		z-dropdown
+		zVariant="outline"
+		zType="outline"
+		[zDropdownMenu]="menu"
+		class="clickable border-[1px] border-zinc-800 rounded-lg w-full text-center"
+	>
+		{{ selectedConversion?.name ?? 'Select' }}
+	</button>
+
+	<z-dropdown-menu-content
+		#menu="zDropdownMenuContent"
+		class="w-full rounded-lg bg-zinc-800 border-zinc-600 starting:bg-zinc-800/0 after:bg-zinc-800 transition-all duration-150 ease-in-out p-2"
+	>
+		<z-dropdown-menu-item
+			*ngFor="let entry of conversions"
+			class="clickable w-full mx-auto h-min"
+			(click)="this.selectConversion(entry)"
+			>{{ entry.name }}</z-dropdown-menu-item
 		>
-			Select
-		</button>
+	</z-dropdown-menu-content>
 
-		<div
-			class="flex flex-row gap-2 items-start justify-start"
-			w-full
-		>
-			<z-dropdown-menu-content
-				#menu="zDropdownMenuContent"
-				class="w-64 rounded-lg bg-zinc-800/0 starting:opacity-0 after:opacity-100 transition-all duration-150 ease-in-out p-2"
-			>
-				<z-dropdown-menu-item
-					*ngFor="let entry of conversions"
-					class="clickable w-56 mx-auto h-min"
-					(click)="this.selectConversion(entry.value)"
-					>{{ entry.name }}</z-dropdown-menu-item
-				>
-			</z-dropdown-menu-content>
-
-			<p
-				*ngIf="selectedConversion !== null"
-				class="text-lg my-2 font-light text-zinc-100"
-			>
-				Selected: {{ selectedConversion }}
-			</p>
-		</div>
-	</div>
-
+	<!-- TEXT RECOGNIZER -->
 	<ng-container
-		*ngIf="selectedConversion === 'text-recognizer'"
-		class="w-full flex-col items-start justify-start"
+		*ngIf="selectedConversion?.value === 'text-recognizer'"
+		class="w-full flex-col items-center justify-center gap-2 h-full"
 	>
 		<input
 			type="file"
 			accept=".jpg,.jpeg"
-			(change)="onFileSelected($event)"
-			class="clickable hover-smooth-higlight"
-			placeholder="Upload image (.JPG, .JPEG)"
+			(change)="setFile(recognizerForm, $event, this.toMB(10))"
+			class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 file:text-zinc-400 file:text-md text-md clickable smooth-hover-highlight file:text-md file:font-semibold"
 		/>
-		<div
-			*ngIf="recognizerForm.file"
-			class="w-full flex-col items-start justify-start"
+
+		<input
+			class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
+			id="recognizerResultName"
+			placeholder="Result file name"
+			(input)="onResultNameChange($event)"
+		/>
+
+		<textarea
+			id="recognizerDescription"
+			class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
+			placeholder="Description (optional)"
+			(input)="onDescriptionChange($event)"
+		></textarea>
+
+		<z-button
+			(click)="submitRecognizer()"
+			class="zard-button clickable"
+			>Upload</z-button
 		>
+	</ng-container>
+
+	<!-- TERM EXTRACTOR -->
+	<ng-container
+		*ngIf="selectedConversion?.value === 'term-extractor'"
+		class="w-full flex-col items-center justify-center gap-2 h-full"
+	>
+		<textarea
+			id="termExtractorText"
+			class="h-56 w-full rounded-md border-zinc-600 border-2 p-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
+			placeholder="Paste text (max 2000 chars)"
+			maxlength="2000"
+			(input)="onTermExtractorInput($event)"
+		></textarea>
+
+		<div class="w-full flex justify-end mt-2">
+			<z-button
+				(click)="submitTermExtractor()"
+				class="zard-button clickable"
+			>
+				Submit
+			</z-button>
+		</div>
+	</ng-container>
+
+	<!-- THUMBNAILER (.mp4) -->
+	<ng-container
+		*ngIf="selectedConversion?.value === 'thumbnailer'"
+		class="w-full flex-col items-center justify-center gap-2 h-full"
+	>
+		<input
+			type="file"
+			accept=".mp4"
+			(change)="setFile(thumbnailerForm, $event, this.toMB(30))"
+			class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md clickable smooth-hover-highlight file:text-zinc-400 file:text-md file:font-semibold"
+		/>
+
+		<div
+			*ngIf="thumbnailerForm?.file"
+			class="w-full"
+		>
+			<p class="text-zinc-400 text-sm truncate">
+				{{ thumbnailerForm.file?.name }}
+			</p>
+
 			<input
-				z-input
-				id="recognizerResultName"
+				id="thumbnailerResultName"
 				placeholder="Result file name"
-				(input)="onResultNameChange($event)"
+				class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md bg-zinc-800/50 my-2"
+				(input)="onThumbnailerResultNameChange($event)"
 			/>
 
 			<textarea
-				id="recognizerDescription"
+				id="thumbnailerDescription"
 				placeholder="Description (optional)"
-				(input)="onDescriptionChange($event)"
+				class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
+				(input)="onThumbnailerDescriptionChange($event)"
 			></textarea>
 		</div>
-		<div class="flex justify-end mt-2">
+
+		<div class="w-full flex justify-end mt-2">
 			<z-button
-				(click)="submitRecognizer()"
+				(click)="submitThumbnailer()"
 				class="zard-button clickable"
-				>Upload</z-button
 			>
+				Upload
+			</z-button>
+		</div>
+	</ng-container>
+
+	<!-- WAVEFORMER (.wav) -->
+	<ng-container
+		*ngIf="selectedConversion?.value === 'waveformer'"
+		class="w-full flex-col items-center justify-center gap-2 h-full"
+	>
+		<input
+			type="file"
+			accept=".wav"
+			(change)="setFile(waveformerForm, $event, this.toMB(20))"
+			class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md clickable smooth-hover-highlight file:text-zinc-400 file:text-md file:font-semibold"
+		/>
+
+		<div
+			*ngIf="selectedConversion?.value === 'waveformer'"
+			class="w-full flex flex-col gap-2"
+		>
+			<p class="text-zinc-400 text-sm truncate">
+				{{ waveformerForm.file?.name }}
+			</p>
+
+			<!-- Filters -->
+			<div class="grid grid-cols-2 gap-2 my-3">
+				<label
+					class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
+					tabindex="0"
+				>
+					<input
+						type="checkbox"
+						(change)="
+							this.waveformerForm.filters!.compress =
+								!this.waveformerForm.filters!.compress
+						"
+						class="text-zinc-100 text-sm p-2 bg-zinc-400 checked:bg-lime-400"
+					/>
+					<span class="text-zinc-100 text-sm">Compress</span>
+				</label>
+
+				<label
+					class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
+				>
+					<input
+						type="checkbox"
+						(change)="
+							this.waveformerForm.filters!.reverb =
+								!this.waveformerForm.filters!.reverb
+						"
+					/>
+					<span class="text-zinc-100 text-sm">Reverb</span>
+				</label>
+
+				<label
+					class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
+				>
+					<input
+						type="checkbox"
+						(change)="
+							this.waveformerForm.filters!.gain =
+								!this.waveformerForm.filters!.gain
+						"
+					/>
+					<span class="text-zinc-100 text-sm">Gain</span>
+				</label>
+
+				<label
+					class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
+				>
+					<input
+						type="checkbox"
+						(change)="
+							this.waveformerForm.filters!.downmix =
+								!this.waveformerForm.filters!.downmix
+						"
+					/>
+					<span class="text-zinc-100 text-sm">Downmix</span>
+				</label>
+			</div>
+
+			<input
+				id="waveformerResultName"
+				placeholder="Result file name"
+				class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md bg-zinc-800/50"
+				(input)="onWaveformerResultNameChange($event)"
+			/>
+
+			<textarea
+				id="waveformerDescription"
+				placeholder="Description (optional)"
+				class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 mt-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
+				(input)="onWaveformerDescriptionChange($event)"
+			></textarea>
+		</div>
+
+		<div class="w-full flex justify-end mt-2">
+			<z-button
+				(click)="submitWaveformer()"
+				class="zard-button clickable"
+			>
+				Upload
+			</z-button>
 		</div>
 	</ng-container>
 </div>

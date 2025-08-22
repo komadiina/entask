@@ -18,11 +18,13 @@ export class OAuth2CallbackComponent {
 			const accessToken = params['access_token'];
 			const refreshToken = params['refresh_token'];
 			const idToken = params['id_token'];
+			const authProvider = params['provider'];
 
 			this.localStorageService.updateMany({
 				idToken,
 				accessToken,
 				refreshToken,
+				authProvider,
 			});
 
 			this.router.navigate(['/dashboard']);

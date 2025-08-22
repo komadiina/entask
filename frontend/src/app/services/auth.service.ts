@@ -1,12 +1,11 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { LogLevel } from '@entask-constants/logger.constants';
 import { KLocalStorage } from '@entask-types/local-storage/local-storage.type';
 import { ApiUtil } from '@entask-utilities/api/api.util';
 import { Subscription } from 'rxjs';
+import { LoginComponent } from '@entask-pages/login/login.component';
 import { LoginResponse } from '@entask-models/login/login-response.model';
 import { LocalStorageService } from '@entask-services/local-storage.service';
-import { LoggerService } from '@entask-services/logger.service';
 import { RedirectService } from '@entask-services/redirect.service';
 import { loginObservers } from '@entask-utils/rxjs/observers/login/login.observer';
 
@@ -14,14 +13,17 @@ import { loginObservers } from '@entask-utils/rxjs/observers/login/login.observe
 	providedIn: 'root',
 })
 export class AuthService {
+	private _hostComponent: LoginComponent | null = null;
+
+	public set hostComponent(c: LoginComponent) {
+		this._hostComponent = c;
+	}
+
 	constructor(
 		private redirectService: RedirectService,
-		private logService: LoggerService,
 		private httpClient: HttpClient,
 		private localStorageService: LocalStorageService,
 	) {
-		logService.init({ logLevel: LogLevel.DEBUG, logPrefix: 'AuthService' });
-
 		if (this.isLoggedIn() == false) {
 			this.redirectService.redirect({ path: '/login' });
 		}
@@ -36,13 +38,12 @@ export class AuthService {
 	}
 
 	public login(usernameEmail: string, password: string): Subscription {
-		this.logService.log(['AuthService: login']);
 		return this.httpClient
 			.post<LoginResponse>(ApiUtil.buildUrl('/auth/login'), {
 				usernameEmail,
 				password,
 			})
-			.subscribe(loginObservers.loginSubmit);
+			.subscribe(loginObservers.loginSubmit.context(this._hostComponent!));
 	}
 
 	public async logout(): Promise<void> {

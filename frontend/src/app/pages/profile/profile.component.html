@@ -1,50 +1,56 @@
-<div *ngIf="(user$ | async) === false">
-	<z-loader />
-	<p>Loading data, hang tight...</p>
-</div>
-
-<div
-	*ngIf="user$ | async as data"
-	class="w-full mx-auto"
->
-	<div
-		class="flex flex-row md:flex-col gap-12 items-start justify-start w-full"
-	>
-		<div class="flex flex-col md:flex-row items-start justify-start gap-8">
-			<img
-				class="w-64 h-64 rounded-lg drop-shadow-xl drop-shadow-gray-black/50"
-				src="{{ (user$ | async)?.pictureUrl }}"
-				alt="{{ (user$ | async)?.name }}'s avatar"
-			/>
-
-			<div class="flex flex-col items-start-safe justify-evenly gap-1 w-[75%]">
-				<span class="text-2xl md:text-5xl font-semibold">
-					{{ `${(user$ | async)?.givenName} ${(user$ | async)?.familyName}` }}
-				</span>
-
-				<span class="text-lg md:text-xl font-light text-white/75">
-					{{ `(@${(user$ | async)?.username})` }}
-				</span>
-
-				<span class="text-lg md:text-xl font-light text-white/75">
-					{{
-						`Member since ${((user$ | async)?.joinedAt | date: 'yyyy-MM-dd')}`
-					}}
-				</span>
-
-				<hr class="h-1 w-[50%] border-white/25 my-2 rounded-3xl" />
-				<span class="overflow-ellipsis max-w-[50%] flex-wrap wrap-break-word">
-					{{ `${(user$ | async)?.bio.slice(0, 100)}` }}
-				</span>
-				<hr class="h-1 w-[50%] border-white/25 my-2 rounded-3xl" />
-				<p class="max-w-[50%] wrap-break-word">
-					{{
-						`Last seen on ${((user$ | async)?.lastLogin | date: 'yyyy-MM-dd HH:mm:ss')}`
-					}}
-				</p>
-			</div>
-		</div>
+<div class="flex flex-col items-center justify-center w-full">
+	<div *ngIf="(user$ | async) === false">
+		<z-loader />
+		<p>Loading data, hang tight...</p>
 	</div>
 
-	<app-conversion-history></app-conversion-history>
+	<div
+		*ngIf="user$ | async as data"
+		class="w-full mx-auto"
+	>
+		<div
+			class="flex flex-row md:flex-col gap-12 items-start justify-start w-full"
+		>
+			<div class="flex flex-col md:flex-row items-start justify-start gap-8">
+				<img
+					class="w-64 h-64 rounded-lg drop-shadow-xl drop-shadow-gray-black/50"
+					src="{{ (user$ | async)?.pictureUrl }}"
+					alt="{{ (user$ | async)?.name }}'s avatar"
+				/>
+
+				<div
+					class="flex flex-col items-start-safe justify-evenly gap-1 w-[75%]"
+				>
+					<span class="text-2xl md:text-5xl font-semibold">
+						{{ `${(user$ | async)?.givenName} ${(user$ | async)?.familyName}` }}
+					</span>
+
+					<span class="text-lg md:text-xl font-light text-white/75">
+						{{ `(@${(user$ | async)?.username})` }}
+					</span>
+
+					<span class="text-lg md:text-xl font-light text-white/75">
+						{{
+							`Member since ${((user$ | async)?.joinedAt | date: 'yyyy-MM-dd')}`
+						}}
+					</span>
+
+					<hr class="h-1 w-[50%] border-white/25 my-2 rounded-3xl" />
+					<span class="overflow-ellipsis max-w-[50%] flex-wrap wrap-break-word">
+						{{ `${(user$ | async)?.bio.slice(0, 100)}` }}
+					</span>
+					<hr class="h-1 w-[50%] border-white/25 my-2 rounded-3xl" />
+					<p class="max-w-[50%] wrap-break-word">
+						{{
+							`Last seen on ${((user$ | async)?.lastLogin | date: 'yyyy-MM-dd HH:mm:ss')}`
+						}}
+					</p>
+				</div>
+			</div>
+		</div>
+
+		<app-conversion-history
+			class="max-h-[50vh] overflow-scroll overflow-x-hidden w-auto border-b-2 border-zinc-600/50 p-2"
+		></app-conversion-history>
+	</div>
 </div>

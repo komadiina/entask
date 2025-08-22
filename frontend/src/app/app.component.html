@@ -3,36 +3,20 @@
 </div>
 
 <div
-	class="flex flex-col md:overflow-x-hidden gap-2 items-center justify-center w-full max-w-screen mx-auto"
+	class="flex flex-col h-screen max-h-screen md:overflow-x-hidden gap-2 items-center justify-center w-[90vw] max-w-screen mx-auto"
 >
-	<div
-		class="flex flex-col md:flex-row items-center justify-center w-full gap-6 mt-10"
-		*ngIf="!this.router.url.includes('login')"
-	>
-		<z-button
-			class="zard-button clickable"
-			(click)="this.router.navigate(['/home'])"
-			>🏠 Home</z-button
-		>
-		<z-button
-			class="zard-button clickable"
-			(click)="this.router.navigate(['/dashboard'])"
-			>💨 Dashboard</z-button
-		>
-		<z-button
-			class="zard-button clickable"
-			(click)="this.router.navigate(['/profile'])"
-			>🧑 Profile</z-button
-		>
-		<z-button
-			class="zard-button clickable"
-			(click)="this.router.navigate(['/logout'])"
-			>Logout</z-button
-		>
-	</div>
+	<!-- <app-header
+		*ngIf="
+			this.router.url.includes('login') === false ||
+			this.router.url.includes('register') === false
+		"
+	></app-header> -->
+
 	<hr
-		class="h-1 border-2 border-white opacity-75 w-[75%] my-2 rounded-3xl hr-expand"
+		class="h-1 border-[1px] border-zinc-600 opacity-75 w-full my-2 rounded-3xl hr-expand"
 	/>
 
-	<router-outlet />
+	<main class="flex flex-1 items-center justify-center w-screen">
+		<router-outlet />
+	</main>
 </div>

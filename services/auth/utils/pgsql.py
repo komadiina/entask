@@ -1,25 +1,31 @@
 import os
+from logging import getLogger
 from typing import Any
 
 import psycopg
-from psycopg import Connection, Cursor
+from psycopg import Connection
 from psycopg.errors import ProgrammingError
-from psycopg.rows import DictRow, RowMaker, dict_row
-from psycopg.sql import SQL, Composed
+from psycopg.rows import DictRow, dict_row
+from psycopg.sql import SQL, Composed, Identifier
 
-user = os.environ["AUTH_DB_USER"]
-password = os.environ["AUTH_DB_PASSWORD"]
-host = os.environ["AUTH_DB_HOST"]
-port = os.environ["AUTH_DB_PORT"]
-database = os.environ["AUTH_DB"]
-conn_str = f"postgresql://{user}:{password}@{host}:{port}/{database}"
+user = os.getenv("AUTH_DB_USER")
+password = os.getenv("AUTH_DB_PASSWORD")
+host = os.getenv("AUTH_DB_HOST")
+port = os.getenv("AUTH_DB_PORT")
+database = os.getenv("AUTH_DB", "auth")
+conninfo = "postgresql://{}:{}@{}:{}/{}".format(user, password, host, port, database)
+print(f"Initialized connection string: {conninfo}")
+
+logger = getLogger(__name__)
 
 
 def get_connection() -> Connection[Any]:
-    return psycopg.connect(conn_str)
+    return psycopg.connect(conninfo=conninfo)
 
 
-def exec_query(sql: SQL | Composed, params: tuple | str | None) -> list[DictRow] | None:
+def exec_query(
+    sql: SQL | Composed, params: tuple | str | None, produces_results: bool = False
+) -> list[DictRow] | None:
     """Executes a parametrized (composed) query.
 
     Args:
@@ -29,26 +35,32 @@ def exec_query(sql: SQL | Composed, params: tuple | str | None) -> list[DictRow]
     Returns:
         (list[DictRow] | None): The result set (if query is of SELECT type), else `None`.
     """
-    conn = get_connection()
-    cursor = conn.cursor(row_factory=dict_row)
-    cursor.execute(SQL("SET search_path TO {schema};").format(schema=database))
 
-    try:
-        cursor = cursor.execute(sql, params)
-        result_set = cursor.fetchall()
+    def close(cursor: psycopg.Cursor[Any], conn: psycopg.Connection[Any]):
         cursor.close()
         conn.close()
 
-        return result_set
-    except ProgrammingError as e:
-        # thrown from fetchall() method - can't fetch on produced empty records
-        if cursor is not None:
-            cursor.close()
+    with psycopg.connect(conninfo=conninfo) as conn:
+        with conn.cursor(row_factory=dict_row) as cursor:
+            try:
+                print(sql.as_string(cursor))
 
-        if conn is not None:
-            conn.close()
+                cursor.execute(
+                    SQL("SET search_path TO {};").format(Identifier(database))
+                )
+                logger.info(f"SQL: {sql}; params: {params}")
+                cursor.execute(sql, params or ())
 
-        return None
+                if produces_results:
+                    return cursor.fetchall()
+
+                conn.commit()
+                return None
+            except (Exception, ProgrammingError) as e:
+                logger.exception(e)
+                return None
+            finally:
+                close(cursor, conn)
 
 
 def close_connection(conn: psycopg.Connection) -> None:

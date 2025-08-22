@@ -2,6 +2,7 @@
 const eslint = require('@eslint/js');
 const tseslint = require('typescript-eslint');
 const angular = require('angular-eslint');
+const angularTemplate = require('@angular-eslint/eslint-plugin-template');
 
 module.exports = tseslint.config(
 	{
@@ -26,5 +27,18 @@ module.exports = tseslint.config(
 			...angular.configs.templateAccessibility,
 		],
 		rules: {},
+	},
+	{
+		files: ['**/*.html'],
+		extends: [
+			...angular.configs.templateRecommended,
+			...angular.configs.templateAccessibility,
+		],
+		rules: {
+			'@angular-eslint/template/interactive-supports-focus': [
+				'warn',
+				{ allowList: ['a', 'button', 'input'] },
+			],
+		},
 	},
 );

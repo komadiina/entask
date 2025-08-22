@@ -1,5 +1,5 @@
 <div
-	class="flex flex-col md:flex-row justify-center gap-2 h-screen items-center place-items-centers align-middle w-screen transition-opacity duration-1000 ease-in-out starting:opacity-0 ending:opacity-100"
+	class="flex flex-col md:flex-row justify-center gap-2 flex-1 items-center place-items-centers align-middle w-screen transition-opacity duration-1000 ease-in-out starting:opacity-0 ending:opacity-100"
 >
 	<div class="flex flex-col gap-2 items-start md:items-end">
 		<span class="text-7xl font-semibold"
@@ -27,6 +27,7 @@
 			placeholder="Username or e-mail address"
 			tabindex="1"
 			[formControl]="usernameControl"
+			class="input-styled"
 		/>
 
 		<input
@@ -38,6 +39,7 @@
 			class="animated"
 			tabindex="2"
 			[formControl]="passwordControl"
+			class="input-styled"
 		/>
 
 		<button

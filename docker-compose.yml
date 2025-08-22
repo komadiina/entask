@@ -1,5 +1,6 @@
 services:
   minio:
+    container_name: minio
     image: minio/minio:latest
     command: ["minio", "server", "/data", "--console-address", ":${MINIO_CONSOLE_PORT}"]
     environment:
@@ -16,11 +17,14 @@ services:
       - entask
 
   postgres:
+    container_name: postgres
     image: postgres:alpine
+    shm_size: 512mb
+    restart: always
     environment:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
     volumes:
       - ./core/postgres/initdb.sql:/docker-entrypoint-initdb.d/init.sql
       - ./core/postgres/data:/var/lib/postgresql/data
@@ -36,7 +40,7 @@ services:
           "-p",
           "${POSTGRES_PORT}",
         ]
-      interval: 30s
+      interval: 60s
       timeout: 15s
       retries: 5
       start_period: 5s
@@ -44,6 +48,7 @@ services:
       - "traefik.enable=false"
       
   pgadmin:
+    container_name: pgadmin
     image: dpage/pgadmin4
     restart: unless-stopped
     environment:
@@ -57,16 +62,22 @@ services:
       - "traefik.enable=false"
 
   pgbouncer:
-    image: bitnami/pgbouncer:1.24.1
+    container_name: pgbouncer
+    image: edoburu/pgbouncer:latest
+    restart: always
     environment:
       PGBOUNCER_PORT: ${PGBOUNCER_PORT}
       POSTGRESQL_HOST: ${POSTGRES_HOST}
       POSTGRESQL_PORT: ${POSTGRES_PORT}
-      POSTGRESQL_PASSWORD: ${AUTH_DB_USER}
-      POSTGRESQL_USER: ${AUTH_DB_PASSWORD}
-    volumes:
-      - ./core/pgbouncer/pgbouncer.ini:/etc/pgbouncer/pgbouncer.ini:ro
-      - ./core/pgbouncer/userlist.txt:/etc/pgbouncer/userlist.txt:ro
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: ${POSTGRES_HOST}
+      AUTH_TYPE: ${POSTGRES_HOST_AUTH_METHOD}
+      MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN}
+      DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE}
+      POOL_MODE: ${PGBOUNCER_POOL_MODE}
+      LISTEN_ADDR: ${PGBOUNCER_LISTEN_ADDR}
+      LISTEN_PORT: ${PGBOUNCER_LISTEN_PORT}
     depends_on:
       - postgres
     networks:
@@ -75,6 +86,7 @@ services:
       - "traefik.enable=false"
 
   flyway:
+    container_name: flyway
     build:
       context: /core/flyway
       dockerfile: Dockerfile
@@ -97,6 +109,7 @@ services:
       - "traefik.enable=false"
 
   redis:
+    container_name: redis
     image: redis:alpine
     environment:
       REDIS_PORT: ${REDIS_PORT}
@@ -109,6 +122,7 @@ services:
       - "traefik.enable=false"
 
   placement:
+    container_name: placement
     image: daprio/dapr
     command: ["./placement", "-port", "50006"]
     ports:
@@ -119,6 +133,7 @@ services:
       - "traefik.enable=false"
 
   traefik:
+    container_name: traefik
     image: traefik:latest
     ports:
       - target: 80
@@ -135,7 +150,7 @@ services:
         mode: host
     healthcheck:
       test: ["CMD", "traefik", "version"]
-      interval: 10s
+      interval: 60s
       timeout: 15s
       retries: 5
       start_period: 5s
@@ -146,6 +161,7 @@ services:
       - entask   
   
   version-service:
+    container_name: service-version
     build:
       context: ./services/version-api
       dockerfile: Dockerfile
@@ -165,7 +181,7 @@ services:
           "--fail",
           "http://localhost:${VERSION_SERVICE_PORT}/api/version",
         ]
-      interval: 30s
+      interval: 60s
       timeout: 15s
       retries: 5
       start_period: 5s
@@ -176,6 +192,7 @@ services:
       - "traefik.http.routers.version.service=version-service"
       
   auth-service:
+    container_name: service-auth
     build:
       context: ./services/auth
       dockerfile: Dockerfile
@@ -191,8 +208,8 @@ services:
       AUTH_DB_USER: ${AUTH_DB_USER}
       AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD}
       AUTH_DB: ${AUTH_DB}
-      AUTH_DB_HOST: ${POSTGRES_HOST}
-      AUTH_DB_PORT: ${POSTGRES_PORT}
+      AUTH_DB_HOST: ${AUTH_DB_HOST}
+      AUTH_DB_PORT: ${AUTH_DB_PORT}
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       JWT_REFRESH_KEY: ${JWT_REFRESH_KEY}
       JWT_OIDC_KEY: ${JWT_OIDC_KEY}
@@ -213,7 +230,7 @@ services:
           "--fail",
           "http://localhost:${AUTH_SERVICE_PORT}/api/auth/health",
         ]
-      interval: 10s
+      interval: 60s
       timeout: 15s
       retries: 5
       start_period: 5s
@@ -227,8 +244,36 @@ services:
         - action: sync+restart
           path: ./services/auth
           target: /services/auth
+          
+  file-service:
+    container_name: service-file
+    build: 
+      context: ./services/file
+      dockerfile: Dockerfile
+    environment:
+      FILE_SERVICE_PORT: ${FILE_SERVICE_PORT}
+      S3_HOST: ${S3_HOST}
+      S3_PORT: ${S3_PORT}
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET_UPLOADS: ${S3_BUCKET_UPLOADS}
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./services/file
+          target: /services/file
+    ports:
+      - "${FILE_SERVICE_PORT}:${FILE_SERVICE_PORT}"
+    expose:
+      - ${FILE_SERVICE_PORT}
+    networks:
+      - entask
+    volumes:
+      - ./services/file:/services/file
+    
   
   frontend:
+    container_name: frontend
     build: ./frontend
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"

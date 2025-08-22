@@ -18,5 +18,8 @@ export function authInterceptor(
 	const refreshToken = LocalStorageService.get('refreshToken' as KLocalStorage);
 	if (refreshToken) req.headers.append('x-refresh-token', `${refreshToken}`);
 
+	const authProvider = LocalStorageService.get('authProvider' as KLocalStorage);
+	if (authProvider) req.headers.append('x-auth-type ', `${authProvider}`);
+
 	return next(req);
 }
