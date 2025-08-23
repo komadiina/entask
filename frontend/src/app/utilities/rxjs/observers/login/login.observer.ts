@@ -9,6 +9,8 @@ export const loginObservers = {
 			LocalStorageService.set('accessToken', value.accessToken);
 			LocalStorageService.set('refreshToken', value.refreshToken);
 			LocalStorageService.set('idToken', value.idToken);
+			LocalStorageService.set('authProvider', value.provider);
+			LocalStorageService.set('tokenType', value.tokenType);
 
 			if (ctx) {
 				ctx.getMessageService.add({
@@ -34,7 +36,7 @@ export const loginObservers = {
 		},
 
 		(): void => {
-			console.log('complete');
+			// noop
 		},
 	),
 };

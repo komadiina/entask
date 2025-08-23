@@ -9,9 +9,9 @@ app = FastAPI(
     middleware=[
         Middleware(
             CORSMiddleware,
-            allow_origins=["*"],
+            allow_origins=["*"],  # xd
             allow_methods=["*"],
-            allow_headers=["*"],
+            allow_headers=["*"],  # xd
         )
     ]
 )
@@ -53,6 +53,25 @@ async def user_details(request: Request):
     USER_DETAILS_SERVICE_PORT = os.getenv("AUTH_SERVICE_PORT", 5201)
 
     url = f"http://{USER_DETAILS_API_HOST}:{USER_DETAILS_SERVICE_PORT}/api/user-details/version"
+
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            resp = await client.get(url)
+            resp.raise_for_status()
+            return resp.json()
+    except httpx.RequestError as e:
+        raise HTTPException(status_code=503, detail=f"connect error: {e}")
+
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
+
+
+@app.get("/api/version/file")
+async def file(request: Request):
+    FILE_API_HOST = os.getenv("FILE_API_HOST", "file-service")
+    FILE_SERVICE_PORT = os.getenv("FILE_SERVICE_PORT", 5202)
+
+    url = f"http://{FILE_API_HOST}:{FILE_SERVICE_PORT}/api/file/version"
 
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:

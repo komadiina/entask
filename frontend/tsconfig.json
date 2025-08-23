@@ -4,6 +4,7 @@
 		"baseUrl": "./",
 		"paths": {
 			"@entask-pages/*": ["./src/app/pages/*"],
+			"@entask-components/*": ["./src/app/components/*"],
 			"@entask-models/*": ["./src/app/models/*"],
 			"@entask-services/*": ["./src/app/services/*"],
 			"@entask-utils/*": ["./src/app/utilities/*"],

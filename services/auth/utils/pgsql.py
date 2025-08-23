@@ -14,9 +14,10 @@ host = os.getenv("AUTH_DB_HOST")
 port = os.getenv("AUTH_DB_PORT")
 database = os.getenv("AUTH_DB", "auth")
 conninfo = "postgresql://{}:{}@{}:{}/{}".format(user, password, host, port, database)
-print(f"Initialized connection string: {conninfo}")
+
 
 logger = getLogger(__name__)
+logger.info(f"Initialized connection string: {conninfo}")
 
 
 def get_connection() -> Connection[Any]:
@@ -24,7 +25,7 @@ def get_connection() -> Connection[Any]:
 
 
 def exec_query(
-    sql: SQL | Composed, params: tuple | str | None, produces_results: bool = False
+    sql: SQL | Composed, params: tuple | None, produces_results: bool = False
 ) -> list[DictRow] | None:
     """Executes a parametrized (composed) query.
 
@@ -43,8 +44,6 @@ def exec_query(
     with psycopg.connect(conninfo=conninfo) as conn:
         with conn.cursor(row_factory=dict_row) as cursor:
             try:
-                print(sql.as_string(cursor))
-
                 cursor.execute(
                     SQL("SET search_path TO {};").format(Identifier(database))
                 )

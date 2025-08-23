@@ -120,6 +120,11 @@ async def register_user(details: RegisterRequestModel):
 async def login_user(details: LoginRequestModel):
     try:
         res = functions.auth.login_user(details)
+        if res is None:
+            return Response(
+                status_code=400, content={"message": "User does not exist."}
+            )
+
         return res
     except HTTPException as e:
         return Response(
@@ -140,11 +145,13 @@ async def get_user_details(request: Request):
 
     if user_details is None:
         return Response(
-            {"message": "User not found with the supplied credentials."},
+            content=json.dumps(
+                {"message": "User not found with the supplied credentials."}
+            ),
             status_code=404,
         )
 
-    return Response(content=user_details.model_dump_json())
+    return user_details
 
 
 @auth_router.post("/refresh-tokens")

@@ -113,6 +113,8 @@ def generate_credentials(username: str, email: str) -> models.auth.Credentials:
         id_token=it,
         access_token_expiry=int(at_expiry),
         refresh_token_expiry=int(rt_expiry),
+        provider="entask",
+        token_type="bearer",
     )
 
 
@@ -137,4 +139,4 @@ def get_email(request: fastapi.Request, credentials: models.auth.Credentials) ->
             credentials.id_token,
             os.environ.get("JWT_OIDC_KEY") or "",
             algorithms=[os.environ.get("JWT_ALGORITHM") or ""],
-        )["claims"]["email"]
+        )["email"]

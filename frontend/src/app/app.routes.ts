@@ -17,11 +17,20 @@ export const routes: Routes = [
 		title: 'Entask | Login',
 	},
 	{
+		path: 'logout',
+		pathMatch: 'full',
+		title: '',
+		loadComponent: () =>
+			import('@entask-middleware/callbacks/logout-callback.component').then(
+				(c) => c.LogoutCallbackComponent,
+			),
+	},
+	{
 		path: 'oauth2/callback',
 		loadComponent: () =>
-			import(
-				'@entask-root/middleware/callbacks/oauth2-callback.component'
-			).then((c) => c.OAuth2CallbackComponent),
+			import('@entask-middleware/callbacks/oauth2-callback.component').then(
+				(c) => c.OAuth2CallbackComponent,
+			),
 	},
 	{
 		path: 'register',

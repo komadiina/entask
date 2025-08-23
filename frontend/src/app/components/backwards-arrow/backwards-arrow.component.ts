@@ -7,6 +7,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
 @Component({
 	selector: 'app-backwards-arrow',
 	imports: [NgIf],
+	standalone: true,
 	templateUrl: './backwards-arrow.component.html',
 	styleUrl: './backwards-arrow.component.css',
 	changeDetection: ChangeDetectionStrategy.OnPush,

@@ -100,25 +100,13 @@ def register_user(user: RegisterRequestModel) -> Dict[str, Any]:
             produces_results=False,
         )
 
-        # ---------------------
-        # Does not output any data
-        q = sql.SQL("select * from {table} where {p1} LIKE %s OR {p2} LIKE %s;").format(
-            table=sql.Identifier("users"),
-            p1=sql.Identifier("username"),
-            p2=sql.Identifier("email"),
-        )
-
-        result = exec_query(q, (user.username, user.email), produces_results=True)
-
-        print("fin!")
-
     except:
         raise HTTPException(status_code=400, detail="Unable to register user.")
 
     return {"message": "User registered successfully"}
 
 
-def login_user(user: LoginRequestModel) -> Credentials:
+def login_user(user: LoginRequestModel) -> Credentials | None:
     # check if user already exists (username && email criteria)
     q = sql.SQL("SELECT * FROM {table} WHERE {v1} LIKE %s OR {v2} LIKE %s;").format(
         table=sql.Identifier("users"),
@@ -126,14 +114,17 @@ def login_user(user: LoginRequestModel) -> Credentials:
         v2=sql.Identifier("email"),
     )
 
-    result = exec_query(q, (user.username_email, user.username_email))
+    result = exec_query(
+        q, (user.username_email, user.username_email), produces_results=True
+    )
 
     if result is not None and len(result):
         for row in result:
             if check_password(user.password, row["password"]):
                 return generate_credentials(row["username"], row["email"])
 
-    raise HTTPException(status_code=400, detail="User does not exist")
+    # raise HTTPException(status_code=400, detail="User does not exist")
+    return None
 
 
 def get_user_details(email: str) -> User | None:
@@ -142,11 +133,18 @@ def get_user_details(email: str) -> User | None:
             table=sql.Identifier("users"),
             v1=sql.Identifier("email"),
         ),
-        params=(email),
+        params=(email,),  # python xdddd
+        produces_results=True,
     )
 
     if result is not None and len(result):
         for row in result:
-            return User(**row)
+            return User(
+                username=row["username"],
+                email=row["email"],
+                given_name=row["given_name"],
+                family_name=row["family_name"],
+                password="",
+            )
 
     return None

@@ -11,10 +11,14 @@ services:
     ports:
       - "${MINIO_PORT}:${MINIO_PORT}"
       - "${MINIO_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}"
+    expose:
+      - ${MINIO_PORT}`
     volumes:
       - ./core/minio/data:/data
     networks:
       - entask
+    labels:
+      - "traefik.enable=false"
 
   postgres:
     container_name: postgres
@@ -257,6 +261,9 @@ services:
       S3_ACCESS_KEY: ${MINIO_ROOT_USER}
       S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       S3_BUCKET_UPLOADS: ${S3_BUCKET_UPLOADS}
+      S3_BUCKET_CONVERSIONS: ${S3_BUCKET_CONVERSIONS}
+      AUTH_SERVICE_HOST: ${AUTH_SERVICE_HOST}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
     develop:
       watch:
         - action: sync+restart
@@ -270,7 +277,11 @@ services:
       - entask
     volumes:
       - ./services/file:/services/file
-    
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.file-service.loadbalancer.server.port=${FILE_SERVICE_PORT}"
+      - "traefik.http.routers.file.rule=PathRegexp(`/api/file(.*?)`)"
+      - "traefik.http.routers.file.service=file-service"
   
   frontend:
     container_name: frontend

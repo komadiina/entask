@@ -46,8 +46,8 @@ export class AuthService {
 			.subscribe(loginObservers.loginSubmit.context(this._hostComponent!));
 	}
 
-	public async logout(): Promise<void> {
-		this.httpClient.post(ApiUtil.buildUrl('/auth/logout'), {}).subscribe();
+	public logout(): void {
+		this.redirectService.redirect({ path: '/login' }, false);
 		this.localStorageService.clear();
 	}
 

@@ -2,6 +2,7 @@ import { AsyncPipe, DatePipe, NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { Observable, from, map } from 'rxjs';
 import { ConversionHistoryComponent } from '@entask-root/components/conversion-history/conversion-history.component';
+import { HeaderComponent } from '@entask-root/components/header/header.component';
 import { ZardLoaderComponent } from '@entask-root/components/loader/loader.component';
 
 @Component({
@@ -12,6 +13,7 @@ import { ZardLoaderComponent } from '@entask-root/components/loader/loader.compo
 		DatePipe,
 		ZardLoaderComponent,
 		ConversionHistoryComponent,
+		HeaderComponent,
 	],
 	templateUrl: './profile.component.html',
 	styleUrl: './profile.component.css',

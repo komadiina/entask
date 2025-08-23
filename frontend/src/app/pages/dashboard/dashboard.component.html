@@ -32,7 +32,7 @@
 		<input
 			type="file"
 			accept=".jpg,.jpeg"
-			(change)="setFile(recognizerForm, $event, this.toMB(10))"
+			(change)="setFile(textRecognizerForm, $event, this.fromMB(10))"
 			class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 file:text-zinc-400 file:text-md text-md clickable smooth-hover-highlight file:text-md file:font-semibold"
 		/>
 
@@ -88,18 +88,14 @@
 		<input
 			type="file"
 			accept=".mp4"
-			(change)="setFile(thumbnailerForm, $event, this.toMB(30))"
+			(change)="setFile(thumbnailerForm, $event, this.fromMB(30))"
 			class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md clickable smooth-hover-highlight file:text-zinc-400 file:text-md file:font-semibold"
 		/>
 
 		<div
-			*ngIf="thumbnailerForm?.file"
-			class="w-full"
+			*ngIf="thumbnailerForm?.content"
+			class="w-full flex flex-col gap-2 justify-center items-center"
 		>
-			<p class="text-zinc-400 text-sm truncate">
-				{{ thumbnailerForm.file?.name }}
-			</p>
-
 			<input
 				id="thumbnailerResultName"
 				placeholder="Result file name"
@@ -113,15 +109,15 @@
 				class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
 				(input)="onThumbnailerDescriptionChange($event)"
 			></textarea>
-		</div>
 
-		<div class="w-full flex justify-end mt-2">
-			<z-button
-				(click)="submitThumbnailer()"
-				class="zard-button clickable"
-			>
-				Upload
-			</z-button>
+			<div class="w-full flex justify-end mt-2">
+				<z-button
+					(click)="submitThumbnailer()"
+					class="zard-button clickable"
+				>
+					Upload
+				</z-button>
+			</div>
 		</div>
 	</ng-container>
 
@@ -133,7 +129,7 @@
 		<input
 			type="file"
 			accept=".wav"
-			(change)="setFile(waveformerForm, $event, this.toMB(20))"
+			(change)="setFile(waveformerForm, $event, this.fromMB(20))"
 			class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md clickable smooth-hover-highlight file:text-zinc-400 file:text-md file:font-semibold"
 		/>
 
@@ -212,18 +208,18 @@
 			<textarea
 				id="waveformerDescription"
 				placeholder="Description (optional)"
-				class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 mt-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
+				class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 my-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
 				(input)="onWaveformerDescriptionChange($event)"
 			></textarea>
-		</div>
 
-		<div class="w-full flex justify-end mt-2">
-			<z-button
-				(click)="submitWaveformer()"
-				class="zard-button clickable"
-			>
-				Upload
-			</z-button>
+			<div class="w-full flex justify-end mt-2">
+				<z-button
+					(click)="submitWaveformer()"
+					class="zard-button clickable"
+				>
+					Upload
+				</z-button>
+			</div>
 		</div>
 	</ng-container>
 </div>
