@@ -1,22 +1,25 @@
-from fastapi import APIRouter, HTTPException, Request
 from models.conversion import ConversionRequest
-from nats.aio.client import Client as NATSClient
+from faststream.nats import JStream, NatsBroker
+from faststream.nats.fastapi import NatsRouter
 
-convert_router = APIRouter(prefix="/api/conversion")
+import os
+
+NATS_USER = os.getenv("NATS_USER")
+NATS_PASSWORD = os.getenv("NATS_PASSWORD")
+NATS_HOST = os.getenv("NATS_HOST")
+NATS_CLIENT_PORT = int(os.getenv("NATS_CLIENT_PORT", 4222))
+
+convert_router = NatsRouter(
+    "nats://{}:{}@{}:{}".format(NATS_USER, NATS_PASSWORD, NATS_HOST, NATS_CLIENT_PORT),
+    prefix="/api/conversion",
+)
+broker = NatsBroker("nats://nats:nats@nats-1:4222")
 
 
 @convert_router.post("/submit")
-async def submit_conversion(request: Request, conversion: ConversionRequest):
-    if not request.app.state.nats_client.is_connected:
-        raise HTTPException(detail="NATS connection is not open", status_code=503)
+async def submit_conversion(conversion: ConversionRequest):
+    await broker.connect()
+    await broker.start()
 
-    # 1. fetch nats client from app state
-    nats_client: NATSClient = request.app.state.nats_client
-
-    # 2. init jetstream
-    jetstream = nats_client.jetstream()
-
-    # 3. persist messages on appropriate conversion subject
-    subject = "convert.{}".format(conversion.type)
-    ack = await jetstream.publish(subject, conversion.object_key.encode("utf-8"))
-    return {"ack": ack}
+    await broker.publisher(subject="convert.thumbnailer").publish(conversion.object_key)
+    return {"message": "Conversion request published."}

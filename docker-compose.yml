@@ -381,7 +381,7 @@ services:
       dockerfile: Dockerfile
     restart: unless-stopped
     environment:
-      CONVERSION_API_VERSION:  ${CONVERSION_API_VERSION}
+      CONVRESION_SERVICE_VERSION:  ${CONVERSION_SERVICE_VERSION}
       CONVERSION_SERVICE_HOST: ${CONVERSION_SERVICE_HOST}
       CONVERSION_SERVICE_PORT: ${CONVERSION_SERVICE_PORT}
       NATS_USER: ${NATS_USER}
@@ -410,6 +410,34 @@ services:
         - action: sync+restart
           path: ./services/conversion
           target: /services/conversion
+          
+  thumbnailer-converter:
+    container_name: converter-thumbnailer
+    build:
+      context: ./converters/thumbnailer
+      dockerfile: Dockerfile
+    environment:
+      THUMBNAILER_CONVERTER_PORT: ${THUMBNAILER_CONVERTER_PORT}
+      NATS_USER: ${NATS_USER}
+      NATS_PASSWORD: ${NATS_PASSWORD}
+      NATS_HOST: ${NATS_HOST}
+      NATS_CLIENT_PORT: ${NATS_CLIENT_PORT}
+      THUMBNAILER_CONVERTER_VERSION: ${THUMBNAILER_CONVERTER_VERSION}
+    restart: unless-stopped
+    volumes:
+      - ./converters/thumbnailer:/converters/thumbnailer
+    networks:
+      - entask
+    depends_on:
+      - nats-1
+      - nats-2
+      - nats-3
+      - conversion-service
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./converters/thumbnailer
+          target: /converters/thumbnailer
       
   
   frontend:

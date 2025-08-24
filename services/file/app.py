@@ -13,7 +13,10 @@ app = FastAPI(
             allow_methods=["*"],
             allow_headers=["*"],
         )
-    ]
+    ],
+    docs_url="/api/file/docs",
+    openapi_url="/api/file/openapi.json",
+    redoc_url="/api/file/redoc",
 )
 app.include_router(file_router)
 

@@ -1,6 +1,6 @@
+import logging
 import os
 from datetime import datetime
-from logging import getLogger
 from typing import Any, Dict
 
 import bcrypt
@@ -14,7 +14,8 @@ from utils.auth import check_password, generate_credentials
 from utils.pgsql import exec_query
 
 BCRYPT_EFF = 16
-logger = getLogger(__name__)
+logging.basicConfig(filename="app.log", level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def refresh_credentials(tokens: Dict[str, str]) -> Credentials:

@@ -3,11 +3,11 @@
   - ~~API services register at their respective LoadBalancer Redis service registry~~
   - ~~finish up AuthService as a whole, test, and then develop other services~~
     - ~~(user-details service, history service, s3-upload service (MinIO - s3-compatible object-store))~~
-- Implement NATS (JetStream) message broker 
-  - sends notifications on:
-    - produce
-    - consume
-    - DaprWorkflowTaskEvent (update, finish)
+- ~~Implement NATS (JetStream) message broker ~~
+  - ~~sends notifications on:~~
+    - ~~produce~~
+    - ~~consume~~
+    - ~~DaprWorkflowTaskEvent (update, finish)~~
 - Dapr Workflow:
   - pubsub, statestore
   - atomicize workflows into durable atomic tasks - abort/pause/continue

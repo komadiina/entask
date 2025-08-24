@@ -1,6 +1,6 @@
 import json
+import logging
 import os
-from logging import getLogger
 
 from fastapi import Depends, HTTPException, Request
 from fastapi.security import APIKeyHeader
@@ -13,7 +13,8 @@ from redis.asyncio import Redis
 JWT_OIDC_KEY = os.getenv("JWT_OIDC_KEY", "")
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "")
 
-logger = getLogger(__name__)
+logging.basicConfig(filename="auth.log", level=logging.INFO)
+logger = logging.getLogger(__name__)
 auth_token = APIKeyHeader(name="x-id-token", auto_error=False)
 
 r = Redis(

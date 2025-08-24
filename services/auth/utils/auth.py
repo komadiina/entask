@@ -1,6 +1,6 @@
+import datetime
 import logging
 import os
-from datetime import datetime
 
 import bcrypt
 import fastapi
@@ -59,15 +59,10 @@ def get_credentials(request: fastapi.Request) -> models.auth.Credentials:
 
 
 def generate_credentials(username: str, email: str) -> models.auth.Credentials:
-    now = datetime.now()
-    at_expiry = datetime(
-        now.year, now.month, now.day, now.hour + 4, now.minute, now.second
-    ).timestamp()
+    now = datetime.datetime.now()
 
-    rt_expiry = datetime(
-        now.year, now.month, now.day + 7, now.hour, now.minute, now.second
-    ).timestamp()
-
+    at_expiry = int((now + datetime.timedelta(hours=4)).timestamp())
+    rt_expiry = int((now + datetime.timedelta(days=7)).timestamp())
     it_expiry = at_expiry
 
     at = {

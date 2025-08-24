@@ -4,3 +4,4 @@ typing
 requests
 websockets
 nats-py
+faststream[nats]

@@ -13,7 +13,10 @@ app = FastAPI(
             allow_methods=["*"],
             allow_headers=["*"],  # xd
         )
-    ]
+    ],
+    docs_url="/api/version/docs",
+    openapi_url="/api/version/openapi.json",
+    redoc_url="/api/version/redoc",
 )
 
 

@@ -79,13 +79,7 @@ export class DashboardComponent {
 
 	// --- text-recognizer --- //
 	public submitRecognizer(): void {
-		this.textRecognizerForm.formData = new FormData();
-		this.textRecognizerForm.formData.append(
-			'file',
-			this.textRecognizerForm.content!,
-		);
 		this.forwardUpload(this.textRecognizerForm);
-		throw new Error('submitRecognizer not implemented.');
 	}
 
 	public onResultNameChange(event: Event) {
@@ -102,7 +96,7 @@ export class DashboardComponent {
 
 	// --- waveformer --- //
 	public submitWaveformer() {
-		throw new Error('submitWaveformer not implemented.');
+		this.forwardUpload(this.waveformerForm);
 	}
 
 	public onWaveformerDescriptionChange($event: Event) {
@@ -115,9 +109,7 @@ export class DashboardComponent {
 
 	// --- thumbnailer --- //
 	public submitThumbnailer() {
-		// todo: add checks
 		this.forwardUpload(this.thumbnailerForm);
-		throw new Error('submitThumbnailer not implemented.');
 	}
 
 	public onThumbnailerDescriptionChange($event: Event) {

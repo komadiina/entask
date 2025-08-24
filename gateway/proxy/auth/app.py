@@ -10,6 +10,7 @@ from jose import jwt
 from jose.exceptions import JWTError
 
 app = FastAPI()
+logging.basicConfig(filename="auth.log", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 SECRET_KEY = os.getenv("JWT_SECRET_KEY", "")

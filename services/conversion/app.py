@@ -1,12 +1,9 @@
-import asyncio
 import logging
 import os
-from contextlib import asynccontextmanager
-from typing import cast
 
-import nats
 from fastapi import FastAPI
-from nats.aio.client import Client as NATSClient
+from fastapi.middleware import Middleware
+from fastapi.middleware.cors import CORSMiddleware
 from routers.convert import convert_router
 
 NATS_USER = os.getenv("NATS_USER")
@@ -16,34 +13,23 @@ NATS_CLIENT_PORT = int(os.getenv("NATS_CLIENT_PORT", 4222))
 
 HOSTS = ["nats-1", "nats-2", "nats-3"]
 
+logging.basicConfig(filename="conversion-service.log", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    nc = await nats.connect(
-        servers=[
-            "nats://{}:{}@{}:{}".format(
-                NATS_USER, NATS_PASSWORD, host, NATS_CLIENT_PORT
-            )
-            for host in HOSTS
-        ],
-        verbose=True,
-    )
-    await nc.jetstream().add_stream(
-        name="convert", subjects=["convert.*"], storage="file"
-    )
-    app.state.nats_client = nc
-
-    try:
-        yield
-    finally:
-        # graceful shutdown
-        await nc.drain()
-        await nc.close()
-
-
-app = FastAPI(docs_url="/api/conversion/docs", lifespan=lifespan)
+app = FastAPI(
+    docs_url="/api/conversion/docs",
+    openapi_url="/api/conversion/openapi.json",
+    redoc_url="/api/conversion/redoc",
+    middleware=[
+        Middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    ],
+)
 app.include_router(convert_router)
 
 

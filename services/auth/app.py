@@ -1,3 +1,4 @@
+import datetime
 import logging
 import os
 from typing import List
@@ -7,7 +8,9 @@ from fastapi.middleware import Middleware
 from fastapi.middleware.cors import CORSMiddleware
 from routers.auth import auth_router
 
-logger = logging.getLogger()
+logging.basicConfig(filename=f"logs/{datetime.datetime.now()}.log", level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 app = FastAPI(
     middleware=[
         Middleware(
@@ -16,7 +19,10 @@ app = FastAPI(
             allow_methods=["*"],
             allow_headers=["*"],
         )
-    ]
+    ],
+    docs_url="/api/auth/docs",
+    openapi_url="/api/auth/openapi.json",
+    redoc_url="/api/auth/redoc",
 )
 
 

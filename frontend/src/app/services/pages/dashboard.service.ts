@@ -1,7 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import {
-	TBaseConversionForm,
 	TFileConversionForm,
 } from '@entask-types/dashboard/forms.type';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
@@ -63,6 +62,8 @@ export class DashboardService {
 			.breadcrumbs('submit')
 			.build();
 
-		return await lastValueFrom(this.http.post(endpoint, data));
+		return await lastValueFrom(
+			this.http.post(endpoint, { ...data, type: data.conversionType }),
+		);
 	}
 }

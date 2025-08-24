@@ -5,4 +5,5 @@ fastapi[standard]
 pydantic
 typing
 requests
-python-dotenv==1.1.1
+nats-py
+faststream[nats]
