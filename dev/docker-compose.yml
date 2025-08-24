@@ -151,7 +151,6 @@ services:
     environment:
       VERSION_SERVICE_PORT: ${VERSION_SERVICE_PORT}
       AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
-      USER_SERVICE_PORT: ${USER_SERVICE_PORT}
     networks:
       - entask
     volumes:

@@ -203,26 +203,38 @@ export class DashboardComponent {
 			conversionType: formBody.conversionType,
 		};
 
-		await this.dashboardService
+		let resp = await this.dashboardService
 			.getSignedUrl(presignRequest, presignRequest.file)
-			.then(async (response) => {
+			.then((response) => {
 				this.messageService.add({
 					severity: 'success',
 					summary: 'Success',
 					detail: 'Upload URL generated successfully.',
 				});
-
-				this.dashboardService
-					.uploadFile(response, formBody)
-					.then((response) => {
-						this.messageService.add({
-							severity: 'info',
-							summary: 'Uploading',
-							detail: 'Uploading file...',
-						});
-
-						console.log(response);
-					});
+				return response;
 			});
+
+		resp = await this.dashboardService
+			.uploadFile(resp, formBody)
+			.then(async (response) => {
+				this.messageService.add({
+					severity: 'info',
+					summary: 'Uploading',
+					detail: 'Uploading file...',
+				});
+
+				await this.dashboardService.submitConversionRequest({
+					...formBody,
+					objectKey: resp.key,
+				});
+
+				return response;
+			});
+
+		this.messageService.add({
+			severity: 'success',
+			summary: 'Success',
+			detail: 'File uploaded successfully.',
+		});
 	}
 }

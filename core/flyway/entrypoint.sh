@@ -2,7 +2,6 @@
 set -e
 declare -A DBS=(
   [auth]=$AUTH_DB
-  [gateway]=$GATEWAY_DB
   [conversion]=$CONVERSION_DB
 )
 

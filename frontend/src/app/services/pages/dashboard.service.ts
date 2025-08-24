@@ -1,7 +1,10 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { TFileConversionForm } from '@entask-types/dashboard/forms.type';
-import { firstValueFrom } from 'rxjs';
+import {
+	TBaseConversionForm,
+	TFileConversionForm,
+} from '@entask-types/dashboard/forms.type';
+import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { PresignRequest } from '@entask-models/file/presign-request.model';
 import { PresignResponse } from '@entask-models/file/presign-response.model';
 import { ApiUtil } from '@entask-utils/api/api.util';
@@ -42,7 +45,7 @@ export class DashboardService {
 	): Promise<any> {
 		const endpoint = presignDetails.url;
 
-		// amends auth headers -> breaks minio upload flow
+		// amends auth headers via httpinterceptor -> breaks presign upload flow
 		// return await firstValueFrom(this.http.put(endpoint, data.content!));
 
 		// avoids httpInterceptors -> minio works, no auth headers needed for presigned url
@@ -50,5 +53,16 @@ export class DashboardService {
 			method: 'PUT',
 			body: data.content!,
 		});
+	}
+
+	public async submitConversionRequest(
+		data: any, // TODO: implement type -> {...body, objectKey} cba atm
+	): Promise<any> {
+		const endpoint = ApiUtil.builder()
+			.service('conversion')
+			.breadcrumbs('submit')
+			.build();
+
+		return await lastValueFrom(this.http.post(endpoint, data));
 	}
 }

@@ -194,3 +194,4 @@ client_secret.json
 **/postgres/data/*
 !/core/flyway/*
 /core/minio/*
+/core/nats/data

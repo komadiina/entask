@@ -19,6 +19,72 @@ services:
       - entask
     labels:
       - "traefik.enable=false"
+  
+  # nats quorum
+  nats-1:
+    container_name: nats-quorum-1
+    image: nats:2.11-alpine
+    environment:
+      NATS_USER: ${NATS_USER}
+      NATS_PASSWORD: ${NATS_PASSWORD}
+      NATS_TIMEOUT: ${NATS_TIMEOUT}
+      NATS_HOST: ${NATS_HOST}
+      NATS_CLUSTER_PORT: ${NATS_CLUSTER_PORT}
+      NATS_CLUSTER_NAME: ${NATS_CLUSTER_NAME}
+    volumes:
+      - ./core/nats/server.conf:/etc/nats/nats.conf
+      - ./core/nats/data:/data
+    command: ["-c", "/etc/nats/nats.conf", "--server_name", "nats-1"]
+    ports:
+      - "${NATS_CLIENT_PORT}:${NATS_CLIENT_PORT}"
+      - "${NATS_CLUSTER_PORT}:${NATS_CLUSTER_PORT}"
+      - "${NATS_MONITOR_PORT}:${NATS_MONITOR_PORT}"
+    expose:
+      - ${NATS_CLIENT_PORT}
+      - ${NATS_CLUSTER_PORT}
+      - ${NATS_MONITOR_PORT}
+    networks:
+      - entask
+    labels:
+      - "traefik.enable=false"
+      
+  nats-2:
+    container_name: nats-quorum-2
+    image: nats:2.11-alpine
+    environment:
+      NATS_USER: ${NATS_USER}
+      NATS_PASSWORD: ${NATS_PASSWORD}
+      NATS_TIMEOUT: ${NATS_TIMEOUT}
+      NATS_HOST: ${NATS_HOST}
+      NATS_CLUSTER_PORT: ${NATS_CLUSTER_PORT}
+      NATS_CLUSTER_NAME: ${NATS_CLUSTER_NAME}
+    volumes:
+      - ./core/nats/server.conf:/etc/nats/nats.conf
+      - ./core/nats/data:/data
+    command: ["-c", "/etc/nats/nats.conf", "--server_name", "nats-2"]
+    networks:
+      - entask
+    labels:
+      - "traefik.enable=false"
+
+  nats-3:
+    container_name: nats-quorum-3
+    image: nats:2.11-alpine
+    environment:
+      NATS_USER: ${NATS_USER}
+      NATS_PASSWORD: ${NATS_PASSWORD}
+      NATS_TIMEOUT: ${NATS_TIMEOUT}
+      NATS_HOST: ${NATS_HOST}
+      NATS_CLUSTER_PORT: ${NATS_CLUSTER_PORT}
+      NATS_CLUSTER_NAME: ${NATS_CLUSTER_NAME}
+    volumes:
+      - ./core/nats/server.conf:/etc/nats/nats.conf
+      - ./core/nats/data:/data
+    command: ["-c", "/etc/nats/nats.conf", "--server_name", "nats-3"]
+    networks:
+      - entask
+    labels:
+      - "traefik.enable=false"
 
   postgres:
     container_name: postgres
@@ -172,7 +238,6 @@ services:
     environment:
       VERSION_SERVICE_PORT: ${VERSION_SERVICE_PORT}
       AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
-      USER_SERVICE_PORT: ${USER_SERVICE_PORT}
     networks:
       - entask
     volumes:
@@ -282,6 +347,39 @@ services:
       - "traefik.http.services.file-service.loadbalancer.server.port=${FILE_SERVICE_PORT}"
       - "traefik.http.routers.file.rule=PathRegexp(`/api/file(.*?)`)"
       - "traefik.http.routers.file.service=file-service"
+      
+  conversion-service:
+    container_name: service-conversion
+    build:
+      context: ./services/conversion
+      dockerfile: Dockerfile
+    environment:
+      CONVERSION_API_VERSION:  ${CONVERSION_API_VERSION}
+      CONVERSION_SERVICE_HOST: ${CONVERSION_SERVICE_HOST}
+      CONVERSION_SERVICE_PORT: ${CONVERSION_SERVICE_PORT}
+      NATS_USER: ${NATS_USER}
+      NATS_PASSWORD: ${NATS_PASSWORD}
+      NATS_HOST: ${NATS_HOST}
+      NATS_CLIENT_PORT: ${NATS_CLIENT_PORT}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.conversion-service.loadbalancer.server.port=${CONVERSION_SERVICE_PORT}"
+      - "traefik.http.routers.conversion.rule=PathRegexp(`/api/conversion(.*?)`)"
+      - "traefik.http.routers.conversion.service=conversion-service"
+    ports:
+      - "${CONVERSION_SERVICE_PORT}:${CONVERSION_SERVICE_PORT}"
+    expose:
+      - ${CONVERSION_SERVICE_PORT}
+    networks:
+      - entask
+    volumes:
+      - ./services/conversion:/services/conversion
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./services/conversion
+          target: /services/conversion
+      
   
   frontend:
     container_name: frontend
