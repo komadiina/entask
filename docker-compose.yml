@@ -22,18 +22,18 @@ services:
   
   # nats quorum
   nats-1:
-    container_name: nats-quorum-1
     image: nats:2.11-alpine
     environment:
       NATS_USER: ${NATS_USER}
       NATS_PASSWORD: ${NATS_PASSWORD}
       NATS_TIMEOUT: ${NATS_TIMEOUT}
       NATS_HOST: ${NATS_HOST}
+      NATS_CLIENT_PORT: ${NATS_CLIENT_PORT}
       NATS_CLUSTER_PORT: ${NATS_CLUSTER_PORT}
       NATS_CLUSTER_NAME: ${NATS_CLUSTER_NAME}
     volumes:
       - ./core/nats/server.conf:/etc/nats/nats.conf
-      - ./core/nats/data:/data
+      - ./core/nats/data/nats-1:/data
     command: ["-c", "/etc/nats/nats.conf", "--server_name", "nats-1"]
     ports:
       - "${NATS_CLIENT_PORT}:${NATS_CLIENT_PORT}"
@@ -45,44 +45,70 @@ services:
       - ${NATS_MONITOR_PORT}
     networks:
       - entask
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${NATS_MONITOR_PORT}/healthz"]
+      interval: 90s
+      timeout: 30s
+      retries: 5
+      start_period: 5s
     labels:
       - "traefik.enable=false"
       
   nats-2:
-    container_name: nats-quorum-2
     image: nats:2.11-alpine
     environment:
       NATS_USER: ${NATS_USER}
       NATS_PASSWORD: ${NATS_PASSWORD}
       NATS_TIMEOUT: ${NATS_TIMEOUT}
       NATS_HOST: ${NATS_HOST}
+      NATS_CLIENT_PORT: ${NATS_CLIENT_PORT}
       NATS_CLUSTER_PORT: ${NATS_CLUSTER_PORT}
       NATS_CLUSTER_NAME: ${NATS_CLUSTER_NAME}
+    expose:
+      - ${NATS_CLIENT_PORT}
+      - ${NATS_CLUSTER_PORT}
+      - ${NATS_MONITOR_PORT}
     volumes:
       - ./core/nats/server.conf:/etc/nats/nats.conf
-      - ./core/nats/data:/data
+      - ./core/nats/data/nats-2:/data
     command: ["-c", "/etc/nats/nats.conf", "--server_name", "nats-2"]
     networks:
       - entask
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${NATS_MONITOR_PORT}/healthz"]
+      interval: 90s
+      timeout: 30s
+      retries: 5
+      start_period: 5s
     labels:
       - "traefik.enable=false"
 
   nats-3:
-    container_name: nats-quorum-3
     image: nats:2.11-alpine
     environment:
       NATS_USER: ${NATS_USER}
       NATS_PASSWORD: ${NATS_PASSWORD}
       NATS_TIMEOUT: ${NATS_TIMEOUT}
       NATS_HOST: ${NATS_HOST}
+      NATS_CLIENT_PORT: ${NATS_CLIENT_PORT}
       NATS_CLUSTER_PORT: ${NATS_CLUSTER_PORT}
       NATS_CLUSTER_NAME: ${NATS_CLUSTER_NAME}
+    expose:
+      - ${NATS_CLIENT_PORT}
+      - ${NATS_CLUSTER_PORT}
+      - ${NATS_MONITOR_PORT}
     volumes:
       - ./core/nats/server.conf:/etc/nats/nats.conf
-      - ./core/nats/data:/data
+      - ./core/nats/data/nats-3:/data
     command: ["-c", "/etc/nats/nats.conf", "--server_name", "nats-3"]
     networks:
       - entask
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:${NATS_MONITOR_PORT}/healthz"]
+      interval: 90s
+      timeout: 30s
+      retries: 5
+      start_period: 5s
     labels:
       - "traefik.enable=false"
 
@@ -353,6 +379,7 @@ services:
     build:
       context: ./services/conversion
       dockerfile: Dockerfile
+    restart: unless-stopped
     environment:
       CONVERSION_API_VERSION:  ${CONVERSION_API_VERSION}
       CONVERSION_SERVICE_HOST: ${CONVERSION_SERVICE_HOST}
@@ -374,6 +401,10 @@ services:
       - entask
     volumes:
       - ./services/conversion:/services/conversion
+    depends_on:
+      - nats-1
+      - nats-2
+      - nats-3
     develop:
       watch:
         - action: sync+restart
