@@ -11,7 +11,7 @@ a very rough-looking schema, will evolve as the project itself evolves. currentl
 deployment is supported via **docker swarm** (*todo hihi*) or **docker compose**.
 
 prerequisites:
-  - docker desktop
+  - docker
 
 installation:
   1. clone the repo (`git clone https://github.com/komadiina/entask.git`)
