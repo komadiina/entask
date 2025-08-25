@@ -411,6 +411,28 @@ services:
           path: ./services/conversion
           target: /services/conversion
           
+  notifier-service:
+    container_name: service-notifier
+    build:
+      context: ./services/notifier
+      dockerfile: Dockerfile
+    environment:
+      NOTIFIER_SERVICE_PORT: ${NOTIFIER_SERVICE_PORT}
+      NOTIFIER_SERVICE_VERSION: ${NOTIFIER_SERVICE_VERSION}
+    volumes:
+      - ./services/notifier:/services/notifier
+    networks:
+      - entask
+    ports:
+      - "${NOTIFIER_SERVICE_PORT}:${NOTIFIER_SERVICE_PORT}"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./services/notifier
+          target: /services/notifier
+    labels:
+      - "traefik.enable=false"
+          
   thumbnailer-converter:
     container_name: converter-thumbnailer
     build:
