@@ -51,6 +51,7 @@ take note that some require authenticated URLs (`user:pass@host:port`):
 | **conversion-service** | `conversion-service:5205`            |
 | **notifier-service**   | `notifier-service:5206`              |
 | **thumbnailer-converter** | `thumbnailer-converter:7401`      |
+| **ws-proxy**            | `ws-proxy:9202`                     |
 
 
 ## components

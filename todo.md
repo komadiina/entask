@@ -5,7 +5,7 @@
 - Implement ClientNotifier service
   - communicates with frontend webapp via websockets using (client_id), sending:
 ```py
-# /services/notifier/routers/notify.py
+# /services/notifier/routers/notify.py 
 # service receives: {data: any}, client_id from pathparam on http:// POST
 # service sends: {message: string, client_id: string, status: string | enum, data: any} on ws://../notify/client
 
@@ -39,5 +39,47 @@ export interface WSWorkflowInterruptIn { // POST /notify/client/{client_id} (fro
   status: string;
   clientId: string;
   data: any
+}
+```
+
+alternative (via using a client <--> websocket-facade (HTTP -> pub/sub) <--> (SSE) {conversion-service, workflow-engine}):
+```ts
+export enum WSMessageType {
+  WorkflowInterrupt = 'workflow-interrupt',
+  Event = 'event',
+  Ack = 'ack',
+  Error = 'error',
+  Other = 'other'
+}
+
+export enum WFInterruptType {
+  Abort = 'abort',
+  Pause = 'pause',
+  Resume = 'resume'
+}
+
+export enum AckStatus {
+  Ack = 'ack',
+  Nack = 'nack'
+}
+
+export interface WebSocketClientMessage {
+  type: WSMessageType;
+  data: {
+    // if type === WSMessageType.WorkflowInterrupt:
+    signal: WFInterruptType;
+    token: str; // conversion token, used to identify the workflow engine worker
+  } | undefined;
+}
+
+export interface WebSocketServerMessage {
+  data: {
+    // if clientMessage.type === 'workflow-interrupt'
+    status: AckStatus;
+    stateKey: string; // base64 encoded, if bytes
+    
+    // if status === 'nack';
+    error: Error | undefined;
+  } | any;
 }
 ```
