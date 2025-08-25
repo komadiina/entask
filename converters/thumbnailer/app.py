@@ -1,7 +1,8 @@
+import asyncio
+import os
+
 from faststream import FastStream
 from faststream.nats import NatsBroker
-import os
-import asyncio
 
 HOSTS = ["nats-1", "nats-2", "nats-3"]
 NATS_USER = os.getenv("NATS_USER")

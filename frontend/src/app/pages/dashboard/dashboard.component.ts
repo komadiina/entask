@@ -1,6 +1,11 @@
 import { NgForOf } from '@angular/common';
 import { NgIf } from '@angular/common';
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnDestroy,
+	OnInit,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { ZardButtonComponent } from '@entask-components/button/button.component';
 import { ZardDropdownModule } from '@entask-components/dropdown/dropdown.module';
@@ -12,10 +17,13 @@ import {
 	TermExtractorForm,
 	WaveformerForm,
 } from '@entask-types/dashboard/forms.type';
+import { WebSocketResponse } from '@entask-types/dashboard/websocket-response.type';
 import { MessageService } from 'primeng/api';
+import { Subscription } from 'rxjs';
 import { PresignRequest } from '@entask-models/file/presign-request.model';
 import { AuthService } from '@entask-services/auth.service';
 import { DashboardService } from '@entask-services/pages/dashboard.service';
+import { GeneralWebSocket } from '@entask-services/websocket.class';
 
 @Component({
 	selector: 'app-dashboard',
@@ -31,42 +39,54 @@ import { DashboardService } from '@entask-services/pages/dashboard.service';
 	changeDetection: ChangeDetectionStrategy.OnPush,
 	standalone: true,
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnDestroy {
+	websocket: GeneralWebSocket<any>;
+	wsSubscription: Subscription;
+	conversionStatus: string;
 	conversions: ConversionLabel[] = _conversions;
-
-	textRecognizerForm: TFileConversionForm = {
-		contentType: 'image/jpeg',
-		conversionType: 'text-recognizer',
-	};
-
-	thumbnailerForm: TFileConversionForm = {
-		contentType: 'video/mp4',
-		conversionType: 'thumbnailer',
-	};
-
-	waveformerForm: WaveformerForm = {
-		contentType: 'audio/wav',
-		filters: {
-			compress: false,
-			reverb: false,
-			gain: false,
-			downmix: false,
-		},
-		conversionType: 'waveformer',
-	};
-
-	termExtractorForm: TermExtractorForm = {
-		contentType: 'text/plain',
-	};
-
 	selectedConversion: ConversionLabel | null = null;
+
+	textRecognizerForm: TFileConversionForm;
+	thumbnailerForm: TFileConversionForm;
+	waveformerForm: WaveformerForm;
+	termExtractorForm: TermExtractorForm;
 
 	constructor(
 		private authService: AuthService,
 		public router: Router,
 		private messageService: MessageService,
 		private dashboardService: DashboardService,
-	) {}
+	) {
+		this.websocket = new GeneralWebSocket(null, true, this.messageService);
+		this.wsSubscription = this.websocket.getMessages().subscribe((msg) => {
+			console.log(msg);
+		});
+
+		this.conversionStatus = 'Pending...';
+
+		this.textRecognizerForm = {
+			contentType: 'image/jpeg',
+			conversionType: 'text-recognizer',
+		};
+
+		this.thumbnailerForm = {
+			contentType: 'video/mp4',
+			conversionType: 'thumbnailer',
+		};
+
+		this.waveformerForm = {
+			contentType: 'audio/wav',
+			filters: {
+				compress: false,
+				reverb: false,
+				gain: false,
+				downmix: false,
+			},
+			conversionType: 'waveformer',
+		};
+
+		this.termExtractorForm = { contentType: 'text/plain' };
+	}
 
 	public logout(): void {
 		this.authService.logout();
@@ -109,6 +129,7 @@ export class DashboardComponent {
 
 	// --- thumbnailer --- //
 	public submitThumbnailer() {
+		this.websocket.send({ text: 'hello' });
 		this.forwardUpload(this.thumbnailerForm);
 	}
 
@@ -228,5 +249,10 @@ export class DashboardComponent {
 			summary: 'Success',
 			detail: 'File uploaded successfully.',
 		});
+	}
+
+	ngOnDestroy(): void {
+		this.messageService.clear();
+		this.websocket.close();
 	}
 }

@@ -23,8 +23,6 @@ export function authInterceptor(
 	headers = headers.set('x-refresh-token', `${refreshToken}`);
 	headers = headers.set('x-auth-type', `${authProvider}`);
 
-	console.log(req.url, req.headers.getAll('Content-Length'));
-
 	req = req.clone({
 		headers: headers,
 	});

@@ -5,7 +5,7 @@ WORKDIR /frontend
 RUN npm i -g npm@10.8.3
 
 COPY package*.json .
-RUN npm ci
+RUN npm i
 
 COPY . .
 RUN npm i -s -g @angular/cli@19

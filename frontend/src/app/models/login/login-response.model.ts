@@ -8,6 +8,7 @@ export const loginResponse = z.object({
 	refreshTokenExpiry: z.string(),
 	provider: z.enum(['entask', 'google']),
 	tokenType: z.string(),
+	uuid: z.string(),
 });
 
 export type LoginResponse = z.infer<typeof loginResponse>;

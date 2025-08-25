@@ -1,8 +1,9 @@
-from fastapi import APIRouter, WebSocket, HTTPException
-from fastapi.websockets import WebSocketDisconnect
+import json
 from typing import Dict
 
+from fastapi import APIRouter, HTTPException, WebSocket
 from models.messages import WebSocketMessage
+from starlette.websockets import WebSocketDisconnect
 
 notify_router = APIRouter(prefix="/api/notifier")
 ws_clients: Dict[str, WebSocket] = dict()
@@ -23,12 +24,26 @@ async def notify(websocket: WebSocket, client_id: str):
 
     while True:
         try:
-            data = await websocket.receive_text()
-            await websocket.send_text(f"Message text was: {data}, from {client_id}")
+            data = await websocket.receive_json()
+            data = json.loads(data)
+
+            # ... doSomething()
+            await websocket.send_json(
+                {
+                    "client_id": client_id,
+                    "status": "ack",
+                    "message": "Conversion submitted succesfully.",
+                    "data": data,
+                }
+            )
         except (WebSocketDisconnect, RuntimeError) as e:
             ws_clients.pop(client_id)
+            try:
+                await websocket.close()
+            except:
+                pass
+
             print(f"WebSocket({client_id}) disconnected.")
-            break
 
 
 @notify_router.post("/notify/client/{client_id}")
@@ -39,11 +54,11 @@ async def external_notify(client_id: str, data: WebSocketMessage):
         raise HTTPException(status_code=404, detail="Client not found")
 
     try:
-        await websocket.send_text(f"Message text was: {data}, from {client_id}")
+        await websocket.send_json(data)
         return {
             "message": "Message sent.",
-            "detail": {"client_id": client_id, "data": data},
+            "client_id": client_id,
         }
     except (WebSocketDisconnect, RuntimeError) as e:
         print(f"WebSocket({client_id}) was either disconnected or not open.")
-        return HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=str(e))

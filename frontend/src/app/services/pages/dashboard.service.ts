@@ -1,8 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import {
-	TFileConversionForm,
-} from '@entask-types/dashboard/forms.type';
+import { TFileConversionForm } from '@entask-types/dashboard/forms.type';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { PresignRequest } from '@entask-models/file/presign-request.model';
 import { PresignResponse } from '@entask-models/file/presign-response.model';
@@ -20,7 +18,7 @@ export class DashboardService {
 	): Promise<PresignResponse> {
 		const endpoint = ApiUtil.builder()
 			.service('file')
-			.breadcrumbs('presign', 'upload')
+			.endpoint('/presign/upload')
 			.build();
 
 		return await firstValueFrom(
@@ -51,6 +49,7 @@ export class DashboardService {
 		return await fetch(endpoint, {
 			method: 'PUT',
 			body: data.content!,
+			window: null,
 		});
 	}
 
@@ -59,7 +58,7 @@ export class DashboardService {
 	): Promise<any> {
 		const endpoint = ApiUtil.builder()
 			.service('conversion')
-			.breadcrumbs('submit')
+			.endpoint('/submit')
 			.build();
 
 		return await lastValueFrom(

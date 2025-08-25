@@ -3,6 +3,7 @@ import {
 	KLocalStorage,
 	TLocalStorage,
 } from '@entask-types/local-storage/local-storage.type';
+import * as uuid from 'uuid';
 
 @Injectable({
 	providedIn: 'root',
@@ -54,5 +55,11 @@ export class LocalStorageService {
 
 	public clear(): void {
 		this.storage.clear();
+	}
+
+	public static initUuid(): void {
+		if (!LocalStorageService.get('uuid')) {
+			LocalStorageService.set('uuid', uuid.v4());
+		}
 	}
 }

@@ -7,9 +7,11 @@ import google_auth_oauthlib.flow
 import requests
 import utils
 import utils.auth as uauth
-from constants.auth_responses import (InvalidClientResponse,
-                                      InvalidRegistrationResponse,
-                                      UnauthorizedResponse)
+from constants.auth_responses import (
+    InvalidClientResponse,
+    InvalidRegistrationResponse,
+    UnauthorizedResponse,
+)
 from decorators.auth import authorized
 from fastapi import APIRouter, Request
 from fastapi.exceptions import HTTPException
@@ -122,7 +124,6 @@ async def login_user(details: LoginRequestModel):
             return Response(
                 status_code=400, content={"message": "User does not exist."}
             )
-
         return res
     except HTTPException as e:
         return Response(

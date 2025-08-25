@@ -38,8 +38,10 @@ export class AuthService {
 	}
 
 	public login(usernameEmail: string, password: string): Subscription {
+		const url = ApiUtil.builder().service('auth').endpoint('/login').build();
+
 		return this.httpClient
-			.post<LoginResponse>(ApiUtil.buildUrl('/auth/login'), {
+			.post<LoginResponse>(url, {
 				usernameEmail,
 				password,
 			})
@@ -52,7 +54,7 @@ export class AuthService {
 	}
 
 	public async signupGoogle(): Promise<void> {
-		const uri = ApiUtil.buildUrl('/auth/oauth2');
-		this.redirectService.absoluteRedirect(uri);
+		const url = ApiUtil.builder().service('auth').endpoint('/oauth2').build();
+		this.redirectService.absoluteRedirect(url);
 	}
 }
