@@ -1,6 +1,7 @@
 import datetime
 import logging
 import os
+import uuid
 
 import bcrypt
 import fastapi
@@ -65,12 +66,15 @@ def generate_credentials(username: str, email: str) -> models.auth.Credentials:
     rt_expiry = int((now + datetime.timedelta(days=7)).timestamp())
     it_expiry = at_expiry
 
+    uid = uuid.uuid4().hex
+
     at = {
         "claims": {
             "sub": username,
             "email": email,
             "exp": at_expiry,
             "type": "access",
+            "uuid": uid,
         },
         "headers": {"alg": os.environ.get("JWT_ALGORITHM")},
         "key": os.environ.get("JWT_SECRET_KEY"),
@@ -110,6 +114,7 @@ def generate_credentials(username: str, email: str) -> models.auth.Credentials:
         refresh_token_expiry=int(rt_expiry),
         provider="entask",
         token_type="bearer",
+        uuid=uid,
     )
 
 

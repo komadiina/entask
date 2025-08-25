@@ -1,7 +1,13 @@
 export const environment: {
 	production: boolean;
-	backendUrl: string;
+	backendProtocol: string;
+	backendPort: string;
+	backendHost: string;
+	backendRootPrefix: string;
 } = {
 	production: false,
-	backendUrl: 'http://localhost:80/api',
+	backendProtocol: 'http',
+	backendPort: '80',
+	backendHost: 'localhost',
+	backendRootPrefix: 'api',
 };

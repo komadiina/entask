@@ -23,13 +23,14 @@ installation:
 
 ### envfile
 
-| envvar              | description                                                                 |
-|-----------------------|-----------------------------------------------------------------------------|
-| `PGADMIN_EMAIL`       | use this email with `POSTGRES_PASSWORD` to log into pgAdmin console         |
-| `FRONTEND_HOST`       | hardcoded, used for client-side redirects (`0.0.0.0` does not work here)    |
-| `CLIENT_SECRET_FILE`  | your Google API Client secrets file                                         |
-| `GOOGLE_OAUTH_CLIENT_ID` | extracted from the secret file or via the Google Cloud console           |
-| `GOOGLE_KEYS_URL`     | public Google endpoint for fetching public keys (if `provider == 'google'`) |
+| envvar                    |  description                                                                |
+|---------------------------|-----------------------------------------------------------------------------|
+| `PGADMIN_EMAIL`           | use this email with `POSTGRES_PASSWORD` to log into pgAdmin console         |
+| `FRONTEND_HOST`           | hardcoded, used for client-side redirects (`0.0.0.0` does not work here)    |
+| `CLIENT_SECRET_FILE`      | your Google API Client secrets file                                         |
+| `GOOGLE_OAUTH_CLIENT_ID`  | extracted from the secret file or via the Google Cloud console              |
+| `GOOGLE_KEYS_URL`         | public Google endpoint for fetching public keys (if `provider == 'google'`) |
+| `...`                     | others are pretty self-explanatory                                          |
 
 ### default hosts/listens
 
@@ -43,11 +44,12 @@ take note that some require authenticated URLs (`user:pass@host:port`):
 | **pgBouncer**          | `pgbouncer:6432`                     |
 | **Redis**              | `redis:6379`                         |
 | **Traefik**            | `0.0.0.0:{80, 443, 8080}`            |
-| **Webapp client**      | `frontend:4200`                      |
+| **angular client**      | `frontend:4200`                      |
 | **auth-service**       | `auth-service:5201`                  |
 | **user-details-service** | `user-details-service:5202`        |
 | **file-service**       | `file-service:5204`                  |
 | **conversion-service** | `conversion-service:5205`            |
+| **notifier-service**   | `notifier-service:5206`              |
 | **thumbnailer-converter** | `thumbnailer-converter:7401`      |
 
 

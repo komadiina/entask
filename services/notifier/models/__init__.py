@@ -1,7 +1,7 @@
 import models
-from models import messages, camelizer
-from models.messages import WebSocketMessage
+from models import camelizer, messages
 from models.camelizer import BaseSchema
+from models.messages import WebSocketMessage
 
 __all__ = [
     "models",

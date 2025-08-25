@@ -5,6 +5,7 @@ export interface TLocalStorage {
 	apiVersion: string;
 	authProvider: string;
 	tokenType: string;
+	uuid: string;
 }
 
 export type KLocalStorage = keyof TLocalStorage;

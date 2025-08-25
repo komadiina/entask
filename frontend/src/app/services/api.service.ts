@@ -16,15 +16,17 @@ export class APIService {
 
 	public getApiVersion(): Observable<{ version: string }> {
 		return this.http.get<{ version: string }>(
-			ApiUtil.buildUrl('/auth/version'),
+			ApiUtil.builder().endpoint('/auth/version').build(),
 		);
 	}
 
 	public async initApi(): Promise<void> {
-		const response = await lastValueFrom(this.getApiVersion());
-		this.localStorageService.set(
-			'apiVersion',
-			response.version as TLocalStorage['apiVersion'],
-		);
+		if (!this.localStorageService.get('apiVersion')) {
+			const response = await lastValueFrom(this.getApiVersion());
+			this.localStorageService.set(
+				'apiVersion',
+				response.version as TLocalStorage['apiVersion'],
+			);
+		}
 	}
 }

@@ -11,6 +11,7 @@ export const loginObservers = {
 			LocalStorageService.set('idToken', value.idToken);
 			LocalStorageService.set('authProvider', value.provider);
 			LocalStorageService.set('tokenType', value.tokenType);
+			LocalStorageService.set('uuid', value.uuid);
 
 			if (ctx) {
 				ctx.getMessageService.add({

@@ -1,4 +1,4 @@
-from datetime import timedelta
+from typing import Optional
 
 from models.camelizer import BaseSchema
 
@@ -41,3 +41,4 @@ class Credentials(BaseSchema):
     access_token_expiry: int
     refresh_token_expiry: int
     provider: str = "entask"
+    uuid: Optional[str] = None

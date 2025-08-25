@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Router, RouterOutlet } from '@angular/router';
+import { RouterOutlet } from '@angular/router';
 import { Toast } from 'primeng/toast';
 import { APIService } from '@entask-services/api.service';
 
@@ -14,10 +14,7 @@ export class AppComponent {
 	isCollapsed = false;
 	history: History = window.history;
 
-	constructor(
-		private apiClient: APIService,
-		public router: Router,
-	) {
+	constructor(private apiClient: APIService) {
 		this.apiClient.initApi();
 	}
 }

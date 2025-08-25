@@ -1,8 +1,8 @@
-from models.conversion import ConversionRequest
+import os
+
 from faststream.nats import JStream, NatsBroker
 from faststream.nats.fastapi import NatsRouter
-
-import os
+from models.conversion import ConversionRequest
 
 NATS_USER = os.getenv("NATS_USER")
 NATS_PASSWORD = os.getenv("NATS_PASSWORD")

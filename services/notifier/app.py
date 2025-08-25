@@ -1,4 +1,5 @@
 import os
+
 from fastapi import FastAPI
 from routers.notify import notify_router
 

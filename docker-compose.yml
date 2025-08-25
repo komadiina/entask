@@ -425,13 +425,18 @@ services:
       - entask
     ports:
       - "${NOTIFIER_SERVICE_PORT}:${NOTIFIER_SERVICE_PORT}"
+    expose:
+      - ${NOTIFIER_SERVICE_PORT}
     develop:
       watch:
         - action: sync+restart
           path: ./services/notifier
           target: /services/notifier
     labels:
-      - "traefik.enable=false"
+      - "traefik.enable=true"
+      - "traefik.http.services.notifier-service.loadbalancer.server.port=${NOTIFIER_SERVICE_PORT}"
+      - "traefik.http.routers.notifier.rule=PathRegexp(`/api/notifier(.*?)`)"
+      - "traefik.http.routers.notifier.service=notifier-service"
           
   thumbnailer-converter:
     container_name: converter-thumbnailer
