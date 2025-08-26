@@ -26,7 +26,7 @@ class ApiEndpointBuilder {
 		this._protocol = environment.backendProtocol;
 		this._host = environment.backendHost;
 		this._port = environment.backendPort;
-		this._rootPrefix = environment.backendRootPrefix;
+		this._rootPrefix = '/' + environment.backendRootPrefix;
 
 		this._prefix = this._endpoint = '';
 	}
@@ -65,7 +65,7 @@ class ApiEndpointBuilder {
 	 * Removes the root prefix (e.g. `'/api'` from `'/api/auth/login'`)
 	 * @returns {ApiEndpointBuilder} The current builder instance
 	 */
-	public noPrefix(): ApiEndpointBuilder {
+	public noRootPrefix(): ApiEndpointBuilder {
 		this._rootPrefix = '';
 		return this;
 	}

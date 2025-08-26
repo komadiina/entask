@@ -40,6 +40,8 @@ export class AuthService {
 	public login(usernameEmail: string, password: string): Subscription {
 		const url = ApiUtil.builder().service('auth').endpoint('/login').build();
 
+		console.log(url);
+
 		return this.httpClient
 			.post<LoginResponse>(url, {
 				usernameEmail,

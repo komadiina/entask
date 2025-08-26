@@ -7,16 +7,13 @@ import { LocalStorageService } from './local-storage.service';
 export class GeneralWebSocket<TSent> {
 	private socket: WebSocketSubject<any>;
 
-	constructor(
-		url: string | null,
-		useEnvironment: boolean,
-	) {
+	constructor(url: string | null, useEnvironment: boolean) {
 		if (useEnvironment) {
 			const _url = ApiUtil.builder()
 				.protocol('ws')
 				.host(environment.backendHost)
 				.port(environment.backendPort)
-				.noPrefix()
+				.noRootPrefix()
 				.service('ws')
 				.endpoint(`/${LocalStorageService.get('uuid')}`)
 				.build();

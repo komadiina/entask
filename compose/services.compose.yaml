@@ -1,0 +1,210 @@
+services:
+  version-service:
+    container_name: service-version
+    build:
+      context: ../services/version-api
+      dockerfile: Dockerfile
+    environment:
+      VERSION_SERVICE_PORT: ${VERSION_SERVICE_PORT}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+    networks:
+      - entask
+    volumes:
+      - ../services/version-api:/services/version-api
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "http://localhost:${VERSION_SERVICE_PORT}/api/version",
+        ]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 5s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.version-service.loadbalancer.server.port=${VERSION_SERVICE_PORT}"
+      - "traefik.http.routers.version.rule=PathRegexp(`/api/version(.*?)`)"
+      - "traefik.http.routers.version.service=version-service"
+      
+  auth-service:
+    container_name: service-auth
+    build:
+      context: ../services/auth
+      dockerfile: Dockerfile
+    environment:
+      SERVICE_GROUP: ${AUTH_SERVICE_GROUP}
+      AUTH_API_VERSION: ${AUTH_API_VERSION}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+      AUTH_REDIS_HOST: ${REDIS_HOST}
+      AUTH_REDIS_PORT: ${REDIS_PORT}
+      FRONTEND_HOST: ${FRONTEND_HOST}
+      FRONTEND_PORT: ${FRONTEND_PORT}
+      CLIENT_SECRET_FILE: ${CLIENT_SECRET_FILE}
+      AUTH_DB_USER: ${AUTH_DB_USER}
+      AUTH_DB_PASSWORD: ${AUTH_DB_PASSWORD}
+      AUTH_DB: ${AUTH_DB}
+      AUTH_DB_HOST: ${AUTH_DB_HOST}
+      AUTH_DB_PORT: ${AUTH_DB_PORT}
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_REFRESH_KEY: ${JWT_REFRESH_KEY}
+      JWT_OIDC_KEY: ${JWT_OIDC_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM}
+      BCRYPT_EFF: ${BCRYPT_EFF}
+      TRAEFIK_USES_HTTP: ${TRAEFIK_USES_HTTP}
+      TRAEFIK_HTTP_PORT: ${TRAEFIK_HTTP_PORT}
+      TRAEFIK_HTTPS_PORT: ${TRAEFIK_HTTPS_PORT}
+    networks:
+      - entask
+    volumes:
+      - ../services/auth:/services/auth
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "curl",
+          "--fail",
+          "http://localhost:${AUTH_SERVICE_PORT}/api/auth/health",
+        ]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 5s
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.auth-service.loadbalancer.server.port=${AUTH_SERVICE_PORT}"
+      - "traefik.http.routers.auth.rule=PathRegexp(`/api/auth(.*?)`)"
+      - "traefik.http.routers.auth.service=auth-service"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ../services/auth
+          target: /services/auth
+          
+  file-service:
+    container_name: service-file
+    build: 
+      context: ../services/file
+      dockerfile: Dockerfile
+    environment:
+      FILE_SERVICE_PORT: ${FILE_SERVICE_PORT}
+      S3_HOST: ${S3_HOST}
+      S3_PORT: ${S3_PORT}
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      S3_BUCKET_UPLOADS: ${S3_BUCKET_UPLOADS}
+      S3_BUCKET_CONVERSIONS: ${S3_BUCKET_CONVERSIONS}
+      AUTH_SERVICE_HOST: ${AUTH_SERVICE_HOST}
+      AUTH_SERVICE_PORT: ${AUTH_SERVICE_PORT}
+    develop:
+      watch:
+        - action: sync+restart
+          path: ../services/file
+          target: /services/file
+    ports:
+      - "${FILE_SERVICE_PORT}:${FILE_SERVICE_PORT}"
+    expose:
+      - ${FILE_SERVICE_PORT}
+    networks:
+      - entask
+    volumes:
+      - ../services/file:/services/file
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.file-service.loadbalancer.server.port=${FILE_SERVICE_PORT}"
+      - "traefik.http.routers.file.rule=PathRegexp(`/api/file(.*?)`)"
+      - "traefik.http.routers.file.service=file-service"
+      
+  conversion-service:
+    container_name: service-conversion
+    build:
+      context: ../services/conversion
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      CONVRESION_SERVICE_VERSION:  ${CONVERSION_SERVICE_VERSION}
+      CONVERSION_SERVICE_HOST: ${CONVERSION_SERVICE_HOST}
+      CONVERSION_SERVICE_PORT: ${CONVERSION_SERVICE_PORT}
+      NATS_USER: ${NATS_USER}
+      NATS_PASSWORD: ${NATS_PASSWORD}
+      NATS_HOST: ${NATS_HOST}
+      NATS_CLIENT_PORT: ${NATS_CLIENT_PORT}
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.conversion-service.loadbalancer.server.port=${CONVERSION_SERVICE_PORT}"
+      - "traefik.http.routers.conversion.rule=PathRegexp(`/api/conversion(.*?)`)"
+      - "traefik.http.routers.conversion.service=conversion-service"
+    ports:
+      - "${CONVERSION_SERVICE_PORT}:${CONVERSION_SERVICE_PORT}"
+    expose:
+      - ${CONVERSION_SERVICE_PORT}
+    networks:
+      - entask
+    volumes:
+      - ../services/conversion:/services/conversion
+    depends_on:
+      - nats-1
+      - nats-2
+      - nats-3
+    develop:
+      watch:
+        - action: sync+restart
+          path: ../services/conversion
+          target: /services/conversion
+  
+  llm-service:
+    container_name: service-llm
+    build:
+      context: ../services/llm
+      dockerfile: Dockerfile
+    environment:
+      LLM_SERVICE_HOST: ${LLM_SERVICE_HOST}
+      LLM_SERVICE_PORT: ${LLM_SERVICE_PORT}
+      LLM_SERVICE_VERSION: ${LLM_SERVICE_VERSION}
+      LLM_SERVICE_MODEL: ${LLM_SERVICE_MODEL}
+      LLM_SERVICE_SYSTEM_PROMPT: ${LLM_SERVICE_SYSTEM_PROMPT}
+      DOCKER_MODEL_RUNNER_PROTOCOL: ${DOCKER_MODEL_RUNNER_PROTOCOL}
+      DOCKER_MODEL_RUNNER_LISTEN: ${DOCKER_MODEL_RUNNER_LISTEN}
+    networks:
+      - entask
+    ports: 
+      - "${LLM_SERVICE_PORT}:${LLM_SERVICE_PORT}"
+    volumes:
+      - "../services/llm:/services/llm"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.llm-service.loadbalancer.server.port=${LLM_SERVICE_PORT}"
+      - "traefik.http.routers.llm.rule=PathRegexp(`/api/llm(.*?)`)"
+      - "traefik.http.routers.llm.service=llm-service"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ../services/llm
+          target: /services/llm
+  
+  ws-proxy:
+    container_name: proxy-websocket
+    build:
+      context: ../gateway/proxy/ws
+      dockerfile: Dockerfile
+    environment:
+      WS_PROXY_HOST: ${WS_PROXY_HOST}
+      WS_PROXY_PORT: ${WS_PROXY_PORT}
+    ports:
+      - "${WS_PROXY_PORT}:${WS_PROXY_PORT}"
+    volumes:
+      - ../gateway/proxy/ws:/gateway/proxy/ws
+    networks:
+      - entask
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.ws-proxy.loadbalancer.server.port=${WS_PROXY_PORT}"
+      - "traefik.http.routers.ws-proxy.rule=PathRegexp(`/ws(.*?)`)"
+      - "traefik.http.routers.ws-proxy.service=ws-proxy"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ../gateway/proxy/ws
+          target: /gateway/proxy/ws

@@ -1,0 +1,186 @@
+services:
+  minio:
+    container_name: minio
+    image: minio/minio:latest
+    command: ["minio", "server", "/data", "--console-address", ":${MINIO_CONSOLE_PORT}"]
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+      MINIO_CONSOLE_PORT: ${MINIO_CONSOLE_PORT}
+      MINIO_PORT: ${MINIO_PORT}
+    ports:
+      - "${MINIO_PORT}:${MINIO_PORT}"
+      - "${MINIO_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}"
+    expose:
+      - ${MINIO_PORT}`
+    volumes:
+      - ../core/minio/data:/data
+    networks:
+      - entask
+    labels:
+      - "traefik.enable=false"
+      
+  postgres:
+    container_name: postgres
+    image: postgres:alpine
+    shm_size: 512mb
+    restart: always
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_HOST_AUTH_METHOD: ${POSTGRES_HOST_AUTH_METHOD}
+    volumes:
+      - ../core/postgres/initdb.sql:/docker-entrypoint-initdb.d/init.sql
+      - ../core/postgres/data:/var/lib/postgresql/data
+    networks:
+      - entask
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "pg_isready",
+          "-U",
+          "${POSTGRES_USER}",
+          "-p",
+          "${POSTGRES_PORT}",
+        ]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 5s
+    labels:
+      - "traefik.enable=false"
+      
+  pgadmin:
+    container_name: pgadmin
+    image: dpage/pgadmin4
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${POSTGRES_PASSWORD}
+    networks:
+      - entask
+    ports:
+      - "5434:80"
+    labels:
+      - "traefik.enable=false"
+
+  pgbouncer:
+    container_name: pgbouncer
+    image: edoburu/pgbouncer:latest
+    restart: always
+    environment:
+      PGBOUNCER_PORT: ${PGBOUNCER_PORT}
+      POSTGRESQL_HOST: ${POSTGRES_HOST}
+      POSTGRESQL_PORT: ${POSTGRES_PORT}
+      DB_USER: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_HOST: ${POSTGRES_HOST}
+      AUTH_TYPE: ${POSTGRES_HOST_AUTH_METHOD}
+      MAX_CLIENT_CONN: ${PGBOUNCER_MAX_CLIENT_CONN}
+      DEFAULT_POOL_SIZE: ${PGBOUNCER_DEFAULT_POOL_SIZE}
+      POOL_MODE: ${PGBOUNCER_POOL_MODE}
+      LISTEN_ADDR: ${PGBOUNCER_LISTEN_ADDR}
+      LISTEN_PORT: ${PGBOUNCER_LISTEN_PORT}
+    depends_on:
+      - postgres
+    networks:
+      - entask
+    labels:
+      - "traefik.enable=false"
+
+  flyway:
+    container_name: flyway
+    build:
+      context: ../core/flyway
+      dockerfile: Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      POSTGRES_HOST: ${POSTGRES_HOST}
+      POSTGRES_PORT: ${POSTGRES_PORT}
+      POSTGRES_MIGRATIONS_USER: ${POSTGRES_MIGRATIONS_USER}
+      POSTGRES_MIGRATIONS_PASSWORD: ${POSTGRES_MIGRATIONS_PASSWORD}
+      AUTH_DB: ${AUTH_DB}
+      GATEWAY_DB: ${GATEWAY_DB}
+      CONVERSION_DB: ${CONVERSION_DB}
+    volumes:
+      - "../core/flyway/scripts:/flyway/sql/"
+    networks:
+      - entask
+    labels:
+      - "traefik.enable=false"
+
+  redis:
+    container_name: redis
+    image: redis:alpine
+    environment:
+      REDIS_PORT: ${REDIS_PORT}
+      REDIS_HOST: ${REDIS_HOST}
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    networks:
+      - entask
+    labels:
+      - "traefik.enable=false"
+
+  dapr-placement:
+    container_name: dapr-placement
+    image: daprio/dapr
+    environment:
+      DAPR_PLACEMENT_PORT: ${DAPR_PLACEMENT_PORT}
+    command: ["./placement", "-port", "${DAPR_PLACEMENT_PORT}"]
+    ports:
+      - "${DAPR_PLACEMENT_PORT}:${DAPR_PLACEMENT_PORT}"
+    networks:
+      - entask
+    labels:
+      - "traefik.enable=false"
+
+  traefik:
+    container_name: traefik
+    image: traefik:latest
+    ports:
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: host
+      - target: 443
+        published: 443
+        protocol: tcp
+        mode: host
+      - target: 8080
+        published: 8080
+        protocol: tcp
+        mode: host
+    healthcheck:
+      test: ["CMD", "traefik", "version"]
+      interval: 60s
+      timeout: 15s
+      retries: 5
+      start_period: 5s
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ../gateway/traefik/traefik.yml:/etc/traefik/traefik.yml
+    networks:
+      - entask   
+  
+  frontend:
+    container_name: frontend
+    build: ../frontend
+    ports:
+      - "${FRONTEND_PORT}:${FRONTEND_PORT}"
+    volumes:
+      - ../frontend:/frontend
+      - node_modules:/frontend/node_modules:rw
+    networks:
+      - entask
+    develop:
+      watch:
+        - action: sync+restart
+          path: ../frontend
+          target: /frontend
+          
+volumes:
+  node_modules: {}
