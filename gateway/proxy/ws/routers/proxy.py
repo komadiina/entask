@@ -20,6 +20,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
             data: dict = await websocket.receive_json()
 
             try:
+                # clients should only be able to send interrupts atm
                 msg = WebSocketClientInterrupt.model_validate(data)
             except ValidationError as exc:
                 await websocket.send_json(
@@ -57,11 +58,15 @@ async def proxy(client_id: str, data: TWSServerMessage):
     try:
         await ws_clients[client_id].send_json(data.model_dump_json())
         return {"message": "Message proxied.", "client_id": client_id}
-    except:
+    except Exception as e:
         return Response(
             status_code=500,
             content=json.dumps(
-                {"error": "Failed to proxy message.", "client_id": client_id}
+                {
+                    "error": "Failed to proxy message.",
+                    "client_id": client_id,
+                    "error": str(e),
+                }
             ),
         )
 

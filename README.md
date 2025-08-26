@@ -56,3 +56,36 @@ take note that some require authenticated URLs (`user:pass@host:port`):
 
 ## components
 review [TODO](./todo.md) for roadmap, issues & etc
+
+
+## converters
+**all** converters use `minio` and `httpx` for file-based communication (no ftp yet)
+
+___
+
+thumbnailer uses:
+- `ffmpeg` & `imageio`
+- `moviepy`
+![flow-thumbnailer](./docs/thumbnailer-flow.jpg)
+
+___
+
+waveformer uses:
+- `pedalboard`
+![flow-waveformer](./docs/waveformer-flow.jpg)
+
+___
+
+term-extractor uses:
+- `sentence-transfomers`
+- `spacy`
+![flow-term-extractor](./docs/term-extractor-flow.jpg)
+
+___
+
+text-recognizer uses:
+- `easyocr`
+- `pyspellchecker`
+- `openai`
+- `fpdf2`
+![flow-text-recognizer](./docs/text-recognizer-flow.jpg)
