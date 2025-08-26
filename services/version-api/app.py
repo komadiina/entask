@@ -21,8 +21,7 @@ app = FastAPI(
 
 
 @app.get("/api/version")
-async def version(response: Response):
-    response.status_code = 200
+async def version():
     return {"service": "version-service", "version": "v1"}
 
 
@@ -37,25 +36,6 @@ async def auth(request: Request):
     AUTH_PORT = os.getenv("AUTH_SERVICE_PORT", 5201)
 
     url = f"http://{AUTH_HOST}:{AUTH_PORT}/api/auth/version"
-
-    try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
-            resp = await client.get(url)
-            resp.raise_for_status()
-            return resp.json()
-    except httpx.RequestError as e:
-        raise HTTPException(status_code=503, detail=f"connect error: {e}")
-
-    except httpx.HTTPStatusError as e:
-        raise HTTPException(status_code=e.response.status_code, detail=e.response.text)
-
-
-@app.get("/api/version/user-details")
-async def user_details(request: Request):
-    USER_DETAILS_API_HOST = os.getenv("AUTH_API_HOST", "auth-service")
-    USER_DETAILS_SERVICE_PORT = os.getenv("AUTH_SERVICE_PORT", 5201)
-
-    url = f"http://{USER_DETAILS_API_HOST}:{USER_DETAILS_SERVICE_PORT}/api/user-details/version"
 
     try:
         async with httpx.AsyncClient(timeout=5.0) as client:

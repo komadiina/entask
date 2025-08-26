@@ -9,5 +9,5 @@ export const environment: {
 	backendProtocol: 'http',
 	backendPort: '80',
 	backendHost: 'localhost',
-	backendRootPrefix: 'api',
+	backendRootPrefix: '/api',
 };

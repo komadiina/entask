@@ -40,6 +40,7 @@ async def health():
 
 @app.get("/api/conversion/version")
 async def version():
+    
     return {
         "service": "conversion-service",
         "version": os.getenv("CONVERSION_API_VERSION", "v1"),

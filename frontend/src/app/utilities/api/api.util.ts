@@ -62,6 +62,15 @@ class ApiEndpointBuilder {
 	}
 
 	/**
+	 * Removes the root prefix (e.g. `'/api'` from `'/api/auth/login'`)
+	 * @returns {ApiEndpointBuilder} The current builder instance
+	 */
+	public noPrefix(): ApiEndpointBuilder {
+		this._rootPrefix = '';
+		return this;
+	}
+
+	/**
 	 *
 	 * @param prefix The custom prefix of the endpoint (e.g. `/private_api`). Do not use this to set the service name.
 	 * @returns {ApiEndpointBuilder} The current builder instance
@@ -117,6 +126,6 @@ class ApiEndpointBuilder {
 	 * @returns {string} The built endpoint using previously set parameters (`protocol`, `host`, `port`, `(prefix | service)`, `(breadcrumb | breadcrumbs | endpoint`)
 	 */
 	public build(): string {
-		return `${this._protocol}://${this._host}:${this._port}/${this._rootPrefix}${this._prefix}${this._endpoint}`;
+		return `${this._protocol}://${this._host}:${this._port}${this._rootPrefix}${this._prefix}${this._endpoint}`;
 	}
 }

@@ -222,4 +222,32 @@
 			</div>
 		</div>
 	</ng-container>
+
+	<ng-container
+		*ngIf="conversionStarted"
+		class="flex flex-col items-start w-full justify-center"
+	>
+		<p class="text-zinc-100 text-sm">Converting...</p>
+		<span>{{ this.conversionStatus }}</span>
+
+		<div class="w-full flex flex-row items-end">
+			<button
+				z-button
+				zButton
+				(click)="cancelConversion()"
+				class="zard-button clickable bg-red-600/25"
+			>
+				Abort
+			</button>
+
+			<button
+				z-button
+				(click)="downloadResult()"
+				[disabled]="this.conversionDownloadUri === null"
+				class="zard-button clickable"
+			>
+				Download
+			</button>
+		</div>
+	</ng-container>
 </div>

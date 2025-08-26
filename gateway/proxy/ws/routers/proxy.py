@@ -1,13 +1,18 @@
 import json
 from typing import Dict
 
-from fastapi import APIRouter, Response
+from fastapi import APIRouter, Request, Response
 from models.wsmessages import *
 from pydantic import ValidationError
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
-ws_clients: Dict[str, WebSocket] = dict()
 websocket_router = APIRouter(prefix="/ws")
+
+# keep track of client ws connections via their tokens
+ws_clients: Dict[str, WebSocket] = dict()
+
+# keep track of conversions (conversion_token, client_id), for easier lookup
+conversions: Dict[str, str] = dict()
 
 
 @websocket_router.websocket("/{client_id}")
@@ -47,8 +52,27 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         await websocket.close()
 
 
+@websocket_router.post("/proxy-broadcast")
+async def proxy_broadcast(request: Request):
+    for client in ws_clients.values():
+        try:
+            json = await request.json()
+            await client.send_json(json)
+        except Exception as e:
+            print(e)
+            return Response(
+                status_code=500,
+                content=json.dumps(
+                    {
+                        "error": "Failed to proxy message.",
+                        "error": str(e),
+                    }
+                ),
+            )
+
+
 @websocket_router.post("/proxy/{client_id}")
-async def proxy(client_id: str, data: TWSServerMessage):
+async def proxy(request: Request, client_id: str):
     if client_id not in ws_clients:
         return Response(
             status_code=404,
@@ -56,7 +80,8 @@ async def proxy(client_id: str, data: TWSServerMessage):
         )
 
     try:
-        await ws_clients[client_id].send_json(data.model_dump_json())
+        req_json = await request.json()
+        await ws_clients[client_id].send_json(json.dumps(req_json))
         return {"message": "Message proxied.", "client_id": client_id}
     except Exception as e:
         return Response(

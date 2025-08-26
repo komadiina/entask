@@ -12,6 +12,7 @@ deployment is supported via **docker swarm** (*todo hihi*) or **docker compose**
 
 prerequisites:
   - docker
+  - docker model runner
 
 installation:
   1. clone the repo (`git clone https://github.com/komadiina/entask.git`)
@@ -20,17 +21,24 @@ installation:
   4. run with `docker compose up` (use `-d` for detached)
   5. stop with `docker compose down -v --remove-orphans`
   - if any `package.json` or `requirements.txt` changes haven't reflected, pass the `--force-recreate` flag into `docker compose up`
+  6. `text-recognizer` converter requires an instantiated docker model (i.e. `ai/gemma3:latest`, `ai/gemma3-qat:latest`)
+     1. go to docker desktop
+     2. navigate to **Models (BETA)** tab
+     3. download any model (`gemma3` should suffice, if low on resources you can use any other smaller-form quantized models)
+     4. since it is running outside of the `entask` network, requests will need to target the docker internal network (`model-runner.docker.internal`, see `DOCKER_MODEL_RUNNER_LISTEN`)
+     5. (**note**) to enable GPU inference, see [official docs](https://docs.docker.com/ai/model-runner/)
 
 ### envfile
 
-| envvar                    |  description                                                                |
-|---------------------------|-----------------------------------------------------------------------------|
-| `PGADMIN_EMAIL`           | use this email with `POSTGRES_PASSWORD` to log into pgAdmin console         |
-| `FRONTEND_HOST`           | hardcoded, used for client-side redirects (`0.0.0.0` does not work here)    |
-| `CLIENT_SECRET_FILE`      | your Google API Client secrets file                                         |
-| `GOOGLE_OAUTH_CLIENT_ID`  | extracted from the secret file or via the Google Cloud console              |
-| `GOOGLE_KEYS_URL`         | public Google endpoint for fetching public keys (if `provider == 'google'`) |
-| `...`                     | others are pretty self-explanatory                                          |
+| envvar                      |  description                                                                |
+|-----------------------------|-----------------------------------------------------------------------------|
+| `PGADMIN_EMAIL`             | use this email with `POSTGRES_PASSWORD` to log into pgAdmin console         |
+| `FRONTEND_HOST`             | hardcoded, used for client-side redirects (`0.0.0.0` does not work here)    |
+| `CLIENT_SECRET_FILE`        | your Google API Client secrets file                                         |
+| `GOOGLE_OAUTH_CLIENT_ID`    | extracted from the secret file or via the Google Cloud console              |
+| `GOOGLE_KEYS_URL`           | public Google endpoint for fetching public keys (if `provider == 'google'`) |
+| `DOCKER_MODEL_RUNNNER_LISTEN` | docker model runner host/listen, used as a local LLM host                   |
+| `...`                       | others are pretty self-explanatory                                          |
 
 ### default hosts/listens
 
@@ -44,12 +52,13 @@ take note that some require authenticated URLs (`user:pass@host:port`):
 | **pgBouncer**          | `pgbouncer:6432`                     |
 | **Redis**              | `redis:6379`                         |
 | **Traefik**            | `0.0.0.0:{80, 443, 8080}`            |
-| **angular client**      | `frontend:4200`                      |
+| **angular client**      | `frontend:4200`                     |
 | **auth-service**       | `auth-service:5201`                  |
 | **user-details-service** | `user-details-service:5202`        |
 | **file-service**       | `file-service:5204`                  |
 | **conversion-service** | `conversion-service:5205`            |
 | **notifier-service**   | `notifier-service:5206`              |
+| **llm-service**         | `llm-service:5207`                  |
 | **thumbnailer-converter** | `thumbnailer-converter:7401`      |
 | **ws-proxy**            | `ws-proxy:9202`                     |
 

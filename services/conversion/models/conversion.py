@@ -7,3 +7,4 @@ class ConversionRequest(BaseSchema):
     type: str
     user_id: Optional[Union[str, int]] = None
     object_key: str
+    token: Optional[str] | None = None

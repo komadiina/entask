@@ -1,11 +1,6 @@
 import { NgForOf } from '@angular/common';
 import { NgIf } from '@angular/common';
-import {
-	ChangeDetectionStrategy,
-	Component,
-	OnDestroy,
-	OnInit,
-} from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { ZardButtonComponent } from '@entask-components/button/button.component';
 import { ZardDropdownModule } from '@entask-components/dropdown/dropdown.module';
@@ -17,9 +12,9 @@ import {
 	TermExtractorForm,
 	WaveformerForm,
 } from '@entask-types/dashboard/forms.type';
-import { WebSocketResponse } from '@entask-types/dashboard/websocket-response.type';
+import { WSMessageType } from '@entask-types/websockets/websocket.types';
 import { MessageService } from 'primeng/api';
-import { Subscription } from 'rxjs';
+import { Observable, Subscription, map } from 'rxjs';
 import { PresignRequest } from '@entask-models/file/presign-request.model';
 import { AuthService } from '@entask-services/auth.service';
 import { DashboardService } from '@entask-services/pages/dashboard.service';
@@ -42,6 +37,8 @@ import { GeneralWebSocket } from '@entask-services/websocket.class';
 export class DashboardComponent implements OnDestroy {
 	websocket: GeneralWebSocket<any>;
 	wsSubscription: Subscription;
+	conversionStarted = false;
+	serverResponse?: Observable<string>;
 	conversionStatus: string;
 	conversions: ConversionLabel[] = _conversions;
 	selectedConversion: ConversionLabel | null = null;
@@ -50,6 +47,7 @@ export class DashboardComponent implements OnDestroy {
 	thumbnailerForm: TFileConversionForm;
 	waveformerForm: WaveformerForm;
 	termExtractorForm: TermExtractorForm;
+	conversionDownloadUri: string | null = null;
 
 	constructor(
 		private authService: AuthService,
@@ -57,10 +55,25 @@ export class DashboardComponent implements OnDestroy {
 		private messageService: MessageService,
 		private dashboardService: DashboardService,
 	) {
-		this.websocket = new GeneralWebSocket(null, true, this.messageService);
-		this.wsSubscription = this.websocket.getMessages().subscribe((msg) => {
-			console.log(msg);
+		this.websocket = new GeneralWebSocket(null, true);
+
+		this.wsSubscription = this.websocket.getMessages().subscribe((message) => {
+			console.log(message);
+
+			if (message?.type == WSMessageType.Notification) {
+				this.messageService.add({
+					severity: 'info',
+					summary: 'WebSockets',
+					detail: 'Message received from server: ' + message.data.status,
+				});
+			}
+
+			this.conversionStatus = message.data.status ?? 'Pending...';
 		});
+
+		this.serverResponse = this.websocket
+			.getMessages()
+			.pipe(map((data) => data.data?.message || 'Malformed message received.'));
 
 		this.conversionStatus = 'Pending...';
 
@@ -129,7 +142,6 @@ export class DashboardComponent implements OnDestroy {
 
 	// --- thumbnailer --- //
 	public submitThumbnailer() {
-		this.websocket.send({ text: 'hello' });
 		this.forwardUpload(this.thumbnailerForm);
 	}
 
@@ -239,6 +251,7 @@ export class DashboardComponent implements OnDestroy {
 				await this.dashboardService.submitConversionRequest({
 					...formBody,
 					objectKey: resp.key,
+					userId: resp.userId,
 				});
 
 				return response;
@@ -249,6 +262,16 @@ export class DashboardComponent implements OnDestroy {
 			summary: 'Success',
 			detail: 'File uploaded successfully.',
 		});
+
+		this.conversionStarted = true;
+	}
+
+	public downloadResult(): void {
+		throw new Error('Method not implemented.');
+	}
+
+	public cancelConversion(): void {
+		throw new Error('Method not implemented.');
 	}
 
 	ngOnDestroy(): void {

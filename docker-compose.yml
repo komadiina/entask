@@ -410,7 +410,37 @@ services:
         - action: sync+restart
           path: ./services/conversion
           target: /services/conversion
-          
+  
+  llm-service:
+    container_name: service-llm
+    build:
+      context: ./services/llm
+      dockerfile: Dockerfile
+    environment:
+      LLM_SERVICE_HOST: ${LLM_SERVICE_HOST}
+      LLM_SERVICE_PORT: ${LLM_SERVICE_PORT}
+      LLM_SERVICE_VERSION: ${LLM_SERVICE_VERSION}
+      LLM_SERVICE_MODEL: ${LLM_SERVICE_MODEL}
+      LLM_SERVICE_SYSTEM_PROMPT: ${LLM_SERVICE_SYSTEM_PROMPT}
+      DOCKER_MODEL_RUNNER_PROTOCOL: ${DOCKER_MODEL_RUNNER_PROTOCOL}
+      DOCKER_MODEL_RUNNER_LISTEN: ${DOCKER_MODEL_RUNNER_LISTEN}
+    networks:
+      - entask
+    ports: 
+      - "${LLM_SERVICE_PORT}:${LLM_SERVICE_PORT}"
+    volumes:
+      - "./services/llm:/services/llm"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.llm-service.loadbalancer.server.port=${LLM_SERVICE_PORT}"
+      - "traefik.http.routers.llm.rule=PathRegexp(`/api/llm(.*?)`)"
+      - "traefik.http.routers.llm.service=llm-service"
+    develop:
+      watch:
+        - action: sync+restart
+          path: ./services/llm
+          target: /services/llm
+  
   thumbnailer-converter:
     container_name: converter-thumbnailer
     build:
@@ -423,6 +453,8 @@ services:
       NATS_HOST: ${NATS_HOST}
       NATS_CLIENT_PORT: ${NATS_CLIENT_PORT}
       THUMBNAILER_CONVERTER_VERSION: ${THUMBNAILER_CONVERTER_VERSION}
+      WS_PROXY_HOST: ${WS_PROXY_HOST}
+      WS_PROXY_PORT: ${WS_PROXY_PORT}
     restart: unless-stopped
     volumes:
       - ./converters/thumbnailer:/converters/thumbnailer

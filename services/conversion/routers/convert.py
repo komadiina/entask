@@ -1,4 +1,5 @@
 import os
+import uuid
 
 from faststream.nats import JStream, NatsBroker
 from faststream.nats.fastapi import NatsRouter
@@ -25,11 +26,14 @@ async def submit_conversion(conversion: ConversionRequest):
     await broker.connect()
     await broker.start()
 
+    conversion.token = uuid.uuid4().hex
+
     await broker.publisher(subject="convert.{}".format(conversion.type)).publish(
-        conversion.object_key
+        conversion.model_dump_json()
     )
 
     return {
         "message": "Conversion request published.",
         "subject": "convert.{}".format(conversion.type),
+        "conversion": conversion,
     }

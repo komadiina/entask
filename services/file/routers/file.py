@@ -92,4 +92,9 @@ async def create_upload_url(
         },
         ExpiresIn=URI_TTL,
     )
-    return {"url": presigned_url, "bucket": S3_BUCKET_UPLOADS, "key": object_key}
+    return {
+        "url": presigned_url,
+        "bucket": S3_BUCKET_UPLOADS,
+        "key": object_key,
+        "user_id": user_id,
+    }
