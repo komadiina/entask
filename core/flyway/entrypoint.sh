@@ -2,7 +2,6 @@
 set -e
 declare -A DBS=(
   [auth]=$AUTH_DB
-  [conversion]=$CONVERSION_DB
 )
 
 for svc in "${!DBS[@]}"; do

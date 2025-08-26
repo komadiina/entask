@@ -1,6 +1,6 @@
 services:
   minio:
-    container_name: minio
+    container_name: core-minio
     image: minio/minio:latest
     command: ["minio", "server", "/data", "--console-address", ":${MINIO_CONSOLE_PORT}"]
     environment:
@@ -21,7 +21,7 @@ services:
       - "traefik.enable=false"
       
   postgres:
-    container_name: postgres
+    container_name: core-postgres
     image: postgres:alpine
     shm_size: 512mb
     restart: always
@@ -35,15 +35,7 @@ services:
     networks:
       - entask
     healthcheck:
-      test:
-        [
-          "CMD",
-          "pg_isready",
-          "-U",
-          "${POSTGRES_USER}",
-          "-p",
-          "${POSTGRES_PORT}",
-        ]
+      test: [ "CMD", "pg_isready" ] 
       interval: 60s
       timeout: 15s
       retries: 5
@@ -52,7 +44,7 @@ services:
       - "traefik.enable=false"
       
   pgadmin:
-    container_name: pgadmin
+    container_name: core-pgadmin
     image: dpage/pgadmin4
     restart: unless-stopped
     environment:
@@ -66,7 +58,7 @@ services:
       - "traefik.enable=false"
 
   pgbouncer:
-    container_name: pgbouncer
+    container_name: core-pgbouncer
     image: edoburu/pgbouncer:latest
     restart: always
     environment:
@@ -90,7 +82,7 @@ services:
       - "traefik.enable=false"
 
   flyway:
-    container_name: flyway
+    container_name: core-flyway
     build:
       context: ../core/flyway
       dockerfile: Dockerfile
@@ -103,8 +95,6 @@ services:
       POSTGRES_MIGRATIONS_USER: ${POSTGRES_MIGRATIONS_USER}
       POSTGRES_MIGRATIONS_PASSWORD: ${POSTGRES_MIGRATIONS_PASSWORD}
       AUTH_DB: ${AUTH_DB}
-      GATEWAY_DB: ${GATEWAY_DB}
-      CONVERSION_DB: ${CONVERSION_DB}
     volumes:
       - "../core/flyway/scripts:/flyway/sql/"
     networks:
@@ -113,7 +103,7 @@ services:
       - "traefik.enable=false"
 
   redis:
-    container_name: redis
+    container_name: core-redis
     image: redis:alpine
     environment:
       REDIS_PORT: ${REDIS_PORT}
@@ -126,7 +116,7 @@ services:
       - "traefik.enable=false"
 
   dapr-placement:
-    container_name: dapr-placement
+    container_name: core-placement
     image: daprio/dapr
     environment:
       DAPR_PLACEMENT_PORT: ${DAPR_PLACEMENT_PORT}
@@ -139,7 +129,7 @@ services:
       - "traefik.enable=false"
 
   traefik:
-    container_name: traefik
+    container_name: core-traefik
     image: traefik:latest
     ports:
       - target: 80
@@ -167,7 +157,7 @@ services:
       - entask   
   
   frontend:
-    container_name: frontend
+    container_name: core-frontend
     build: ../frontend
     ports:
       - "${FRONTEND_PORT}:${FRONTEND_PORT}"
