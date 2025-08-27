@@ -30,7 +30,7 @@ async def send_prompt(req: ChatRequest):
         )
 
         req_json = resp.json()
-        
+
         return Response(
             status_code=resp.status_code,
             content=json.dumps(

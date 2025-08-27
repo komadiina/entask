@@ -3,7 +3,7 @@ include:
   - ./compose/nats.compose.yaml
   - ./compose/services.compose.yaml
   - ./compose/converters.compose.yaml
-  - ./compose/dapr-sidecar.compose.yaml
+  - ./core/conductor/docker/docker-compose.yaml
         
 networks:
   entask:

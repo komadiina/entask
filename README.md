@@ -1,5 +1,5 @@
 # entask
-a university project in online informational systems design. it models a microservice-oriented platform for scalable, durable, and consistent content conversion/transcoding. the system applies durable execution (dapr workflow engine), pub/sub state models (redis streams), message brokerage (nats jetstream), and an api gateway (traefik) for auth checks, request routing, and per-service load balancing, with the frontend is built in angular v19.
+a university project in online informational systems design. it models a microservice-oriented platform for scalable, durable, and consistent content conversion/transcoding. the system applies durable execution (conductor-oss), pub/sub state models (redis streams), message brokerage (nats jetstream), and an api gateway (traefik) for auth checks, request routing, and per-service load balancing, with the frontend is built in angular v19.
 
 
 ## schema
@@ -60,6 +60,9 @@ take note that some require authenticated URLs (`user:pass@host:port`):
 | **notifier-service**   | `notifier-service:5206`              |
 | **llm-service**         | `llm-service:5207`                  |
 | **thumbnailer-converter** | `thumbnailer-converter:7401`      |
+| **waveformer-converter** | `waveformer-converter:7402`        |
+| **term-extractor-converter** | `term-extractor-converter:7403`  |
+| **text-recognizer-converter** | `text-recognizer-converter:7404` |
 | **ws-proxy**            | `ws-proxy:9202`                     |
 
 

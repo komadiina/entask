@@ -1,9 +1,5 @@
-dapr>=1.15.0
-dapr-ext-fastapi>=1.15.0
-dapr-ext-workflow>=1.15.0
 fastapi[standard]
-pydantic
-typing
-requests
-nats-py
 faststream[nats]
+httpx
+
+conductor-python

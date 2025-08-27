@@ -2,7 +2,6 @@ import asyncio
 import json
 import os
 
-import httpx
 from faststream import FastStream
 from faststream.nats import NatsBroker
 

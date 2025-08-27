@@ -115,19 +115,6 @@ services:
     labels:
       - "traefik.enable=false"
 
-  dapr-placement:
-    container_name: core-placement
-    image: daprio/dapr
-    environment:
-      DAPR_PLACEMENT_PORT: ${DAPR_PLACEMENT_PORT}
-    command: ["./placement", "-port", "${DAPR_PLACEMENT_PORT}"]
-    ports:
-      - "${DAPR_PLACEMENT_PORT}:${DAPR_PLACEMENT_PORT}"
-    networks:
-      - entask
-    labels:
-      - "traefik.enable=false"
-
   traefik:
     container_name: core-traefik
     image: traefik:latest
