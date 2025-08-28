@@ -7,6 +7,14 @@ api:
   dashboard: true
   insecure: true
   
+entrypoints:
+  http:
+    address: ":80"
+  https:
+    address: ":443"
+  dashboard:
+    address: ":9091"
+  
 http:    
   routers:
     auth:

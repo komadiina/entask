@@ -13,6 +13,7 @@ deployment is supported via **docker swarm** (*todo hihi*) or **docker compose**
 prerequisites:
   - docker
   - docker model runner
+  - atleast 16gb of working memory (for all 4 services up and running and not turning your pc into a ticking time bomb)
 
 installation:
   1. clone the repo (`git clone https://github.com/komadiina/entask.git`)
@@ -30,6 +31,8 @@ installation:
 
 ### envfile
 
+below is a list of some important env-vars. [default.dev.env](compose/default.dev.env) for more info.
+
 | envvar                      |  description                                                                |
 |-----------------------------|-----------------------------------------------------------------------------|
 | `PGADMIN_EMAIL`             | use this email with `POSTGRES_PASSWORD` to log into pgAdmin console         |
@@ -37,7 +40,8 @@ installation:
 | `CLIENT_SECRET_FILE`        | your Google API Client secrets file                                         |
 | `GOOGLE_OAUTH_CLIENT_ID`    | extracted from the secret file or via the Google Cloud console              |
 | `GOOGLE_KEYS_URL`           | public Google endpoint for fetching public keys (if `provider == 'google'`) |
-| `DOCKER_MODEL_RUNNNER_LISTEN` | docker model runner host/listen, used as a local LLM host                   |
+| `DOCKER_MODEL_RUNNNER_LISTEN` | docker model runner host/listen, used as a local LLM host                 |
+| `LLM_SERVICE_SYSTEM_PROMPT` | characterize your LLM model w/ harsh instructions                           |
 | `...`                       | others are pretty self-explanatory                                          |
 
 ### default hosts/listens
@@ -52,6 +56,7 @@ take note that some require authenticated URLs (`user:pass@host:port`):
 | **pgBouncer**          | `pgbouncer:6432`                     |
 | **Redis**              | `redis:6379`                         |
 | **Traefik**            | `0.0.0.0:{80, 443, 8080}`            |
+| **Conductor**           | `conductor-server:{5000, 8080}`     |
 | **angular client**      | `frontend:4200`                     |
 | **auth-service**       | `auth-service:5201`                  |
 | **user-details-service** | `user-details-service:5202`        |

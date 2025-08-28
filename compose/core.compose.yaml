@@ -127,8 +127,8 @@ services:
         published: 443
         protocol: tcp
         mode: host
-      - target: 8080
-        published: 8080
+      - target: 9091
+        published: 9091
         protocol: tcp
         mode: host
     healthcheck:
@@ -142,6 +142,23 @@ services:
       - ../gateway/traefik/traefik.yml:/etc/traefik/traefik.yml
     networks:
       - entask   
+    labels:
+      - "traefik.http.routers.dashboard.entrypoints=traefik"
+      
+  conductor-server:
+    image: conductoross/conductor-standalone:3.15.0
+    container_name: core-conductor-server
+    environment:
+      CONDUCTOR_SERVER_PORT: ${CONDUCTOR_SERVER_PORT}
+      CONDUCTOR_SERVER_HOST: ${CONDUCTOR_SERVER_HOST}
+      CONDUCTOR_UI_PORT: ${CONDUCTOR_UI_PORT}
+    ports:
+      - "${CONDUCTOR_SERVER_PORT}:${CONDUCTOR_SERVER_PORT}"
+      - "${CONDUCTOR_UI_PORT}:${CONDUCTOR_UI_PORT}"
+    volumes:
+      - ../core/conductor:/opt/conductor
+    networks:
+      - entask
   
   frontend:
     container_name: core-frontend

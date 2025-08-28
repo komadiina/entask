@@ -2,6 +2,6 @@ fastapi[standard]
 faststream[nats]
 httpx
 
-conductor-python
+conductor-python==1.1.10
 
 pedalboard

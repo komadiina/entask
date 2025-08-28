@@ -1,7 +1,7 @@
 import os
 import uuid
 
-from faststream.nats import JStream, NatsBroker
+from faststream.nats import NatsBroker
 from faststream.nats.fastapi import NatsRouter
 from models.conversion import ConversionRequest
 
