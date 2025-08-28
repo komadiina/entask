@@ -147,7 +147,7 @@ def forward_url(input: dict):
 
     notify(
         WSNotification(
-            status=WorkflowStatus.RUNNING,
+            status=WorkflowStatus.SUCCEEDED,
             message="Conversion finished!",
             client_id=input["client_id"],
         )

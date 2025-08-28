@@ -12,7 +12,11 @@ import {
 	TermExtractorForm,
 	WaveformerForm,
 } from '@entask-types/dashboard/forms.type';
-import { WebSocketResponse } from '@entask-types/dashboard/websocket-response.type';
+import {
+	WebSocketResponse,
+	WebSocketResponseType,
+	WebSocketWorkflowStatus,
+} from '@entask-types/dashboard/websocket-response.type';
 import { MessageService } from 'primeng/api';
 import { Observable, map } from 'rxjs';
 import { PresignRequest } from '@entask-models/file/presign-request.model';
@@ -59,6 +63,21 @@ export class DashboardComponent implements OnDestroy {
 
 		this.serverResponse = this.websocket
 			.getMessages()
+			.pipe((data) => {
+				data.subscribe((data) => {
+					if (
+						data.type === WebSocketResponseType.ProgressUpdate &&
+						data?.status === WebSocketWorkflowStatus.Succeeded
+					) {
+						this.messageService.add({
+							severity: 'success',
+							summary: 'Conversion finished',
+							detail: 'Conversion completed successfully!',
+						});
+					}
+				});
+				return data;
+			})
 			.pipe(map((data) => data.message ?? 'Malformed response.'));
 
 		this.conversionStatus = 'Pending...';
