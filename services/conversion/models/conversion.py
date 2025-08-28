@@ -5,6 +5,6 @@ from models.camelizer import BaseSchema
 
 class ConversionRequest(BaseSchema):
     type: str
-    user_id: Optional[Union[str, int]] = None
+    client_id: Optional[Union[str, int]] = None
     object_key: str
     token: Optional[str] | None = None

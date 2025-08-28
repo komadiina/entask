@@ -13,46 +13,28 @@ class BaseSchema(BaseModel):
     )
 
 
-class WSMessageType(Enum):
-    WorkflowInterrupt = "workflow-interrupt"
-    Notification = "notification"
-    Error = "error"
-    Other = "other"
-
-
-class AckStatus(Enum):
-    Ack = "ack"
-    Nack = "nack"
-
-
-class WFInterruptType(Enum):
-    Abort = "abort"
-    Pause = "pause"
-    Resume = "resume"
+class InterruptType(Enum):
+    ABORT = "abort"
+    PAUSE = "pause"
+    RESUME = "resume"
 
 
 class WebSocketClientInterrupt(BaseSchema):
-    type: WSMessageType
-    signal: WFInterruptType
-    token: Union[str, None]
+    user_id: str
+    workflow_id: str
+    interrupt_type: InterruptType
 
 
-class WebSocketClientMessage(BaseSchema):
-    type: WSMessageType
-    content: Union[WebSocketClientInterrupt, Any]
+class ResponseType(str, Enum):
+    UPDATE = "progress-update"
+    ACK = "ack"
+    ERROR = "error"
+    OTHER = "other"
 
 
-class WebSocketInterruptResponse(BaseSchema):
-    status: AckStatus
-    error: Union[Any, None]
-
-
-class WebSocketServerMessage(BaseSchema):
-    data: Union[WebSocketInterruptResponse, Any]
-
-
-# client --> server
-TWSClientMessage = WebSocketClientMessage | WebSocketClientInterrupt
-
-# server --> client
-TWSServerMessage = WebSocketServerMessage | WebSocketInterruptResponse
+class WebSocketResponse(BaseSchema):
+    type: ResponseType
+    client_id: str
+    status: str
+    message: str
+    data: Any

@@ -1,19 +1,22 @@
 import time
 
 from conductor.client.worker.worker_task import worker_task
+from models.messages import WorkflowStatus, WSNotification
 from ws import notify
 
 
 @worker_task(task_definition_name="tr-init-easyocr")
 def init_easyocr(input: dict):
-    time.sleep(5)
     notify(
-        {
-            **input,
-            "message": "easy-ocr initialized",
-            "status": "ok",
-        }
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Initializing EasyOCR...",
+            client_id=input["client_id"],
+        )
     )
+
+    time.sleep(2)
+
     return {
         **input,
         "message": "easy-ocr initialized",
@@ -22,14 +25,16 @@ def init_easyocr(input: dict):
 
 @worker_task(task_definition_name="tr-scan-input")
 def scan_text(input: dict):
-
     notify(
-        {
-            **input,
-            "message": "input scanned",
-            "status": "ok",
-        }
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Scanning input with EasyOCR...",
+            client_id=input["client_id"],
+        )
     )
+
+    time.sleep(2)
+
     return {
         **input,
         "message": "input scanned",
@@ -38,13 +43,12 @@ def scan_text(input: dict):
 
 @worker_task(task_definition_name="tr-discard-low-confidence-boxes")
 def discard_low_confidence_boxes(input: dict):
-
     notify(
-        {
-            **input,
-            "message": "low confidence boxes discarded",
-            "status": "ok",
-        }
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Discarding low confidence boxes...",
+            client_id=input["client_id"],
+        )
     )
     return {
         **input,
@@ -54,13 +58,14 @@ def discard_low_confidence_boxes(input: dict):
 
 @worker_task(task_definition_name="tr-spellcheck")
 def spellcheck(input: dict):
-
     notify(
-        {
-            "user_id": input["user_id"],
-            "message": "input: dict spellchecked",
-        }
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Spellchecking text with pyspellcheck...",
+            client_id=input["client_id"],
+        )
     )
+
     return {
         **input,
         "message": "input: dict spellchecked",
@@ -69,13 +74,12 @@ def spellcheck(input: dict):
 
 @worker_task(task_definition_name="tr-llm-correct")
 def llm_correct(input: dict):
-
     notify(
-        {
-            **input,
-            "message": "input: dict llm-corrected",
-            "status": "ok",
-        }
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Correcting text artifacts using local LLM...",
+            client_id=input["client_id"],
+        )
     )
     return {
         **input,
@@ -85,13 +89,12 @@ def llm_correct(input: dict):
 
 @worker_task(task_definition_name="tr-init-fpdf2")
 def init_fpdf2(input: dict):
-
     notify(
-        {
-            **input,
-            "message": "fpdf2 initialized",
-            "status": "ok",
-        }
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Initializing PDF (fpdf2) document...",
+            client_id=input["client_id"],
+        )
     )
     return {
         **input,
@@ -101,13 +104,12 @@ def init_fpdf2(input: dict):
 
 @worker_task(task_definition_name="tr-populate-pdf")
 def populate_pdf(input: dict):
-
     notify(
-        {
-            **input,
-            "message": "pdf populated",
-            "status": "ok",
-        }
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Populating PDF...",
+            client_id=input["client_id"],
+        )
     )
     return {
         **input,
@@ -117,14 +119,16 @@ def populate_pdf(input: dict):
 
 @worker_task(task_definition_name="tr-upload-s3")
 def upload_s3(input: dict):
-
     notify(
-        {
-            **input,
-            "message": "s3 uploaded",
-            "status": "ok",
-        }
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Uploading PDF to S3...",
+            client_id=input["client_id"],
+        )
     )
+
+    time.sleep(2)
+
     return {
         **input,
         "message": "s3 uploaded",
@@ -133,15 +137,24 @@ def upload_s3(input: dict):
 
 @worker_task(task_definition_name="tr-client-forward-url")
 def forward_url(input: dict):
+    notify(
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Forwarding S3 URL to client...",
+            client_id=input["client_id"],
+        )
+    )
 
     notify(
-        {
-            **input,
-            "message": "url forwarded to client",
-            "status": "ok",
-        }
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Conversion finished!",
+            client_id=input["client_id"],
+        )
     )
+
     return {
         **input,
         "message": "url forwarded to client",
+        "url": "https://google.com",
     }

@@ -25,50 +25,24 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
             data: dict = await websocket.receive_json()
 
             try:
-                # clients should only be able to send interrupts atm
-                msg = WebSocketClientInterrupt.model_validate(data)
-            except ValidationError as exc:
-                await websocket.send_json(
-                    WebSocketServerMessage(data=exc.errors()).model_dump_json()
-                )
+                ws_msg = WebSocketClientInterrupt.model_validate(data)
+            except ValidationError as e:
                 continue
 
-            if msg.type == WSMessageType.WorkflowInterrupt:
-                await websocket.send_json(
-                    WebSocketInterruptResponse(
-                        status=AckStatus.Ack, error=None
-                    ).model_dump_json()
-                )
-            elif msg.type == WSMessageType.Other:
-                await websocket.send_json(
-                    WebSocketServerMessage(
-                        data={"message": "Received other message."}
-                    ).model_dump_json()
-                )
+            if ws_msg.interrupt_type == InterruptType.PAUSE:
+                # TODO: send pause message
+                await websocket.send_json({"type": "pause", "client_id": client_id})
+            elif ws_msg.interrupt_type == InterruptType.RESUME:
+                # TODO: send resume message
+                await websocket.send_json({"type": "resume", "client_id": client_id})
+            elif ws_msg.interrupt_type == InterruptType.ABORT:
+                # TODO: send abort message
+                await websocket.send_json({"type": "abort", "client_id": client_id})
 
     except WebSocketDisconnect:
         del ws_clients[client_id]
     finally:
         await websocket.close()
-
-
-@websocket_router.post("/proxy-broadcast")
-async def proxy_broadcast(request: Request):
-    for client in ws_clients.values():
-        try:
-            json = await request.json()
-            await client.send_json(json)
-        except Exception as e:
-            print(e)
-            return Response(
-                status_code=500,
-                content=json.dumps(
-                    {
-                        "error": "Failed to proxy message.",
-                        "error": str(e),
-                    }
-                ),
-            )
 
 
 @websocket_router.post("/proxy/{client_id}")
@@ -80,8 +54,8 @@ async def proxy(request: Request, client_id: str):
         )
 
     try:
-        req_json = await request.json()
-        await ws_clients[client_id].send_json(json.dumps(req_json))
+        content = await request.json()
+        await ws_clients[client_id].send_json(content)
         return {"message": "Message proxied.", "client_id": client_id}
     except Exception as e:
         return Response(
@@ -99,3 +73,21 @@ async def proxy(request: Request, client_id: str):
 @websocket_router.get("/clients")
 async def get_clients():
     return {"clients": list(ws_clients.keys())}
+
+
+@websocket_router.post("/proxy-broadcast")
+async def proxy_broadcast(request: Request):
+    for client in ws_clients.values():
+        try:
+            json = await request.json()
+            await client.send_json(json)
+        except Exception as e:
+            return Response(
+                status_code=500,
+                content=json.dumps(
+                    {
+                        "error": "Failed to proxy message.",
+                        "error": str(e),
+                    }
+                ),
+            )

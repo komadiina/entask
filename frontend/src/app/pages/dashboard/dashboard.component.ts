@@ -1,4 +1,4 @@
-import { NgForOf } from '@angular/common';
+import { AsyncPipe, NgForOf } from '@angular/common';
 import { NgIf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
@@ -12,9 +12,9 @@ import {
 	TermExtractorForm,
 	WaveformerForm,
 } from '@entask-types/dashboard/forms.type';
-import { WSMessageType } from '@entask-types/websockets/websocket.types';
+import { WebSocketResponse } from '@entask-types/dashboard/websocket-response.type';
 import { MessageService } from 'primeng/api';
-import { Observable, Subscription, map } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { PresignRequest } from '@entask-models/file/presign-request.model';
 import { AuthService } from '@entask-services/auth.service';
 import { DashboardService } from '@entask-services/pages/dashboard.service';
@@ -28,6 +28,7 @@ import { GeneralWebSocket } from '@entask-services/websocket.class';
 		NgForOf,
 		NgIf,
 		HeaderComponent,
+		AsyncPipe,
 	],
 	templateUrl: './dashboard.component.html',
 	styleUrls: ['./dashboard.component.css'],
@@ -35,8 +36,7 @@ import { GeneralWebSocket } from '@entask-services/websocket.class';
 	standalone: true,
 })
 export class DashboardComponent implements OnDestroy {
-	websocket: GeneralWebSocket<any>;
-	wsSubscription: Subscription;
+	websocket: GeneralWebSocket<WebSocketResponse>;
 	conversionStarted = false;
 	serverResponse?: Observable<string>;
 	conversionStatus: string;
@@ -57,23 +57,9 @@ export class DashboardComponent implements OnDestroy {
 	) {
 		this.websocket = new GeneralWebSocket(null, true);
 
-		this.wsSubscription = this.websocket.getMessages().subscribe((message) => {
-			console.log(message);
-
-			if (message?.type == WSMessageType.Notification) {
-				this.messageService.add({
-					severity: 'info',
-					summary: 'WebSockets',
-					detail: 'Message received from server: ' + message.data.status,
-				});
-			}
-
-			this.conversionStatus = message.data.status ?? 'Pending...';
-		});
-
 		this.serverResponse = this.websocket
 			.getMessages()
-			.pipe(map((data) => data.data?.message || 'Malformed message received.'));
+			.pipe(map((data) => data.message ?? 'Malformed response.'));
 
 		this.conversionStatus = 'Pending...';
 
@@ -216,6 +202,8 @@ export class DashboardComponent implements OnDestroy {
 	private async forwardUpload<T extends TFileConversionForm>(
 		formBody: T,
 	): Promise<void> {
+		this.conversionStarted = true;
+
 		this.messageService.add({
 			severity: 'info',
 			summary: 'Uploading',
@@ -262,8 +250,6 @@ export class DashboardComponent implements OnDestroy {
 			summary: 'Success',
 			detail: 'File uploaded successfully.',
 		});
-
-		this.conversionStarted = true;
 	}
 
 	public downloadResult(): void {

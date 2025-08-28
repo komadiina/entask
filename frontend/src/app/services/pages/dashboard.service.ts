@@ -4,6 +4,7 @@ import { TFileConversionForm } from '@entask-types/dashboard/forms.type';
 import { firstValueFrom, lastValueFrom } from 'rxjs';
 import { PresignRequest } from '@entask-models/file/presign-request.model';
 import { PresignResponse } from '@entask-models/file/presign-response.model';
+import { LocalStorageService } from '@entask-services/local-storage.service';
 import { ApiUtil } from '@entask-utils/api/api.util';
 
 @Injectable({
@@ -62,7 +63,11 @@ export class DashboardService {
 			.build();
 
 		return await lastValueFrom(
-			this.http.post(endpoint, { ...data, type: data.conversionType }),
+			this.http.post(endpoint, {
+				...data,
+				type: data.conversionType,
+				clientId: LocalStorageService.get('uuid'),
+			}),
 		);
 	}
 }

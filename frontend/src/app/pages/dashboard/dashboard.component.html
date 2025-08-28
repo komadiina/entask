@@ -227,10 +227,12 @@
 		*ngIf="conversionStarted"
 		class="flex flex-col items-start w-full justify-center"
 	>
-		<p class="text-zinc-100 text-sm">Converting...</p>
-		<span>{{ this.conversionStatus }}</span>
+		<p class="text-zinc-100 text-sm">
+			Converting:
+			{{ `${(this.serverResponse | async) ?? 'Starting conversion...'}` }}
+		</p>
 
-		<div class="w-full flex flex-row items-end">
+		<div class="w-full flex flex-row items-end justify-center gap-2">
 			<button
 				z-button
 				zButton

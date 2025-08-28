@@ -19,7 +19,7 @@ app = FastStream(broker)
 @broker.subscriber(subject="convert.waveformer")
 async def handler(msg: str):
     # TODO
-    print(msg)
+    pass
 
 
 if __name__ == "__main__":

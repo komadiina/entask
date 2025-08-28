@@ -1,16 +1,17 @@
 import asyncio
-import inspect
 import json
 import os
 
-import httpx
 from conductor.client.automator.task_handler import TaskHandler
 from conductor.client.configuration.configuration import Configuration
+from conductor.client.http.models import StartWorkflowRequest
 from conductor.client.workflow.conductor_workflow import ConductorWorkflow
 from conductor.client.workflow.executor.workflow_executor import WorkflowExecutor
 from faststream import FastStream
 from faststream.nats import NatsBroker
+from models.messages import WorkflowStatus, WSNotification
 from workflow import text_recognizer_workflow
+from ws import notify
 
 HOSTS = os.getenv("NATS_HOSTS", "").split(",")
 NATS_USER = os.getenv("NATS_USER")
@@ -46,24 +47,31 @@ def register_workflow(
     return workflow
 
 
+def init_start_workflow_request(msg_json):
+    wf_request = StartWorkflowRequest()
+    wf_request.name = "text-recognizer"
+    wf_request.version = 1
+    wf_request.input = msg_json
+    wf_request.correlation_id = None
+    return wf_request
+
+
 @broker.subscriber(subject="convert.text-recognizer")
-def handler(msg: str):
+async def handler(msg: str):
     workflow = register_workflow(
         text_recognizer_workflow, input=json.loads(msg), workflow_executor=wf_executor
     )
     msg_json = json.loads(msg)
-    print(msg_json)
 
     task_handler = TaskHandler(configuration=api_config)
     task_handler.start_processes()
 
     wf_run = wf_executor.execute(
-        name=workflow.name, version=workflow.version, workflow_input=msg_json
+        name=workflow.name,
+        version=workflow.version,
+        workflow_input=msg_json,
+        request_id=msg_json["token"],
     )
-
-    print(wf_run.output)
-
-    # task_handler.stop_processes()
 
 
 if __name__ == "__main__":

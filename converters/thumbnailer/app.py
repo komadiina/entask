@@ -22,8 +22,8 @@ app = FastStream(broker)
 
 @broker.subscriber(subject="convert.thumbnailer")
 async def handler(msg: str):
-    print(msg)
-    print(json.loads(msg))
+    # TODO
+    pass
 
 
 if __name__ == "__main__":
