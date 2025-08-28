@@ -2,7 +2,7 @@ import time
 
 from conductor.client.worker.worker_task import worker_task
 from models.messages import WorkflowStatus, WSNotification
-from ws import notify
+from utils.ws import notify
 
 
 @worker_task(task_definition_name="tr-init-easyocr")
@@ -81,6 +81,9 @@ def llm_correct(input: dict):
             client_id=input["client_id"],
         )
     )
+
+    time.sleep(60)
+
     return {
         **input,
         "message": "input: dict llm-corrected",

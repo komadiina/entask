@@ -131,6 +131,10 @@ services:
       NATS_PASSWORD: ${NATS_PASSWORD}
       NATS_HOST: ${NATS_HOST}
       NATS_CLIENT_PORT: ${NATS_CLIENT_PORT}
+      CONDUCTOR_SERVER_HOST: ${CONDUCTOR_SERVER_HOST}
+      CONDUCTOR_SERVER_PORT: ${CONDUCTOR_SERVER_PORT}
+      WS_PROXY_HOST: ${WS_PROXY_HOST}
+      WS_PROXY_PORT: ${WS_PROXY_PORT}
     labels:
       - "traefik.enable=true"
       - "traefik.http.services.conversion-service.loadbalancer.server.port=${CONVERSION_SERVICE_PORT}"

@@ -65,17 +65,25 @@ export class DashboardComponent implements OnDestroy {
 			.getMessages()
 			.pipe((data) => {
 				data.subscribe((data) => {
-					if (
-						data.type === WebSocketResponseType.ProgressUpdate &&
-						data?.status === WebSocketWorkflowStatus.Succeeded
-					) {
-						this.messageService.add({
-							severity: 'success',
-							summary: 'Conversion finished',
-							detail: 'Conversion completed successfully!',
-						});
+					if (data.type === WebSocketResponseType.ProgressUpdate) {
+						if (data?.status === WebSocketWorkflowStatus.Succeeded) {
+							this.messageService.add({
+								severity: 'success',
+								summary: 'Conversion finished',
+								detail: 'Conversion completed successfully!',
+							});
+						} else if (data?.status === WebSocketWorkflowStatus.Started) {
+							this.messageService.add({
+								severity: 'info',
+								summary: 'Conversion started',
+								detail:
+									'Conversion has started: ' +
+									(data.data.workflow_id ?? 'unknown_id'),
+							});
+						}
 					}
 				});
+
 				return data;
 			})
 			.pipe(map((data) => data.message ?? 'Malformed response.'));

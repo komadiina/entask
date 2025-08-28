@@ -1,7 +1,3 @@
 fastapi[standard]
-pydantic
-typing
-requests
-websockets
-nats-py
 faststream[nats]
+conductor-python

@@ -5,6 +5,7 @@ export enum WebSocketResponseType {
 }
 
 export enum WebSocketWorkflowStatus {
+	Started = 'started',
 	Running = 'running',
 	Succeeded = 'succeeded',
 	Failed = 'failed',

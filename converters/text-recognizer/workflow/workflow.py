@@ -1,7 +1,7 @@
 # type: ignore
 from conductor.client.workflow.conductor_workflow import ConductorWorkflow
 from conductor.client.workflow.executor.workflow_executor import WorkflowExecutor
-from workers import *
+from workflow.workers import *
 
 
 def text_recognizer_workflow(

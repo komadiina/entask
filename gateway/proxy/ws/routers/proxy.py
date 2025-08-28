@@ -15,36 +15,6 @@ ws_clients: Dict[str, WebSocket] = dict()
 conversions: Dict[str, str] = dict()
 
 
-@websocket_router.websocket("/{client_id}")
-async def websocket_endpoint(websocket: WebSocket, client_id: str):
-    await websocket.accept()
-    ws_clients[client_id] = websocket
-
-    try:
-        while True:
-            data: dict = await websocket.receive_json()
-
-            try:
-                ws_msg = WebSocketClientInterrupt.model_validate(data)
-            except ValidationError as e:
-                continue
-
-            if ws_msg.interrupt_type == InterruptType.PAUSE:
-                # TODO: send pause message
-                await websocket.send_json({"type": "pause", "client_id": client_id})
-            elif ws_msg.interrupt_type == InterruptType.RESUME:
-                # TODO: send resume message
-                await websocket.send_json({"type": "resume", "client_id": client_id})
-            elif ws_msg.interrupt_type == InterruptType.ABORT:
-                # TODO: send abort message
-                await websocket.send_json({"type": "abort", "client_id": client_id})
-
-    except WebSocketDisconnect:
-        del ws_clients[client_id]
-    finally:
-        await websocket.close()
-
-
 @websocket_router.post("/proxy/{client_id}")
 async def proxy(request: Request, client_id: str):
     if client_id not in ws_clients:
@@ -91,3 +61,36 @@ async def proxy_broadcast(request: Request):
                     }
                 ),
             )
+
+
+# << DEPRECATED >>
+# migrated to using REST endpoint delegates
+# (client -> conversion-service -- HTTP -> conductor-server)
+@websocket_router.websocket("/{client_id}")
+async def websocket_endpoint(websocket: WebSocket, client_id: str):
+    await websocket.accept()
+    ws_clients[client_id] = websocket
+
+    try:
+        while True:
+            data: dict = await websocket.receive_json()
+
+            try:
+                ws_msg = WebSocketClientInterrupt.model_validate(data)
+            except ValidationError as e:
+                continue
+
+            if ws_msg.interrupt_type == InterruptType.PAUSE:
+                # TODO: send pause message
+                await websocket.send_json({"type": "pause", "client_id": client_id})
+            elif ws_msg.interrupt_type == InterruptType.RESUME:
+                # TODO: send resume message
+                await websocket.send_json({"type": "resume", "client_id": client_id})
+            elif ws_msg.interrupt_type == InterruptType.ABORT:
+                # TODO: send abort message
+                await websocket.send_json({"type": "abort", "client_id": client_id})
+
+    except WebSocketDisconnect:
+        del ws_clients[client_id]
+    finally:
+        await websocket.close()
