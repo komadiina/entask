@@ -5,5 +5,8 @@
     "format-isort": "isort .",
     "format-black": "black .",
     "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   }
 }

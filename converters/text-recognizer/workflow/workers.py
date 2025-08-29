@@ -5,6 +5,24 @@ from models.messages import WorkflowStatus, WSNotification
 from utils.ws import notify
 
 
+@worker_task(task_definition_name="tr-fetch-raw-document")
+def fetch_raw_document(input: dict):
+    notify(
+        WSNotification(
+            status=WorkflowStatus.RUNNING,
+            message="Fetching raw document...",
+            client_id=input["client_id"],
+        )
+    )
+
+    time.sleep(2)
+
+    return {
+        **input,
+        "message": "raw document fetched",
+    }
+
+
 @worker_task(task_definition_name="tr-init-easyocr")
 def init_easyocr(input: dict):
     notify(
@@ -82,7 +100,7 @@ def llm_correct(input: dict):
         )
     )
 
-    time.sleep(60)
+    time.sleep(4)
 
     return {
         **input,
@@ -153,11 +171,12 @@ def forward_url(input: dict):
             status=WorkflowStatus.SUCCEEDED,
             message="Conversion finished!",
             client_id=input["client_id"],
+            data={"downloadUri": "https://google.com"},
         )
     )
 
     return {
         **input,
         "message": "url forwarded to client",
-        "url": "https://google.com",
+        "downloadUri": "https://google.com",
     }

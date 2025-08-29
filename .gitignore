@@ -195,3 +195,5 @@ client_secret.json
 !/core/flyway/*
 /core/minio/*
 /core/nats/data
+/node_modules
+/package-lock.json

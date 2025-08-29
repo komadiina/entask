@@ -6,6 +6,7 @@ export interface TLocalStorage {
 	authProvider: string;
 	tokenType: string;
 	uuid: string;
+	workflowId: string;
 }
 
 export type KLocalStorage = keyof TLocalStorage;

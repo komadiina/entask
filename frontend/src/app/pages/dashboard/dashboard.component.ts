@@ -21,6 +21,7 @@ import { MessageService } from 'primeng/api';
 import { Observable, map } from 'rxjs';
 import { PresignRequest } from '@entask-models/file/presign-request.model';
 import { AuthService } from '@entask-services/auth.service';
+import { LocalStorageService } from '@entask-services/local-storage.service';
 import { DashboardService } from '@entask-services/pages/dashboard.service';
 import { GeneralWebSocket } from '@entask-services/websocket.class';
 
@@ -46,6 +47,10 @@ export class DashboardComponent implements OnDestroy {
 	conversionStatus: string;
 	conversions: ConversionLabel[] = _conversions;
 	selectedConversion: ConversionLabel | null = null;
+	isConversionPaused = false;
+	isConversionRunning = false;
+	isAbortEnabled = true;
+	isDownloadEnabled = false;
 
 	textRecognizerForm: TFileConversionForm;
 	thumbnailerForm: TFileConversionForm;
@@ -58,6 +63,7 @@ export class DashboardComponent implements OnDestroy {
 		public router: Router,
 		private messageService: MessageService,
 		private dashboardService: DashboardService,
+		private localStorageService: LocalStorageService,
 	) {
 		this.websocket = new GeneralWebSocket(null, true);
 
@@ -67,12 +73,25 @@ export class DashboardComponent implements OnDestroy {
 				data.subscribe((data) => {
 					if (data.type === WebSocketResponseType.ProgressUpdate) {
 						if (data?.status === WebSocketWorkflowStatus.Succeeded) {
+							this.isConversionRunning = false;
+							this.conversionStatus = 'Completed';
+							this.conversionDownloadUri = data.data.downloadUri;
+
+							this.isAbortEnabled = false;
+							this.isDownloadEnabled = true;
+
 							this.messageService.add({
 								severity: 'success',
 								summary: 'Conversion finished',
 								detail: 'Conversion completed successfully!',
 							});
 						} else if (data?.status === WebSocketWorkflowStatus.Started) {
+							this.localStorageService.set('workflowId', data.data.workflow_id);
+							this.isConversionRunning = true;
+
+							this.isAbortEnabled = true;
+							this.isDownloadEnabled = false;
+
 							this.messageService.add({
 								severity: 'info',
 								summary: 'Conversion started',
@@ -280,11 +299,22 @@ export class DashboardComponent implements OnDestroy {
 	}
 
 	public downloadResult(): void {
-		throw new Error('Method not implemented.');
+		this.dashboardService.downloadResult(this.conversionDownloadUri!);
 	}
 
 	public cancelConversion(): void {
-		throw new Error('Method not implemented.');
+		this.dashboardService.cancelConversion().subscribe((data) => {
+			if (data.success == true) {
+				this.messageService.add({
+					severity: 'success',
+					summary: 'Success',
+					detail: 'Conversion cancelled successfully.',
+				});
+			}
+		});
+
+		this.conversionStarted = false;
+		this.conversionDownloadUri = null;
 	}
 
 	ngOnDestroy(): void {

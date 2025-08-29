@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { TFileConversionForm } from '@entask-types/dashboard/forms.type';
-import { firstValueFrom, lastValueFrom } from 'rxjs';
+import { Observable, firstValueFrom, lastValueFrom } from 'rxjs';
 import { PresignRequest } from '@entask-models/file/presign-request.model';
 import { PresignResponse } from '@entask-models/file/presign-response.model';
 import { LocalStorageService } from '@entask-services/local-storage.service';
@@ -69,5 +69,19 @@ export class DashboardService {
 				clientId: LocalStorageService.get('uuid'),
 			}),
 		);
+	}
+
+	public cancelConversion(): Observable<any> {
+		const endpoint = ApiUtil.builder()
+			.service('conversion')
+			.endpoint(LocalStorageService.get('workflowId')!)
+			.queryParam('client_id', LocalStorageService.get('uuid')!)
+			.build();
+
+		return this.http.delete<any>(endpoint);
+	}
+
+	public async downloadResult(url: string): Promise<any> {
+		return await fetch(url);
 	}
 }

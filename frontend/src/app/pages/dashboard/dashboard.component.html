@@ -36,25 +36,35 @@
 			class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 file:text-zinc-400 file:text-md text-md clickable smooth-hover-highlight file:text-md file:font-semibold"
 		/>
 
-		<input
-			class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
-			id="recognizerResultName"
-			placeholder="Result file name"
-			(input)="onResultNameChange($event)"
-		/>
-
-		<textarea
-			id="recognizerDescription"
-			class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
-			placeholder="Description (optional)"
-			(input)="onDescriptionChange($event)"
-		></textarea>
-
-		<z-button
-			(click)="submitRecognizer()"
-			class="zard-button clickable"
-			>Upload</z-button
+		<div
+			*ngIf="textRecognizerForm?.content"
+			class="w-full flex flex-col gap-2 justify-center items-center"
 		>
+			<input
+				class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
+				id="recognizerResultName"
+				placeholder="Result file name"
+				(input)="onResultNameChange($event)"
+			/>
+
+			<textarea
+				id="recognizerDescription"
+				class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
+				placeholder="Description (optional)"
+				(input)="onDescriptionChange($event)"
+			></textarea>
+
+			<div class="w-full flex justify-end mt-2">
+				<button
+					z-button
+					[disabled]="this.conversionStarted"
+					(click)="submitRecognizer()"
+					class="zard-button clickable"
+				>
+					Upload
+				</button>
+			</div>
+		</div>
 	</ng-container>
 
 	<!-- TERM EXTRACTOR -->
@@ -71,12 +81,14 @@
 		></textarea>
 
 		<div class="w-full flex justify-end mt-2">
-			<z-button
+			<button
+				[disabled]="this.conversionStarted"
+				z-button
 				(click)="submitTermExtractor()"
 				class="zard-button clickable"
 			>
 				Submit
-			</z-button>
+			</button>
 		</div>
 	</ng-container>
 
@@ -111,12 +123,14 @@
 			></textarea>
 
 			<div class="w-full flex justify-end mt-2">
-				<z-button
+				<button
+					[disabled]="this.conversionStarted"
+					z-button
 					(click)="submitThumbnailer()"
 					class="zard-button clickable"
 				>
 					Upload
-				</z-button>
+				</button>
 			</div>
 		</div>
 	</ng-container>
@@ -141,84 +155,88 @@
 				{{ waveformerForm.file?.name }}
 			</p>
 
-			<!-- Filters -->
-			<div class="grid grid-cols-2 gap-2 my-3">
-				<label
-					class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
-					tabindex="0"
-				>
-					<input
-						type="checkbox"
-						(change)="
-							this.waveformerForm.filters!.compress =
-								!this.waveformerForm.filters!.compress
-						"
-						class="text-zinc-100 text-sm p-2 bg-zinc-400 checked:bg-lime-400"
-					/>
-					<span class="text-zinc-100 text-sm">Compress</span>
-				</label>
+			<div *ngIf="waveformerForm?.content">
+				<!-- Filters -->
+				<div class="grid grid-cols-2 gap-2 my-3">
+					<label
+						class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
+						tabindex="0"
+					>
+						<input
+							type="checkbox"
+							(change)="
+								this.waveformerForm.filters!.compress =
+									!this.waveformerForm.filters!.compress
+							"
+							class="text-zinc-100 text-sm p-2 bg-zinc-400 checked:bg-lime-400"
+						/>
+						<span class="text-zinc-100 text-sm">Compress</span>
+					</label>
 
-				<label
-					class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
-				>
-					<input
-						type="checkbox"
-						(change)="
-							this.waveformerForm.filters!.reverb =
-								!this.waveformerForm.filters!.reverb
-						"
-					/>
-					<span class="text-zinc-100 text-sm">Reverb</span>
-				</label>
+					<label
+						class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
+					>
+						<input
+							type="checkbox"
+							(change)="
+								this.waveformerForm.filters!.reverb =
+									!this.waveformerForm.filters!.reverb
+							"
+						/>
+						<span class="text-zinc-100 text-sm">Reverb</span>
+					</label>
 
-				<label
-					class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
-				>
-					<input
-						type="checkbox"
-						(change)="
-							this.waveformerForm.filters!.gain =
-								!this.waveformerForm.filters!.gain
-						"
-					/>
-					<span class="text-zinc-100 text-sm">Gain</span>
-				</label>
+					<label
+						class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
+					>
+						<input
+							type="checkbox"
+							(change)="
+								this.waveformerForm.filters!.gain =
+									!this.waveformerForm.filters!.gain
+							"
+						/>
+						<span class="text-zinc-100 text-sm">Gain</span>
+					</label>
 
-				<label
-					class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
-				>
-					<input
-						type="checkbox"
-						(change)="
-							this.waveformerForm.filters!.downmix =
-								!this.waveformerForm.filters!.downmix
-						"
-					/>
-					<span class="text-zinc-100 text-sm">Downmix</span>
-				</label>
-			</div>
+					<label
+						class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
+					>
+						<input
+							type="checkbox"
+							(change)="
+								this.waveformerForm.filters!.downmix =
+									!this.waveformerForm.filters!.downmix
+							"
+						/>
+						<span class="text-zinc-100 text-sm">Downmix</span>
+					</label>
+				</div>
 
-			<input
-				id="waveformerResultName"
-				placeholder="Result file name"
-				class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md bg-zinc-800/50"
-				(input)="onWaveformerResultNameChange($event)"
-			/>
+				<input
+					id="waveformerResultName"
+					placeholder="Result file name"
+					class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md bg-zinc-800/50"
+					(input)="onWaveformerResultNameChange($event)"
+				/>
 
-			<textarea
-				id="waveformerDescription"
-				placeholder="Description (optional)"
-				class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 my-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
-				(input)="onWaveformerDescriptionChange($event)"
-			></textarea>
+				<textarea
+					id="waveformerDescription"
+					placeholder="Description (optional)"
+					class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 my-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
+					(input)="onWaveformerDescriptionChange($event)"
+				></textarea>
 
-			<div class="w-full flex justify-end mt-2">
-				<z-button
-					(click)="submitWaveformer()"
-					class="zard-button clickable"
-				>
-					Upload
-				</z-button>
+				<div class="w-full flex justify-end mt-2">
+					<button
+						z-button
+						[disabled]="this.conversionStarted"
+						(click)="submitWaveformer()"
+						class="zard-button clickable"
+					>
+						Upload
+					</button>
+				</div>
 			</div>
 		</div>
 	</ng-container>
@@ -234,8 +252,8 @@
 
 		<div class="w-full flex flex-row items-end justify-center gap-2">
 			<button
+				[disabled]="!this.isAbortEnabled"
 				z-button
-				zButton
 				(click)="cancelConversion()"
 				class="zard-button clickable bg-red-600/25"
 			>
@@ -245,7 +263,7 @@
 			<button
 				z-button
 				(click)="downloadResult()"
-				[disabled]="this.conversionDownloadUri === null"
+				[disabled]="!this.isDownloadEnabled"
 				class="zard-button clickable"
 			>
 				Download

@@ -98,3 +98,17 @@ async def create_upload_url(
         "key": object_key,
         "user_id": user_id,
     }
+
+
+@file_router.get("/presign/download")
+async def get_download_url(object_key: str):
+    presigned_url = s3_client.generate_presigned_url(
+        "get_object",
+        Params={
+            "Bucket": S3_BUCKET_CONVERSIONS,
+            "Key": object_key,
+        },
+        ExpiresIn=URI_TTL,
+    )
+
+    return {"url": presigned_url}

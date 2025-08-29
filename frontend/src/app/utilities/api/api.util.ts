@@ -21,6 +21,7 @@ class ApiEndpointBuilder {
 	private _rootPrefix: string;
 	private _prefix: string;
 	private _endpoint: string;
+	private _queryParams: Record<string, string> | null = null;
 
 	constructor() {
 		this._protocol = environment.backendProtocol;
@@ -38,6 +39,18 @@ class ApiEndpointBuilder {
 	 */
 	public protocol(protocol: string): ApiEndpointBuilder {
 		this._protocol = protocol;
+		return this;
+	}
+
+	public queryParam(key: string, value: string): ApiEndpointBuilder {
+		if (!this._queryParams) this._queryParams = {};
+
+		this._queryParams[key] = value;
+		return this;
+	}
+
+	public queryParams(queryParams: Record<string, string>): ApiEndpointBuilder {
+		this._queryParams = { ...this._queryParams, ...queryParams };
 		return this;
 	}
 
@@ -126,6 +139,13 @@ class ApiEndpointBuilder {
 	 * @returns {string} The built endpoint using previously set parameters (`protocol`, `host`, `port`, `(prefix | service)`, `(breadcrumb | breadcrumbs | endpoint`)
 	 */
 	public build(): string {
-		return `${this._protocol}://${this._host}:${this._port}${this._rootPrefix}${this._prefix}${this._endpoint}`;
+		const url = `${this._protocol}://${this._host}:${this._port}${this._rootPrefix}${this._prefix}${this._endpoint}`;
+
+		if (this._queryParams) {
+			return `${url}?${Object.entries(this._queryParams)
+				.map(([key, value]) => `${key}=${value}`)
+				.join('&')}`;
+		}
+		return url;
 	}
 }

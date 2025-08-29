@@ -1,5 +1,6 @@
 import os
 import uuid
+from typing import Optional
 
 from conductor.client.configuration.configuration import Configuration
 from conductor.client.orkes_clients import OrkesClients
@@ -51,9 +52,8 @@ async def submit_conversion(conversion: ConversionRequest):
 
 
 @convert_router.delete("/{workflow_id}")
-async def abort_workflow(workflow_id: str, request: Request):
+async def abort_workflow(request: Request, workflow_id: str, client_id: str):
     try:
-        client_id = (await request.json())["clientId"]
 
         config = Configuration(server_api_url=CONDUCTOR_SERVER_API_HOST)
         clients = OrkesClients(config)
@@ -68,17 +68,16 @@ async def abort_workflow(workflow_id: str, request: Request):
                 data={"workflow_id": workflow_id},
             )
         )
-        return {"message": "Workflow aborted."}
+        return {"message": "Workflow aborted.", "success": True}
     except Exception as e:
         print(e)
-        raise HTTPException(status_code=500, detail="Failed to abort workflow.")
+        raise e
+        # raise HTTPException(status_code=500, detail="Failed to abort workflow.")
 
 
 @convert_router.put("/{workflow_id}/pause")
-async def pause_workflow(workflow_id: str, request: Request):
+async def pause_workflow(workflow_id: str, request: Request, client_id: str):
     try:
-        client_id = (await request.json())["clientId"]
-
         config = Configuration(server_api_url=CONDUCTOR_SERVER_API_HOST)
         clients = OrkesClients(config)
         wf_client = clients.get_workflow_client()
@@ -92,17 +91,15 @@ async def pause_workflow(workflow_id: str, request: Request):
                 data={"workflow_id": workflow_id},
             )
         )
-        return {"message": "Workflow paused."}
+        return {"message": "Workflow paused.", "success": True}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Failed to pause workflow.")
 
 
 @convert_router.put("/{workflow_id}/resume")
-async def resume_workflow(workflow_id: str, request: Request):
+async def resume_workflow(workflow_id: str, request: Request, client_id: str):
     try:
-        client_id = (await request.json())["clientId"]
-
         config = Configuration(server_api_url=CONDUCTOR_SERVER_API_HOST)
         clients = OrkesClients(config)
         wf_client = clients.get_workflow_client()
@@ -116,9 +113,7 @@ async def resume_workflow(workflow_id: str, request: Request):
                 data={"workflow_id": workflow_id},
             )
         )
-        return {
-            "message": "Workflow resumed.",
-        }
+        return {"message": "Workflow resumed.", "success": True}
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Failed to resume workflow.")
