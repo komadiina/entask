@@ -66,13 +66,12 @@ async def handler(msg: str):
 
     clients = OrkesClients(api_config)
     wf_executor = clients.get_workflow_executor()
-    workflow = register_workflow(
+    register_workflow(
         text_recognizer_workflow, input=msg_json, workflow_executor=wf_executor
     )
 
     wf_start_request = init_start_workflow_request(msg_json)
     workflow_id = wf_executor.start_workflow(start_workflow_request=wf_start_request)
-    print(workflow_id)
 
     notify(
         WSNotification(

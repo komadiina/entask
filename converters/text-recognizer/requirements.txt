@@ -1,6 +1,7 @@
 fastapi[standard]
 faststream[nats]
 httpx
+boto3
 
 conductor-python==1.1.10
 

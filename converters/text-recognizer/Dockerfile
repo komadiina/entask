@@ -15,6 +15,7 @@ RUN pip3 install pillow
 WORKDIR /converters/text-recognizer
 
 # huge ass packages, docker-cache these build steps
+# only compatible with nvidia drivers
 RUN pip install torch
 RUN pip install nvidia-cublas-cu12
 RUN pip install nvidia-cudnn-cu12
@@ -25,6 +26,14 @@ RUN pip install nvidia_cusparselt_cu12
 RUN pip install nvidia_nccl_cu12
 RUN pip install triton
 
+RUN apt-get install wget
+RUN apt-get install unzip
+RUN wget https://github.com/JaidedAI/EasyOCR/releases/download/v1.3/english_g2.zip
+RUN wget https://github.com/JaidedAI/EasyOCR/releases/download/pre-v1.1.6/craft_mlt_25k.zip
+RUN mkdir /.EasyOCR
+RUN mkdir /.EasyOCR/model
+RUN unzip english_g2.zip -d /.EasyOCR/model
+RUN unzip craft_mlt_25k.zip -d /.EasyOCR/model
 
 COPY requirements.txt .
 RUN pip install --no-cache-dir --upgrade -r /converters/text-recognizer/requirements.txt

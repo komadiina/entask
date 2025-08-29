@@ -17,13 +17,13 @@ import {
 	WebSocketResponseType,
 	WebSocketWorkflowStatus,
 } from '@entask-types/dashboard/websocket-response.type';
+import { GeneralWebSocket } from '@entask-types/websockets/websocket.class';
 import { MessageService } from 'primeng/api';
 import { Observable, map } from 'rxjs';
 import { PresignRequest } from '@entask-models/file/presign-request.model';
 import { AuthService } from '@entask-services/auth.service';
 import { LocalStorageService } from '@entask-services/local-storage.service';
 import { DashboardService } from '@entask-services/pages/dashboard.service';
-import { GeneralWebSocket } from '@entask-services/websocket.class';
 
 @Component({
 	selector: 'app-dashboard',
@@ -139,6 +139,9 @@ export class DashboardComponent implements OnDestroy {
 	}
 
 	public selectConversion(conversionType: ConversionLabel): void {
+		this.conversionStarted = false;
+		this.isDownloadEnabled = false;
+		this.isAbortEnabled = true;
 		this.selectedConversion = conversionType;
 	}
 

@@ -197,3 +197,4 @@ client_secret.json
 /core/nats/data
 /node_modules
 /package-lock.json
+/converters/text-recognizer/easyocr/model/*

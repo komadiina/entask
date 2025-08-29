@@ -14,7 +14,14 @@ def text_recognizer_workflow(
     workflow.version = 1
     workflow = workflow.owner_email("test@entask.com")
 
-    t_init_easyocr = init_easyocr(input=input, task_ref_name="init_easyocr_ref")
+    t_fetch_raw_document = fetch_raw_document(
+        input=input, task_ref_name="fetch_raw_document_ref"
+    )
+    workflow >> t_fetch_raw_document
+
+    t_init_easyocr = init_easyocr(
+        input=t_fetch_raw_document.output(), task_ref_name="init_easyocr_ref"
+    )
     workflow >> t_init_easyocr
 
     t_scan_text = scan_text(

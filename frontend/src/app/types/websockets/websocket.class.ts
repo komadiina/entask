@@ -1,9 +1,9 @@
 import { WebSocketResponse } from '@entask-types/dashboard/websocket-response.type';
 import { Observable, map } from 'rxjs';
 import { WebSocketSubject, webSocket } from 'rxjs/webSocket';
+import { LocalStorageService } from '@entask-services/local-storage.service';
 import { ApiUtil } from '@entask-utils/api/api.util';
 import { environment } from '@entask-environments/environment';
-import { LocalStorageService } from './local-storage.service';
 
 export class GeneralWebSocket<TReceived = WebSocketResponse> {
 	private socket: WebSocketSubject<any>;

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { TFileConversionForm } from '@entask-types/dashboard/forms.type';
 import { Observable, firstValueFrom, lastValueFrom } from 'rxjs';
@@ -80,8 +80,52 @@ export class DashboardService {
 
 		return this.http.delete<any>(endpoint);
 	}
+	private parseFilename(cd: string | null, url: string): string {
+		if (cd) {
+			const m1 = cd.match(/filename\*=UTF-8''([^;]+)/i);
+			if (m1) return decodeURIComponent(m1[1]);
+			const m2 = cd.match(/filename="?([^";]+)"?/i);
+			if (m2) return m2[1];
+		}
+		try {
+			const u = new URL(url);
+			return (
+				u.searchParams
+					.get('response-content-disposition')
+					?.split('filename=')[1] ??
+				(u.pathname.split('/').pop() || 'download')
+			);
+		} catch {
+			return 'download';
+		}
+	}
 
-	public async downloadResult(url: string): Promise<any> {
-		return await fetch(url);
+	public async downloadResult(url: string): Promise<void> {
+		const resp = await fetch(url, {
+			method: 'GET',
+			mode: 'cors',
+			credentials: 'omit',
+		});
+
+		if (!resp.ok) {
+			throw new Error(`HTTP error! status: ${resp.status}`);
+		}
+
+		const blob = await resp.blob();
+		const filename = this.parseFilename(
+			resp.headers.get('content-disposition'),
+			url,
+		);
+
+		const objectUrl = URL.createObjectURL(blob);
+
+		const a = document.createElement('a');
+		a.href = objectUrl;
+		a.download = filename;
+		document.body.appendChild(a);
+		a.click();
+		a.remove();
+
+		URL.revokeObjectURL(objectUrl);
 	}
 }
