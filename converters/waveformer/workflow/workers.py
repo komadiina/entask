@@ -6,10 +6,10 @@ import uuid
 
 import boto3
 import httpx
-from pedalboard import Chorus, Reverb, Gain, Compressor, Pedalboard
-from pedalboard.io import AudioFile
 from conductor.client.worker.worker_task import worker_task
 from models.messages import WorkflowStatus, WSNotification
+from pedalboard import Chorus, Compressor, Gain, Pedalboard, Reverb
+from pedalboard.io import AudioFile
 from utils.ws import notify
 
 S3_HOST = os.getenv("S3_HOST", "minio")

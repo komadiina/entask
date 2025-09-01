@@ -1,6 +1,6 @@
 import asyncio
-import os
 import json
+import os
 
 from conductor.client.automator.task_handler import TaskHandler
 from conductor.client.configuration.configuration import Configuration
@@ -10,10 +10,9 @@ from conductor.client.workflow.conductor_workflow import ConductorWorkflow
 from conductor.client.workflow.executor.workflow_executor import WorkflowExecutor
 from faststream import FastStream
 from faststream.nats import NatsBroker
-
-from workflow.workflow import waveformer_workflow
+from models.messages import WorkflowStatus, WSNotification
 from utils.ws import notify
-from models.messages import WSNotification, WorkflowStatus
+from workflow.workflow import waveformer_workflow
 
 HOSTS = os.getenv("NATS_HOSTS", "").split(",")
 NATS_USER = os.getenv("NATS_USER")

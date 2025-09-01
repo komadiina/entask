@@ -1,17 +1,17 @@
 # type: ignore
 import json
+import math
 import os
 import tempfile
 import uuid
-import math
 from zipfile import ZipFile
 
 import boto3
 import httpx
 import imageio
-from moviepy import VideoFileClip
 from conductor.client.worker.worker_task import worker_task
 from models.messages import WorkflowStatus, WSNotification
+from moviepy import VideoFileClip
 from utils.ws import notify
 
 S3_HOST = os.getenv("S3_HOST", "minio")
@@ -21,6 +21,13 @@ S3_BUCKET_CONVERSIONS = os.getenv("S3_BUCKET_CONVERSIONS", "conversions")
 S3_ACCESS_KEY = os.getenv("S3_ACCESS_KEY")
 S3_SECRET_KEY = os.getenv("S3_SECRET_KEY")
 URI_TTL = 300
+MAX_PIXELS = 2_000_000
+MAX_W = 1280
+MAX_H = 720
+FRAME_COUNT = 10
+TMP_DIR = "/tmp"
+JPEG_PREFIX = "tbnlr_frame_"
+GIF_FILENAME = "tbnlr_preview.gif"
 
 
 @worker_task(task_definition_name="tbnlr-fetch-raw-document")
@@ -76,7 +83,7 @@ def downscale_clamp(input: dict):
         )
     )
 
-    clip = VideoFileClip(src)
+    clip = VideoFileClip(input["file_path"])
     try:
         w, h = int(clip.w), int(clip.h)
         pixels = w * h
@@ -106,7 +113,7 @@ def downscale_clamp(input: dict):
     finally:
         clip.close()
 
-    return {**input, "raw_file_path": src, "file_path": out_path}
+    return {**input, "raw_file_path": input["file_path"], "file_path": out_path}
 
 
 @worker_task(task_definition_name="tbnlr-sample-video")
@@ -119,7 +126,7 @@ def sample_video(input: dict):
         )
     )
 
-    clip = VideoFileClip(src)
+    clip = VideoFileClip(input["file_path"])
     jpeg_paths = []
     try:
         duration = float(clip.duration) if clip.duration is not None else 0.0
@@ -153,13 +160,13 @@ def save_to_gif(input: dict):
         )
     )
 
-    jpeg_paths = input["jpeg_paths"]
-    images = [imageio.imread(p) for p in jpeg_paths]
+    images = [imageio.imread(p) for p in input["jpeg_paths"]]
 
     gif_path = os.path.join(TMP_DIR, GIF_FILENAME)
-    imageio.mimsave(gif_path, images, format="GIF", duration=1)  # 1 fps
+    imageio.mimsave(gif_path, images, format="GIF", duration=0.2)  # 1 fps
+    zipfile_name = "{}.zip".format(input["client_id"])
 
-    return {**input, "gif_path": gif_path}
+    return {**input, "gif_path": gif_path, "tbnlr_doc": {"name": zipfile_name}}
 
 
 @worker_task(task_definition_name="tbnlr-zip")

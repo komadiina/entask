@@ -7,7 +7,7 @@ from workflow.workers import *
 def thumbnailer_workflow(
     workflow_executor: WorkflowExecutor, input: dict
 ) -> ConductorWorkflow:
-    name = "waveformer"
+    name = "thumbnailer"
     workflow = ConductorWorkflow(
         name=name, executor=workflow_executor, description="Thumbnailer workflow"
     )

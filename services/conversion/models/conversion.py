@@ -1,4 +1,4 @@
-from typing import Optional, Union, Dict, Any
+from typing import Any, Dict, Optional, Union
 
 from models.camelizer import BaseSchema
 
