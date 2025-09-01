@@ -289,6 +289,7 @@ def forward_url(input: dict):
 
     # cleanup
     os.remove("/tmp/" + input["pdf_doc"]["name"])
+    os.remove(input["file_path"])
 
     return {
         **input,

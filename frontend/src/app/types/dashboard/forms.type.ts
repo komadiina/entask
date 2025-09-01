@@ -12,11 +12,11 @@ export interface TFileConversionForm extends TBaseConversionForm {
 }
 
 export interface WaveformerForm extends TFileConversionForm {
-	filters?: {
+	additional?: {
 		compress: boolean;
 		reverb: boolean;
 		gain: boolean;
-		downmix: boolean;
+		chorus: boolean;
 	};
 }
 

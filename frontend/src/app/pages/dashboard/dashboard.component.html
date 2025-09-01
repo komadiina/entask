@@ -156,7 +156,7 @@
 			</p>
 
 			<div *ngIf="waveformerForm?.content">
-				<!-- Filters -->
+				<!-- additional -->
 				<div class="grid grid-cols-2 gap-2 my-3">
 					<label
 						class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
@@ -165,8 +165,8 @@
 						<input
 							type="checkbox"
 							(change)="
-								this.waveformerForm.filters!.compress =
-									!this.waveformerForm.filters!.compress
+								this.waveformerForm.additional!.compress =
+									!this.waveformerForm.additional!.compress
 							"
 							class="text-zinc-100 text-sm p-2 bg-zinc-400 checked:bg-lime-400"
 						/>
@@ -179,8 +179,8 @@
 						<input
 							type="checkbox"
 							(change)="
-								this.waveformerForm.filters!.reverb =
-									!this.waveformerForm.filters!.reverb
+								this.waveformerForm.additional!.reverb =
+									!this.waveformerForm.additional!.reverb
 							"
 						/>
 						<span class="text-zinc-100 text-sm">Reverb</span>
@@ -192,8 +192,8 @@
 						<input
 							type="checkbox"
 							(change)="
-								this.waveformerForm.filters!.gain =
-									!this.waveformerForm.filters!.gain
+								this.waveformerForm.additional!.gain =
+									!this.waveformerForm.additional!.gain
 							"
 						/>
 						<span class="text-zinc-100 text-sm">Gain</span>
@@ -205,11 +205,11 @@
 						<input
 							type="checkbox"
 							(change)="
-								this.waveformerForm.filters!.downmix =
-									!this.waveformerForm.filters!.downmix
+								this.waveformerForm.additional!.chorus =
+									!this.waveformerForm.additional!.chorus
 							"
 						/>
-						<span class="text-zinc-100 text-sm">Downmix</span>
+						<span class="text-zinc-100 text-sm">Chorus</span>
 					</label>
 				</div>
 

@@ -59,7 +59,6 @@ def init_start_workflow_request(msg_json):
 @broker.subscriber(subject="convert.text-recognizer")
 async def handler(msg: str):
     msg_json = json.loads(msg)
-    print(msg_json)
 
     task_handler = TaskHandler(configuration=api_config)
     task_handler.start_processes()

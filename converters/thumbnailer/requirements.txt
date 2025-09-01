@@ -3,6 +3,7 @@ faststream[nats]
 httpx
 
 conductor-python==1.1.10
+boto3
 
 numpy
 moviepy

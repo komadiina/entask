@@ -44,6 +44,14 @@ services:
       WAVEFORMER_CONVERTER_VERSION: ${WAVEFORMER_CONVERTER_VERSION}
       WS_PROXY_HOST: ${WS_PROXY_HOST}
       WS_PROXY_PORT: ${WS_PROXY_PORT}
+      FILE_SERVICE_HOST: ${FILE_SERVICE_HOST}
+      FILE_SERVICE_PORT: ${FILE_SERVICE_PORT}
+      S3_HOST: ${S3_HOST}
+      S3_PORT: ${S3_PORT}
+      S3_BUCKET_CONVERSIONS: ${S3_BUCKET_CONVERSIONS}
+      S3_ACCESS_KEY: ${MINIO_ROOT_USER}
+      S3_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      URI_TTL: ${URI_TTL}
     volumes:
       - ../converters/waveformer:/converters/waveformer
     networks:

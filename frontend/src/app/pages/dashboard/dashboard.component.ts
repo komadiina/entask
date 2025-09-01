@@ -121,11 +121,11 @@ export class DashboardComponent implements OnDestroy {
 
 		this.waveformerForm = {
 			contentType: 'audio/wav',
-			filters: {
+			additional: {
 				compress: false,
 				reverb: false,
 				gain: false,
-				downmix: false,
+				chorus: false,
 			},
 			conversionType: 'waveformer',
 		};
