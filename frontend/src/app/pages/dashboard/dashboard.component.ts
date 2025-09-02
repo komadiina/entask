@@ -169,7 +169,7 @@ export class DashboardComponent implements OnDestroy {
 
 	// --- waveformer --- //
 	public submitWaveformer() {
-    this.waveformerForm.additional = this.waveformerFilterComponent.filters;
+		this.waveformerForm.additional = this.waveformerFilterComponent.filters;
 		this.forwardUpload(this.waveformerForm);
 	}
 

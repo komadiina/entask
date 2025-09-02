@@ -9,7 +9,7 @@ from conductor.client.orkes_clients import OrkesClients
 from conductor.client.workflow.conductor_workflow import ConductorWorkflow
 from conductor.client.workflow.executor.workflow_executor import WorkflowExecutor
 from faststream import FastStream
-from faststream.nats import NatsBroker
+from faststream.nats import DeliverPolicy, NatsBroker
 from models.messages import WorkflowStatus, WSNotification
 from utils.ws import notify
 from workflow.workflow import thumbnailer_workflow
@@ -52,7 +52,11 @@ def init_start_workflow_request(msg_json):
     return wf_request
 
 
-@broker.subscriber(subject="convert.thumbnailer")
+@broker.subscriber(
+    subject="convert.thumbnailer",
+    stream="conversions",
+    deliver_policy=DeliverPolicy.ALL,
+)
 async def handler(msg: str):
     msg_json = json.loads(msg)
     print(msg_json)

@@ -207,9 +207,11 @@
 		*ngIf="conversionStarted"
 		class="flex flex-col items-start w-full justify-center"
 	>
-		<p class="text-zinc-100 text-sm">
+		<p class="text-zinc-100 text-lg py-2 my-2 font-semibold italic">
 			Converting:
-			{{ `${(this.serverResponse | async) ?? 'Starting conversion...'}` }}
+			{{
+				`${(this.serverResponse | async) ?? 'Waiting for available converters...'}`
+			}}
 		</p>
 
 		<div class="w-full flex flex-row items-end justify-center gap-2">

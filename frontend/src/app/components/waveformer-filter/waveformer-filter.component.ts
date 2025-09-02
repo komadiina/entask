@@ -1,11 +1,11 @@
-import {  NgForOf } from '@angular/common';
+import { NgForOf } from '@angular/common';
 import { ChangeDetectionStrategy, Component, ViewChild } from '@angular/core';
 import { ZardButtonComponent } from '@entask-components/button/button.component';
 import { ZardDropdownModule } from '@entask-components/dropdown/dropdown.module';
+import { EntaskDirectivesModule } from '@entask-directives/directives.module';
 import { BaseEffect } from '@entask-types/dashboard/waveformer-filter.type';
 import { EffectHostDirective } from '@entask-root/directives/effect-host.directive';
 import { getAvailableFilters } from '@entask-utils/dashboard/waveformer/available-filters';
-import { EntaskDirectivesModule } from '@entask-directives/directives.module';
 
 @Component({
 	selector: 'app-waveformer-filter',
@@ -16,7 +16,7 @@ import { EntaskDirectivesModule } from '@entask-directives/directives.module';
 		ZardDropdownModule,
 		NgForOf,
 		ZardButtonComponent,
-    EntaskDirectivesModule
+		EntaskDirectivesModule,
 	],
 	standalone: true,
 })
