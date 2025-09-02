@@ -1,10 +1,16 @@
 import { AsyncPipe, NgForOf } from '@angular/common';
 import { NgIf } from '@angular/common';
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core';
+import {
+	ChangeDetectionStrategy,
+	Component,
+	OnDestroy,
+	ViewChild,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { ZardButtonComponent } from '@entask-components/button/button.component';
 import { ZardDropdownModule } from '@entask-components/dropdown/dropdown.module';
 import { HeaderComponent } from '@entask-components/header/header.component';
+import { WaveformerFilterComponent } from '@entask-components/waveformer-filter/waveformer-filter.component';
 import { conversions as _conversions } from '@entask-constants/conversions/conversion-types.constant';
 import { ConversionLabel } from '@entask-types/dashboard/conversion-label.type';
 import {
@@ -34,6 +40,7 @@ import { DashboardService } from '@entask-services/pages/dashboard.service';
 		NgIf,
 		HeaderComponent,
 		AsyncPipe,
+		WaveformerFilterComponent,
 	],
 	templateUrl: './dashboard.component.html',
 	styleUrls: ['./dashboard.component.css'],
@@ -57,6 +64,9 @@ export class DashboardComponent implements OnDestroy {
 	waveformerForm: WaveformerForm;
 	termExtractorForm: TermExtractorForm;
 	conversionDownloadUri: string | null = null;
+
+	@ViewChild(WaveformerFilterComponent)
+	waveformerFilterComponent!: WaveformerFilterComponent;
 
 	constructor(
 		private authService: AuthService,
@@ -121,12 +131,7 @@ export class DashboardComponent implements OnDestroy {
 
 		this.waveformerForm = {
 			contentType: 'audio/wav',
-			additional: {
-				compress: false,
-				reverb: false,
-				gain: false,
-				chorus: false,
-			},
+			additional: [],
 			conversionType: 'waveformer',
 		};
 
@@ -164,6 +169,7 @@ export class DashboardComponent implements OnDestroy {
 
 	// --- waveformer --- //
 	public submitWaveformer() {
+    this.waveformerForm.additional = this.waveformerFilterComponent.filters;
 		this.forwardUpload(this.waveformerForm);
 	}
 

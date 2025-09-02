@@ -1,0 +1,53 @@
+<div class="flex flex-1 flex-col gap-2 items-start justify-center">
+	<button
+		z-button
+		z-dropdown
+		zVariant="outline"
+		zType="default"
+		[zDropdownMenu]="menu"
+		class="clickable border-[1px] border-zinc-800 rounded-lg w-full text-center"
+	>
+		Add effect
+	</button>
+
+	<z-dropdown-menu-content
+		#menu="zDropdownMenuContent"
+		class="w-full rounded-lg bg-zinc-800 border-zinc-600 starting:bg-zinc-800/0 after:bg-zinc-800 transition-all duration-150 ease-in-out p-2"
+	>
+		<z-dropdown-menu-item
+			*ngFor="let filter of this.availableFilters"
+			class="clickable w-full mx-auto h-min"
+			(click)="this.filters.push(filter)"
+		>
+			{{ filter.label }}
+		</z-dropdown-menu-item>
+	</z-dropdown-menu-content>
+
+	<div
+		class="flex flex-col items-start w-full h-[30vh] max-h-[30vh] overflow-y-scroll p-4 gap-2"
+	>
+		<div
+			*ngFor="let filter of this.filters"
+			class="text-zinc p-2 hover:bg-amber-600/20 transition-all duration-150 ease-in-out rounded-lg shadow-xl w-full flex flex-row flex-1 items-start justify-between align-middle bg-zinc-700 gap-2"
+		>
+			<span class="h-min hover:text-zinc-100 font-semibold text-xl p-0 m-0">
+				{{ filter.label }}
+			</span>
+
+			<ng-template
+				effectHost
+				#effectHost
+			></ng-template>
+
+			<button
+				z-button
+				zType="default"
+				zVariant="outline"
+				(click)="this.filters.splice(this.filters.indexOf(filter), 1)"
+				class="clickable bg-amber-600"
+			>
+				Remove
+			</button>
+		</div>
+	</div>
+</div>

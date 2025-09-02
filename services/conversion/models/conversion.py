@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional, Union
+from typing import Any, List, Optional, Union, Dict
 
 from models.camelizer import BaseSchema
 
@@ -8,4 +8,4 @@ class ConversionRequest(BaseSchema):
     client_id: Optional[Union[str, int]] = None
     object_key: str
     token: Optional[str] | None = None
-    additional: Optional[Dict[str, Any]] = {}
+    additional: Optional[List[Dict[str, Any]]] = []

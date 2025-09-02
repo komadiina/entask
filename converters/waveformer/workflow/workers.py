@@ -66,25 +66,6 @@ def fetch_raw_document(input: dict):
 
 @worker_task(task_definition_name="wavf-init-pedalboard")
 def init_pedalboard(input: dict):
-    filters = input["additional"]
-
-    if filters["compress"] == True:
-        filters["compress"] = {"attack_ms": 10, "release_ms": 250, "threshold_db": -20}
-
-    if filters["reverb"] == True:
-        filters["reverb"] = {"wet_level": 0.25, "dry_level": 0.8, "room_size": 0.1}
-
-    if filters["gain"] == True:
-        filters["gain"] = 3
-
-    if filters["chorus"] == True:
-        filters["chorus"] = {
-            "rate_hz": 1.25,
-            "depth": 0.1,
-            "centre_delay_ms": 8,
-            "mix": 0.25,
-        }
-
     pb_doc = {"name": input["client_id"] + ".wav"}
 
     return {**input, "pb_doc": pb_doc}
@@ -104,17 +85,39 @@ def apply_effects(input: dict):
         audio = f.read(f.frames)
 
     effects = []
-    if input["additional"]["compress"] == True:
-        effects.append(Compressor(**input["filters"]["compress"]))
-
-    if input["additional"]["reverb"] == True:
-        effects.append(Reverb(**input["filters"]["reverb"]))
-
-    if input["additional"]["gain"] == True:
-        effects.append(Gain(input["filters"]["gain"]))
-
-    if input["additional"]["chorus"] == True:
-        effects.append(Chorus(**input["filters"]["chorus"]))
+    for effect in input["additional"]:
+        if effect["label"].lower() == "chorus":
+            depth = effect["depth"]
+            rate = effect["rate"]
+            mix = effect["mix"]
+            effects.append(Chorus(depth=depth, rate_hz=rate))
+        elif effect["label"].lower() == "compression":
+            attack = effect["attack"]
+            release = effect["release"]
+            threshold = effect["threshold"]
+            mix = effect["mix"]
+            effects.append(
+                Compressor(
+                    attack_ms=attack,
+                    release_ms=release,
+                    threshold_db=threshold,
+                )
+            )
+        elif effect["label"].lower() == "gain":
+            gain = effect["gain"]
+            effects.append(Gain(gain_db=gain))
+        elif effect["label"].lower() == "reverb":
+            room_size = effect["roomSize"]
+            wet = effect["wet"]
+            dry = effect["dry"]
+            mix = effect["mix"]
+            effects.append(
+                Reverb(
+                    room_size=room_size if room_size <= 1 else 1,
+                    dry_level=dry,
+                    wet_level=wet,
+                )
+            )
 
     board = Pedalboard(effects)
     mixed = board(audio, 44100.0)

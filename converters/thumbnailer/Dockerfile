@@ -1,4 +1,4 @@
-FROM python:3.12-alpine AS builder
+FROM python:3.12.11-alpine AS builder
 RUN apk add curl
 
 RUN apk add ffmpeg

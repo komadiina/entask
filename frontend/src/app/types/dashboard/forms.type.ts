@@ -1,3 +1,5 @@
+import { BaseEffect } from './waveformer-filter.type';
+
 export interface TBaseConversionForm {
 	contentType: string;
 	content?: File | string;
@@ -12,12 +14,7 @@ export interface TFileConversionForm extends TBaseConversionForm {
 }
 
 export interface WaveformerForm extends TFileConversionForm {
-	additional?: {
-		compress: boolean;
-		reverb: boolean;
-		gain: boolean;
-		chorus: boolean;
-	};
+	additional?: BaseEffect[];
 }
 
 export interface TermExtractorForm extends TBaseConversionForm {

@@ -83,3 +83,7 @@ body {
 	position: relative;
 	z-index: 1;
 }
+
+div .card {
+	@apply bg-zinc-700/65 p-2 rounded-xl;
+}

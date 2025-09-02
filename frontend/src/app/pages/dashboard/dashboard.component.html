@@ -1,5 +1,9 @@
 <app-header class="w-full absolute top-4 right-0 mx-auto"></app-header>
 
+<div class="my-2">
+	<span class="text-5xl font-semibold">Select a conversion</span>
+</div>
+
 <div class="flex flex-col gap-2 items-center w-[50vw]">
 	<button
 		z-button
@@ -140,12 +144,14 @@
 		*ngIf="selectedConversion?.value === 'waveformer'"
 		class="w-full flex-col items-center justify-center gap-2 h-full"
 	>
-		<input
-			type="file"
-			accept=".wav"
-			(change)="setFile(waveformerForm, $event, this.fromMB(20))"
-			class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md clickable smooth-hover-highlight file:text-zinc-400 file:text-md file:font-semibold"
-		/>
+		<div class="w-full flex-col items-center justify-center gap-2 h-full card">
+			<input
+				type="file"
+				accept=".wav"
+				(change)="setFile(waveformerForm, $event, this.fromMB(20))"
+				class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md clickable smooth-hover-highlight file:text-zinc-400 file:text-md file:font-semibold"
+			/>
+		</div>
 
 		<div
 			*ngIf="selectedConversion?.value === 'waveformer'"
@@ -155,87 +161,43 @@
 				{{ waveformerForm.file?.name }}
 			</p>
 
-			<div *ngIf="waveformerForm?.content">
-				<!-- additional -->
-				<div class="grid grid-cols-2 gap-2 my-3">
-					<label
-						class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
-						tabindex="0"
-					>
-						<input
-							type="checkbox"
-							(change)="
-								this.waveformerForm.additional!.compress =
-									!this.waveformerForm.additional!.compress
-							"
-							class="text-zinc-100 text-sm p-2 bg-zinc-400 checked:bg-lime-400"
-						/>
-						<span class="text-zinc-100 text-sm">Compress</span>
-					</label>
-
-					<label
-						class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
-					>
-						<input
-							type="checkbox"
-							(change)="
-								this.waveformerForm.additional!.reverb =
-									!this.waveformerForm.additional!.reverb
-							"
-						/>
-						<span class="text-zinc-100 text-sm">Reverb</span>
-					</label>
-
-					<label
-						class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
-					>
-						<input
-							type="checkbox"
-							(change)="
-								this.waveformerForm.additional!.gain =
-									!this.waveformerForm.additional!.gain
-							"
-						/>
-						<span class="text-zinc-100 text-sm">Gain</span>
-					</label>
-
-					<label
-						class="flex items-center gap-2 hover-highlight-smooth w-min p-2 rounded-lg"
-					>
-						<input
-							type="checkbox"
-							(change)="
-								this.waveformerForm.additional!.chorus =
-									!this.waveformerForm.additional!.chorus
-							"
-						/>
-						<span class="text-zinc-100 text-sm">Chorus</span>
-					</label>
+			<div
+				*ngIf="waveformerForm?.content"
+				class="w-full flex gap-2"
+			>
+				<div
+					class="w-full flex-col items-center justify-center gap-2 h-full card"
+				>
+					<app-waveformer-filter #filters />
 				</div>
 
-				<input
-					id="waveformerResultName"
-					placeholder="Result file name"
-					class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md bg-zinc-800/50"
-					(input)="onWaveformerResultNameChange($event)"
-				/>
+				<div
+					class="w-full flex flex-col items-start justify-start gap-2 h-[37vh] max-h-[37vh] card"
+				>
+					<input
+						id="waveformerResultName"
+						placeholder="Result file name"
+						class="w-full h-12 rounded-md border-zinc-600 border-[1px] p-2 text-zinc-100 placeholder:text-zinc-400 text-md bg-zinc-800/50 my-2"
+						(input)="onWaveformerResultNameChange($event)"
+					/>
 
-				<textarea
-					id="waveformerDescription"
-					placeholder="Description (optional)"
-					class="w-full h-24 rounded-md border-zinc-600 border-2 p-2 my-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
-					(input)="onWaveformerDescriptionChange($event)"
-				></textarea>
+					<textarea
+						id="waveformerDescription"
+						placeholder="Description (optional)"
+						class="w-full h-full rounded-md border-zinc-600 border-2 p-2 my-2 text-zinc-100 placeholder:text-zinc-400 placeholder:text-md text-md bg-zinc-800/50"
+						(input)="onWaveformerDescriptionChange($event)"
+					></textarea>
 
-				<div class="w-full flex justify-end mt-2">
-					<button
-						z-button
-						[disabled]="this.conversionStarted"
-						(click)="submitWaveformer()"
-						class="zard-button clickable"
-					>
-						Upload
-					</button>
+					<div class="w-full flex justify-end mt-2">
+						<button
+							z-button
+							[disabled]="this.conversionStarted"
+							(click)="submitWaveformer()"
+							class="zard-button clickable"
+						>
+							Upload
+						</button>
+					</div>
 				</div>
 			</div>
 		</div>
