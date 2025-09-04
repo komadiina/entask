@@ -172,7 +172,10 @@ def llm_correct(input: dict):
 
             response = client.post(
                 url,
-                json={"messages": [" ".join(input["result"])]},
+                json={
+                    "messages": [{"content": " ".join(input["result"])}],
+                    "model": None,
+                },
             )
 
             if response.status_code != 200:

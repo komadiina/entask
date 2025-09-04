@@ -82,17 +82,21 @@ async def oauth2_callback(code: str, state: str):
     ).json()
 
     # save user to database
-    functions.auth.register_user(
-        RegisterRequestModel(
-            given_name=body["given_name"],
-            family_name=body["family_name"],
-            email=body["email"],
-            email_confirmed=body["email"],
-            username=body["email"],
-            password="<google-oauth2>",
-            password_confirmed="<google-oauth2>",
+    try:
+        functions.auth.register_user(
+            RegisterRequestModel(
+                given_name=body["given_name"],
+                family_name=body["family_name"],
+                email=body["email"],
+                email_confirmed=body["email"],
+                username=body["email"],
+                password="<google-oauth2>",
+                password_confirmed="<google-oauth2>",
+            )
         )
-    )
+    except:
+        # user exists in db, don't register
+        pass
 
     query = urllib.parse.urlencode(
         {

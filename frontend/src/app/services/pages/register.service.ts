@@ -12,9 +12,8 @@ export class RegisterService {
 	constructor(private http: HttpClient) {}
 
 	public register(user: User): Observable<RegistrationResponse> {
-		return this.http.post<RegistrationResponse>(
-			ApiUtil.buildUrl('/auth/register'),
-			user,
-		);
+		const url = ApiUtil.builder().service('auth').endpoint('register').build();
+
+		return this.http.post<RegistrationResponse>(url, user);
 	}
 }

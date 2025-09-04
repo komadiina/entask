@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import * as uuid from 'uuid';
 import { LocalStorageService } from '@entask-root/services/local-storage.service';
 
 @Component({
@@ -19,6 +20,8 @@ export class OAuth2CallbackComponent {
 			const refreshToken = params['refresh_token'];
 			const idToken = params['id_token'];
 			const authProvider = params['provider'];
+
+			LocalStorageService.initUuid();
 
 			this.localStorageService.updateMany({
 				idToken,
